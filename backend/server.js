@@ -1,24 +1,32 @@
-
-const express = require('express');
+import userRouter from "./routes/Users/user.routes.js";
+import errorMiddleware from "./middleware/error.middleware.js";
+import express from "express";
+import { PORT } from "./config/env.js";
+import cookieParser from "cookie-parser";
+import connectDB from "./config/db.js";
 
 const app = express();
-const PORT = 8002; // or whatever port you're using now
 
 // Middleware pour analyser le corps de la requête en JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // parse json bodies in requests
+app.use(express.urlencoded({ extended: false })); // parse urlencoded bodies in requests
+// parse cookies in requests
+app.use(cookieParser());
 
 // Route de test - Changed from app.use to app.get
 app.get("/", (req, res) => {
-    res.send("Hello World");
+  res.send("Hello World");
 });
 
+// Route pour les utilisateurs
+app.use("/app/users", userRouter);
 
-// app.use("/api/users", );
-
+// Middleware pour les erreurs
+app.use(errorMiddleware);
 // Démarrer le serveur
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+  connectDB();
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
-module.exports = app;
+export default app;
