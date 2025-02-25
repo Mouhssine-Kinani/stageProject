@@ -1,9 +1,10 @@
+import express from 'express'
+import errorMiddleWare from './middleware/error.middleware.js'
+import providerRoute from './routes/providers/providers.routes.js'
+import connectDB from './config/db.js'
 import userRouter from "./routes/Users/user.routes.js";
-import errorMiddleware from "./middleware/error.middleware.js";
-import express from "express";
 import { PORT } from "./config/env.js";
 import cookieParser from "cookie-parser";
-import connectDB from "./config/db.js";
 
 const app = express();
 
@@ -18,15 +19,22 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+app.use('/', providerRoute)
+
 // Route pour les utilisateurs
 app.use("/app/users", userRouter);
 
-// Middleware pour les erreurs
-app.use(errorMiddleware);
+app.use(errorMiddleWare)
+
 // Démarrer le serveur
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, async () => {
+    try {
+      await connectDB()
+      console.log(`Server running at http://localhost:${PORT}`);
+    } catch (err) {
+      console.error('Failed to connect to MongoDB:', err.message);
+      process.exit(1)
+    }
+  });
 
 export default app;
