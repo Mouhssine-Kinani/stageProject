@@ -1,90 +1,92 @@
-import mongoose  from "mongoose";
-import Provider  from '../../models/Products/product.model';
+import mongoose from "mongoose";
+import Product from '../../models/Products/product.model.js';
 
-export const Insertprovider = async (req, res, next)=>{
-    const mongoSession = await mongoose.startSession();
-    
+export const insertProduct = async (req, res, next) => {
     try {
-        const newProvider = new Provider({
-            name: req.body.name,
-            category : req.body.category,
-            website : req.body.website,
+        const newProduct = new Product({
+            productName: req.body.productName,
+            category: req.body.category,
+            billing_cycle: req.body.billing_cycle,
+            price: req.body.price,
+            type: req.body.type,
+            productAddedDate: req.body.productAddedDate,
+            productDeployed: req.body.productDeployed,
+            date_fin: req.body.date_fin,
+            website: req.body.website,
+            provider: req.body.provider
         });
-        if(req.file){
-            newProvider.logo = req.file.path
-        }
-        
-        await newProvider.save({ session: mongoSession });
-        // await mongoSession.commitTransaction();
-        res.status(201).send({message: 'emp added successfully'});
+
+        await newProduct.save();
+        res.status(201).send({ message: 'Product added successfully', data: newProduct });
     } catch (error) {
-        // await mongoSession.abortTransaction();
         next(error);
     }
-    // console.log('Request Method:', req.method);
-    // console.log('Request URL:', req.url);
-    // console.log('Request Headers:', req.headers);
-    // console.log('Request Body:', req.body);
-    // res.status(201).send('Good JOb');
+};
 
-    // const session = provider.insertOne({})
-}
-
-
-export const showProviders = async (req, res, next)=>{
-    try{
-        const providers = await Provider.find()
-        res.status(200).json(providers)
-    }catch(err){
-        next(err)
-    }
-}
-
-export const deleteProvider = async(req, res, next) =>{
-    try{
-        const providerExist = await Provider.findById(req.params.id)
-        if(!providerExist){
-            return res.status(404).json({ message: 'Provider not found' })
-        }
-        Provider.findByIdAndDelete(req.params.id).then(res.status(200).json({ message: 'Provider deleted successfully' }))
-    }catch(err){
-        next(err)
-    }
-}
-
-export const showEditProviderPage = async(req, res, next) =>{
+export const showProducts = async (req, res, next) => {
     try {
-        // returns the provider
-        const providerExist = await Provider.findById(req.params.id);
-        if (!providerExist) {
-            return res.status(404).json({ message: 'Provider not found' });
+        const products = await Product.find();
+        if (!products) {
+            return res.status(404).json({ message: 'Products not found' });
         }
-        return res.status(200).json(providerExist);
-    }catch(err){
-        next(err)
-    } 
-}
-
-
-export const editProvider = async(req, res, next) =>{
-    try{
-    const providerExist = await Provider.findById(req.params.id)
-    if(!providerExist){
-        return res.status(404).json({ message: 'Provider not found' })
+        res.status(200).json(products);
+    } catch (error) {
+        next(error);
     }
-    const updatedProvider = {
-        name: req.body.name,
-        category : req.body.category,
-        website : req.body.website,
-        logo : req.body.logo
-    }
+};
 
-    Provider.findByIdAndUpdate(req.params.id, updatedProvider, {new: true}).then((newUpdatedProvider) => res.status(200).json({
-        success: true, 
-        message: 'Provider is updated', 
-        data: newUpdatedProvider
-    }))
-    }catch(err){
-        next(err)
+export const deleteProduct = async (req, res, next) => {
+    try {
+        const productExist = await Product.findById(req.params.id);
+        if (!productExist) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        await Product.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        next(error);
     }
-}
+};
+
+export const showEditProductPage = async (req, res, next) => {
+    try {
+        const productExist = await Product.findById(req.params.id);
+        if (!productExist) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        return res.status(200).json(productExist);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const editProduct = async (req, res, next) => {
+    try {
+        const productExist = await Product.findById(req.params.id);
+        if (!productExist) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const updatedProduct = {
+            productName: req.body.productName,
+            category: req.body.category,
+            billing_cycle: req.body.billing_cycle,
+            price: req.body.price,
+            type: req.body.type,
+            productAddedDate: req.body.productAddedDate,
+            productDeployed: req.body.productDeployed,
+            date_fin: req.body.date_fin,
+            website: req.body.website,
+            provider: req.body.provider
+        };
+
+        const newUpdatedProduct = await Product.findByIdAndUpdate(req.params.id, updatedProduct, { new: true });
+        res.status(200).json({
+            success: true,
+            message: 'Product is updated',
+            data: newUpdatedProduct
+        });
+    } catch (error) {
+        next(error);
+    }
+};
