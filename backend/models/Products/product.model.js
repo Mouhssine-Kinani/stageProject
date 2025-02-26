@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 const ProductSchema = new Schema(
   {
-    clientId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Client",
-      required: true,
-    },
     reference: {
       type: String,
       required: true,
@@ -48,4 +43,6 @@ const ProductSchema = new Schema(
   { timestamps: true }
 );
 
-export default ProductSchema;
+const Product = model('Provider', ProviderSchema);
+
+export default Product;

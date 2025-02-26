@@ -1,12 +1,7 @@
 import mongoose  from "mongoose";
-import Provider  from '../../models/Providers/provider.model.js';
+import Provider  from '../../models/Products/product.model';
 
 export const Insertprovider = async (req, res, next)=>{
-    
-    // if (!req.file) {
-    //     return res.status(400).json({ success: false, error: 'No file uploaded or file type not supported' });
-    // }
-    
     const mongoSession = await mongoose.startSession();
     
     try {
