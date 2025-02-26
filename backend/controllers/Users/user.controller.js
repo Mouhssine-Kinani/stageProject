@@ -1,5 +1,6 @@
-import { ne } from "faker/lib/locales.js";
+import bcrypt from "bcryptjs";
 import User from "../../models/Users/user.model.js";
+
 
 // funciton that fetches all users
 export const getUsers = async (req, res, next) => {
