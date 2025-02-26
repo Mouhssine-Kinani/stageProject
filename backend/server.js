@@ -5,6 +5,7 @@ import connectDB from './config/db.js'
 import userRouter from "./routes/Users/user.routes.js";
 import { PORT } from "./config/env.js";
 import cookieParser from "cookie-parser";
+import authRouter from './routes/Auth/auth.routes.js'
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.use('/', providerRoute)
 
 // Route pour les utilisateurs
 app.use("/app/users", userRouter);
+// auth
+app.use('/app/auth', authRouter)
 
 app.use(errorMiddleWare)
 
@@ -38,3 +41,5 @@ app.listen(PORT, async () => {
   });
 
 export default app;
+
+
