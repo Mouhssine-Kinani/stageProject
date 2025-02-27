@@ -13,7 +13,6 @@ const productRoute = Router();
 // check if i should add a route get for product creation 
 
 // Create a new product
-// productRoute.post('/products/create', upload.single('logo'), insertProduct);
 productRoute.post('/products/create', insertProduct);
 
 // Get all products
