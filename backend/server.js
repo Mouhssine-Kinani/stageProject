@@ -2,6 +2,7 @@ import express from 'express'
 import errorMiddleWare from './middleware/error.middleware.js'
 import providerRoute from './routes/providers/providers.routes.js'
 import productRoute from './routes/products/products.routes.js'
+import clientRoute from './routes/clients/clients.routes.js'
 import connectDB from './config/db.js'
 import userRouter from "./routes/Users/user.routes.js";
 import { PORT } from "./config/env.js";
@@ -13,6 +14,7 @@ const app = express();
 // Middleware pour analyser le corps de la requête en JSON
 app.use(express.json()); // parse json bodies in requests
 app.use(express.urlencoded({ extended: false })); // parse urlencoded bodies in requests
+app.use(errorMiddleWare)
 // parse cookies in requests
 app.use(cookieParser());
 
@@ -23,13 +25,13 @@ app.get("/", (req, res) => {
 
 app.use('/', providerRoute)
 app.use('/', productRoute)
+app.use('/', clientRoute)
 
 // Route pour les utilisateurs
 app.use("/users", userRouter);
 // auth
 app.use('/auth', authRouter)
 
-app.use(errorMiddleWare)
 
 // Démarrer le serveur
 app.listen(PORT, async () => {

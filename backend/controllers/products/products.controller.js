@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Product from '../../models/Products/product.model.js';
 
 export const insertProduct = async (req, res, next) => {
@@ -17,21 +16,24 @@ export const insertProduct = async (req, res, next) => {
         });
 
         await newProduct.save();
-        res.status(201).send({ message: 'Product added successfully', data: newProduct });
+        res.status(201).json({ success: true, message: 'Product added successfully', data: newProduct });
     } catch (error) {
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
 };
 
 export const showProducts = async (req, res, next) => {
     try {
-        const products = await Product.find();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const products = await Product.find().skip(skip).limit(limit);
         if (!products) {
-            return res.status(404).json({ message: 'Products not found' });
+            return res.status(404).json({ success: false, message: 'Products not found', data: null });
         }
-        res.status(200).json(products);
+        res.status(200).json({ success: true, message: 'Products retrieved successfully', data: products });
     } catch (error) {
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
 };
 
@@ -39,12 +41,12 @@ export const deleteProduct = async (req, res, next) => {
     try {
         const productExist = await Product.findById(req.params.id);
         if (!productExist) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ success: false, message: 'Product not found', data: null });
         }
         await Product.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: 'Product deleted successfully' });
+        res.status(200).json({ success: true, message: 'Product deleted successfully', data: productExist });
     } catch (error) {
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
 };
 
@@ -52,11 +54,11 @@ export const showEditProductPage = async (req, res, next) => {
     try {
         const productExist = await Product.findById(req.params.id);
         if (!productExist) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ success: false, message: 'Product not found', data: null });
         }
-        return res.status(200).json(productExist);
+        return res.status(200).json({ success: true, message: 'Product retrieved successfully', data: productExist });
     } catch (error) {
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
 };
 
@@ -64,7 +66,7 @@ export const editProduct = async (req, res, next) => {
     try {
         const productExist = await Product.findById(req.params.id);
         if (!productExist) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ success: false, message: 'Product not found', data: null });
         }
 
         const updatedProduct = {
@@ -81,12 +83,8 @@ export const editProduct = async (req, res, next) => {
         };
 
         const newUpdatedProduct = await Product.findByIdAndUpdate(req.params.id, updatedProduct, { new: true });
-        res.status(200).json({
-            success: true,
-            message: 'Product is updated',
-            data: newUpdatedProduct
-        });
+        res.status(200).json({ success: true, message: 'Product updated successfully', data: newUpdatedProduct });
     } catch (error) {
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
 };

@@ -6,7 +6,7 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 const Schema = mongoose.Schema;
 const ProductSchema = new Schema(
   {
-    reference: {
+    product_reference: {
       type: Number,
       unique: true
     },
@@ -43,7 +43,7 @@ const ProductSchema = new Schema(
   { timestamps: true }
 );
 
-ProductSchema.plugin(AutoIncrement, { inc_field: 'reference' });
+ProductSchema.plugin(AutoIncrement, { inc_field: 'product_reference' });
 
 const Product = mongoose.model('Product', ProductSchema);
 

@@ -1,95 +1,96 @@
-import mongoose  from "mongoose";
-import Provider  from '../../models/Providers/provider.model.js';
+import Provider from '../../models/Providers/provider.model.js';
 
-export const Insertprovider = async (req, res, next)=>{
-    
-    // if (!req.file) {
-    //     return res.status(400).json({ success: false, error: 'No file uploaded or file type not supported' });
-    // }
-    
-    const mongoSession = await mongoose.startSession();
-    
+export const Insertprovider = async (req, res, next) => {
     try {
         const newProvider = new Provider({
             name: req.body.name,
-            category : req.body.category,
-            website : req.body.website,
+            email: req.body.email,
+            phone: req.body.phone,
+            address: req.body.address,
+            city: req.body.city,
+            country: req.body.country,
+            region: req.body.region,
+            renewal_status: req.body.renewal_status,
+            products: req.body.products
         });
-        if(req.file){
-            newProvider.logo = req.file.path
+
+        if (req.file) {
+            newProvider.logo = req.file.path;
         }
-        
-        await newProvider.save({ session: mongoSession });
-        // await mongoSession.commitTransaction();
-        res.status(201).send({message: 'emp added successfully'});
+
+        await newProvider.save();
+        res.status(201).json({ success: true, message: 'Provider added successfully', data: newProvider });
     } catch (error) {
-        // await mongoSession.abortTransaction();
-        next(error);
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
-    // console.log('Request Method:', req.method);
-    // console.log('Request URL:', req.url);
-    // console.log('Request Headers:', req.headers);
-    // console.log('Request Body:', req.body);
-    // res.status(201).send('Good JOb');
+};
 
-    // const session = provider.insertOne({})
-}
-
-
-export const showProviders = async (req, res, next)=>{
-    try{
-        const providers = await Provider.find()
-        res.status(200).json(providers)
-    }catch(err){
-        next(err)
-    }
-}
-
-export const deleteProvider = async(req, res, next) =>{
-    try{
-        const providerExist = await Provider.findById(req.params.id)
-        if(!providerExist){
-            return res.status(404).json({ message: 'Provider not found' })
-        }
-        Provider.findByIdAndDelete(req.params.id).then(res.status(200).json({ message: 'Provider deleted successfully' }))
-    }catch(err){
-        next(err)
-    }
-}
-
-export const showEditProviderPage = async(req, res, next) =>{
+export const showProviders = async (req, res, next) => {
     try {
-        // returns the provider
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const providers = await Provider.find().skip(skip).limit(limit);
+        if (!providers) {
+            return res.status(404).json({ success: false, message: 'Providers not found', data: null });
+        }
+        res.status(200).json({ success: true, message: 'Providers retrieved successfully', data: providers });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message, data: null });
+    }
+};
+
+export const deleteProvider = async (req, res, next) => {
+    try {
         const providerExist = await Provider.findById(req.params.id);
         if (!providerExist) {
-            return res.status(404).json({ message: 'Provider not found' });
+            return res.status(404).json({ success: false, message: 'Provider not found', data: null });
         }
-        return res.status(200).json(providerExist);
-    }catch(err){
-        next(err)
-    } 
-}
-
-
-export const editProvider = async(req, res, next) =>{
-    try{
-    const providerExist = await Provider.findById(req.params.id)
-    if(!providerExist){
-        return res.status(404).json({ message: 'Provider not found' })
+        await Provider.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'Provider deleted successfully', data: providerExist });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
-    const updatedProvider = {
-        name: req.body.name,
-        category : req.body.category,
-        website : req.body.website,
-        logo : req.body.logo
-    }
+};
 
-    Provider.findByIdAndUpdate(req.params.id, updatedProvider, {new: true}).then((newUpdatedProvider) => res.status(200).json({
-        success: true, 
-        message: 'Provider is updated', 
-        data: newUpdatedProvider
-    }))
-    }catch(err){
-        next(err)
+export const showEditProviderPage = async (req, res, next) => {
+    try {
+        const providerExist = await Provider.findById(req.params.id);
+        if (!providerExist) {
+            return res.status(404).json({ success: false, message: 'Provider not found', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'Provider retrieved successfully', data: providerExist });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message, data: null });
     }
-}
+};
+
+export const editProvider = async (req, res, next) => {
+    try {
+        const providerExist = await Provider.findById(req.params.id);
+        if (!providerExist) {
+            return res.status(404).json({ success: false, message: 'Provider not found', data: null });
+        }
+
+        const updatedProvider = {
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            address: req.body.address,
+            city: req.body.city,
+            country: req.body.country,
+            region: req.body.region,
+            renewal_status: req.body.renewal_status,
+            products: req.body.products
+        };
+
+        if (req.file) {
+            updatedProvider.logo = req.file.path;
+        }
+
+        const newUpdatedProvider = await Provider.findByIdAndUpdate(req.params.id, updatedProvider, { new: true });
+        res.status(200).json({ success: true, message: 'Provider updated successfully', data: newUpdatedProvider });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message, data: null });
+    }
+};

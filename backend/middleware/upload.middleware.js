@@ -2,11 +2,17 @@ import path from 'path'
 import multer from 'multer'
 
 
+const uploadLogoPaths ={
+    '/clients/create' : './uploads/clientsLogo',
+    '/providers/create' : './uploads/providersLogo',
+    '/users/create' : './uploads/usersLogo',
+}
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb){
-        cb(null, 'uploads/providersLogo')
-    },
+        const uploadDir = uploadLogoPaths[req.route.path] || './uploads'
+        cb(null, uploadDir)
+        },
     filename: function (req, file, cb){
         let ext = path.extname(file.originalname)
         cb(null, Date.now() + ext)
