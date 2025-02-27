@@ -5,7 +5,11 @@ import User from "../../models/Users/user.model.js";
 // funciton that fetches all users
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    let skip = (page - 1) * limit;
+
+    const users = await User.find().skip(skip).limit(limit).select("-password");
     res.status(200).json(users);
   } catch (error) {
     next(error);
