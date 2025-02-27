@@ -1,21 +1,27 @@
-import {Router} from 'express';
-import { getUsers,getUser } from '../../controllers/Users/user.controller.js';
+import { Router } from "express";
+import {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../../controllers/Users/user.controller.js";
 
 const userRouter = Router();
 
 // Route to fetch all users
-userRouter.get('/', getUsers);  
+userRouter.get("/", getUsers);
 
 // Route to fetch a single user
-userRouter.get('/:id', getUser);
+userRouter.get("/:id", getUser);
 
 // POST / users -> create a new user
-userRouter.post("/",(req,res)=> res.send({title : "CREATE new user"}));
+userRouter.post("/create", createUser);
 
 // PUT / users -> update user profile
-userRouter.put("/:id",(req,res)=> res.send({title : "UPDATE user"}));
+userRouter.put("/:id", updateUser);
 
 // DELETE / users -> delete user profile
-userRouter.delete("/:id",(req,res)=> res.send({title : "DELETE user"}));
+userRouter.delete("/:id", deleteUser);
 
 export default userRouter;

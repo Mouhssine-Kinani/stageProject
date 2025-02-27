@@ -28,9 +28,9 @@ app.use('/', productRoute)
 app.use('/', clientRoute)
 
 // Route pour les utilisateurs
-app.use("/app/users", userRouter);
+app.use("/users", userRouter);
 // auth
-app.use('/app/auth', authRouter)
+app.use('/auth', authRouter)
 
 
 // Démarrer le serveur
