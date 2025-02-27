@@ -131,6 +131,3 @@ dist
 
 
 .idea/
-
-# Ignore ui folder
-/ui/
