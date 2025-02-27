@@ -6,10 +6,7 @@ const Schema = mongoose.Schema;
 
 const ClientSchema = new Schema(
   {
-    reference: {
-      type: Number,
-      unique: true
-    }, // ex: #CL001
+     // ex: #CL001
     logo: { type: String, trim: true },
     name: {
       type: String,
@@ -49,8 +46,7 @@ const ClientSchema = new Schema(
   { timestamps: true }
 );
 
-ClientSchema.plugin(AutoIncrement, { inc_field: 'reference' })
-
+ClientSchema.plugin(AutoIncrement, { inc_field: 'client_reference' }); 
 
 const Client = mongoose.model('Client', ClientSchema);
 
