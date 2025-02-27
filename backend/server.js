@@ -1,6 +1,7 @@
 import express from 'express'
 import errorMiddleWare from './middleware/error.middleware.js'
 import providerRoute from './routes/providers/providers.routes.js'
+import productRoute from './routes/products/products.routes.js'
 import connectDB from './config/db.js'
 import userRouter from "./routes/Users/user.routes.js";
 import { PORT } from "./config/env.js";
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/', providerRoute)
+app.use('/', productRoute)
 
 // Route pour les utilisateurs
 app.use("/app/users", userRouter);

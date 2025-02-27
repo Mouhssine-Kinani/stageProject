@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import AutoIncrementFactory from 'mongoose-sequence';
 
-const AutoIncrement = AutoIncrementFactory(mongoose); // Use the default mongoose connection
+const AutoIncrement = AutoIncrementFactory(mongoose);
 
 const Schema = mongoose.Schema;
 const ProductSchema = new Schema(
