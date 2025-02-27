@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
+import AutoIncrementFactory from 'mongoose-sequence';
+
+const AutoIncrement = AutoIncrementFactory(mongoose);
 const Schema = mongoose.Schema;
 
 const ClientSchema = new Schema(
   {
     reference: {
-      type: String,
-      required: true,
-      minLength: 3,
-      maxLength: 10,
-      trim: true,
+      type: Number,
+      unique: true
     }, // ex: #CL001
     logo: { type: String, trim: true },
     name: {
@@ -49,4 +49,9 @@ const ClientSchema = new Schema(
   { timestamps: true }
 );
 
-export default ClientSchema;
+ClientSchema.plugin(AutoIncrement, { inc_field: 'reference' })
+
+
+const Client = mongoose.model('Client', ClientSchema);
+
+export default Client;
