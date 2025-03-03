@@ -20,16 +20,10 @@ body{
 }
 .user-icon{
     position: absolute;
-    width: 18px;
     left: 4%;
 }
 
 .eye-icon{
-    position: absolute;
-    width: 16px;
-    left: 90%;
-}
-.unvisible-icon{
     position: absolute;
     left: 90%;
 }
