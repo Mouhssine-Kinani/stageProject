@@ -21,4 +21,32 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.grid-areas-layout {
+  display: grid;
+  grid-template-columns: .8fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto 1fr 1fr 1fr;
+  grid-template-areas: 
+    "sidebar header header header"
+    "sidebar header header header"
+    "sidebar content content content"
+    "sidebar content content content"
+    "sidebar content content content";
+}
+
+
+.area-sidebar {
+  grid-area: sidebar;
+}
+
+.area-header {
+  grid-area: header;
+}
+
+.area-content {
+  grid-area: content;
 }
