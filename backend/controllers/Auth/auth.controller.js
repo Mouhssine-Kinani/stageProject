@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../../models/Users/user.model.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, JWT_EXPIRE_INS } from "../../config/env.js";
 

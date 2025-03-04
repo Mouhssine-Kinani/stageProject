@@ -8,7 +8,7 @@ import userRouter from "./routes/Users/user.routes.js";
 import { PORT } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import authRouter from './routes/Auth/auth.routes.js'
-
+import cors from 'cors'
 const app = express();
 
 // Middleware pour analyser le corps de la requête en JSON
@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: false })); // parse urlencoded bodies in 
 app.use(errorMiddleWare)
 // parse cookies in requests
 app.use(cookieParser());
+app.use(cors())
 
 // Route de test - Changed from app.use to app.get
 app.get("/", (req, res) => {
