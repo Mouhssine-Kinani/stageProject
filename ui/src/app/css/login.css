@@ -1,0 +1,32 @@
+body{
+    background: url('../../../public/img/Rectangle4151.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.login-container{
+    background-color: #FFFFFF2B;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.input-container{
+    position: relative;
+}
+
+.lock-icon{
+    position: absolute;
+    left: 4%;
+}
+.user-icon{
+    position: absolute;
+    left: 4%;
+}
+
+.eye-icon{
+    position: absolute;
+    left: 90%;
+}
+
+/* .password-input{
+} */
