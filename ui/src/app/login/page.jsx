@@ -2,17 +2,49 @@
 import {User, LockKeyhole} from 'lucide-react'
 import '../css/login.css';
 import SignFromComponent from '@/components/SignFromComponent'
+import axios from 'axios'
+import { useState } from 'react';
+import { object, string } from 'yup';
 
 const fields = [
-    {icon: User, type: 'email', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer votre email'},
-    {icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer le mot de passe'}
+    {name:'email' , icon: User, type: 'email', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer votre email'},
+    {name:'password' , icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer le mot de passe'}
 ];
+
+const loginSchema = object({
+    email: string().email("Invalid email format").required("Email is required"),
+    password: string().min(6, "Password must be at least 6 characters").required("Password is required"),
+});
 
 const title = 'Bienvenue à vous !';
 const subtitle = 'Connectez-vous à votre compte';
 const submitButton = 'Connexion';
 const linkText = 'Mot de pass oublié ?';
 const link = '/forget';
+const formType = 'login';
+
+const handleSubmit = async (form, setErrors)=>{
+    try{
+        await loginSchema.validate(form, { abortEarly: false }); 
+        setErrors({});
+        const response = axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form)
+        console.log(response)
+    }
+    catch (err) {
+        const newErrors = {};
+        err.inner.forEach((error) => {
+            // by field name
+            if(!error.path){
+                newErrors[formType] = error.message;
+            }
+            else{
+                newErrors[error.path] = error.message;
+            }
+        });
+        setErrors(newErrors);
+    }
+}
+
 
 
 export default function Login() {
@@ -26,6 +58,8 @@ export default function Login() {
                     submitButton={submitButton} 
                     linkText={linkText}
                     link={link} 
+                    formType={formType}
+                    handleSubmit={handleSubmit}
                 />
             </div>
         </div>
