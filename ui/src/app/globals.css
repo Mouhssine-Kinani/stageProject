@@ -24,13 +24,14 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  height: 100vh;
 }
 
 .grid-areas-layout {
   display: grid;
-  grid-template-columns: .8fr 1fr 1fr 1fr;
+  grid-template-columns: .53fr 1fr 1fr 1fr;
   grid-template-rows: auto auto 1fr 1fr 1fr;
-  grid-template-areas: 
+  grid-template-areas:
     "sidebar header header header"
     "sidebar header header header"
     "sidebar content content content"
@@ -41,12 +42,15 @@ body {
 
 .area-sidebar {
   grid-area: sidebar;
+  border : solid 1px rgb(187, 184, 184);
 }
 
 .area-header {
   grid-area: header;
+  border : solid 1px rgb(187, 184, 184);
 }
 
 .area-content {
   grid-area: content;
+  border : solid 1px rgb(187, 184, 184);
 }

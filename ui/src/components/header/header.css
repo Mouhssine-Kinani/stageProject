@@ -1,0 +1,30 @@
+
+.area-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 8px;
+}
+.div2 {
+    grid-column-start: 4;
+    display: flex;
+}
+.div1{
+    display: flex;
+}
+.div2 input{
+    background-color: rgba(205, 204, 204, 0.777);
+    border:none ;
+    border-radius: 5px;
+
+}
+.div2 .iconsHolder{
+    display: flex;
+}
+
+/* header.css */
+.search-input {
+    background-image: url('/headerIcon/search.svg');
+    background-repeat: no-repeat;
+    background-position: 7px center;
+}

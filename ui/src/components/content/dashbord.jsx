@@ -1,6 +1,6 @@
 export default function Content({ children }) {
     return (
-        <main className="bg-gray-500 p-4 area-content">
+        <main className="bg-[#fff] text-black  p-4 area-content">
         {children}
         <div className="">
           lorem lorem           lorem lorem 

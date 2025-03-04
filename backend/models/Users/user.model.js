@@ -9,7 +9,7 @@ const UserSchema = new Schema(
       minLength: 3,
       maxLength: 10,
       trim: true,
-    }, // ex: #US01
+    },
     fullName: {
       type: String,
       required: true,
@@ -46,9 +46,12 @@ const UserSchema = new Schema(
       description: { type: String, maxLength: 200, trim: true },
       privileges: [{ type: String, minLength: 3, maxLength: 50, trim: true }],
     },
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
   },
   { timestamps: true }
 );
+
 
 const User = mongoose.model("User", UserSchema);
 export default User;
