@@ -51,6 +51,7 @@ export default function SignFromComponent({
                     <field.icon size={22} strokeWidth={1.75} className={field.iconClass} />
                   )}
                   <input
+                    name={field.name}
                     type={
                       field.type === "email" ||
                       (field.type === "password" &&
