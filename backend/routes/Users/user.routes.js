@@ -1,4 +1,5 @@
 import { Router } from "express";
+import upload from '../../middleware/upload.middleware.js'
 import {
   getUsers,
   getUser,
@@ -16,7 +17,7 @@ userRouter.get("/", getUsers);
 userRouter.get("/:id", getUser);
 
 // POST / users -> create a new user
-userRouter.post("/create", createUser);
+userRouter.post("/create", upload.single('logo'), createUser);
 
 // PUT / users -> update user profile
 userRouter.put("/:id", updateUser);

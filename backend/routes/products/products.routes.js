@@ -10,7 +10,7 @@ import {
 
 const productRoute = Router();
 
-// check if i should add a route get for product creation 
+// check if i should add a route get for product creation
 
 // Create a new product
 productRoute.post('/products/create', insertProduct);

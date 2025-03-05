@@ -43,6 +43,8 @@ const UserSchema = new Schema(
       description: { type: String, maxLength: 200, trim: true },
       privileges: [{ type: String, minLength: 3, maxLength: 50, trim: true }],
     },
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
   },
   { timestamps: true }
 );

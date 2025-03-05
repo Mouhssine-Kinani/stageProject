@@ -1,0 +1,38 @@
+.area-header {
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 1rem;
+}
+
+.div1 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.div2 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.search-input {
+  min-width: 200px;
+  flex-shrink: 1;
+}
+
+.iconsHolder {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* Ensure header elements don't overflow */
+.div1 > p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
