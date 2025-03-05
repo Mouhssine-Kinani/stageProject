@@ -1,24 +1,20 @@
 'use client';
-import "./globals.css";
-import Header from "@/components/header/Header";
+import "../globals.css";
 import SideBar from "@/components/sidebar/SideBar";
-import Content from "@/components/content/dashbord";
+import Header from "@/components/header/Header";
+import Content from "@/components/content/dashbord"; // Assure-toi du bon chemin
 import NotificationPanel from "@/components/notification/NotificationPanel";
 import { LayoutProvider } from "@/contexts/LayoutContext";
 
-export default function RootLayout({ children }) {
+export default function AppLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
-        <LayoutProvider>
-          <div className="grid-areas-layout">
-            <SideBar/>
-            <Header/>
-            <Content/>
-            <NotificationPanel/>
-          </div>
-        </LayoutProvider>
-      </body>
-    </html>
+    <LayoutProvider>
+      <div className="grid-areas-layout">
+        <SideBar />
+        <Header />
+        <Content>{children}</Content> {/* Le contenu de la page s'affiche ici */}
+        <NotificationPanel />
+      </div>
+    </LayoutProvider>
   );
 }

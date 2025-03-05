@@ -1,8 +1,7 @@
-
 function page() {
     return (
         <div>
-            content client 
+            content home 
         </div>
     );
 }
