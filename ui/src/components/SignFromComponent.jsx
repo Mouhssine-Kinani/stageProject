@@ -1,7 +1,7 @@
 "use client" // creat a client component and move the state with to keep this one server side compo
 
 
-import '../app/css/login.css';
+import '../app/(Auth)/css/login.css';
 import Link from 'next/link';
 
 import {Eye, EyeOff} from 'lucide-react'
