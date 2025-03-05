@@ -1,25 +1,24 @@
-'use client'
+'use client';
 import "./globals.css";
 import Header from "@/components/header/Header";
 import SideBar from "@/components/sidebar/SideBar";
 import Content from "@/components/content/dashbord";
+import NotificationPanel from "@/components/notification/NotificationPanel";
+import { LayoutProvider } from "@/contexts/LayoutContext";
 
-export default function Layout({ children }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="grid-areas-layout">
-        {/* Sidebar */}
-        <SideBar/>
-
-        {/* Header */}
-          <Header/>
-
-        {/* Content */}
-        <Content/>
-       
+      <body>
+        <LayoutProvider>
+          <div className="grid-areas-layout">
+            <SideBar/>
+            <Header/>
+            <Content/>
+            <NotificationPanel/>
+          </div>
+        </LayoutProvider>
       </body>
     </html>
   );
 }
-
-

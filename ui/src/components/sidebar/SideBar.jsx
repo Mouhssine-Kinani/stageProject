@@ -1,11 +1,16 @@
 import Link from "next/link";
 import "./sideBar.css";
 
+
+import { useLayout } from "@/contexts/LayoutContext";
+
 function SideBar() {
+  const { isSidebarOpen } = useLayout();
+
   return (
-    <>
-      <aside className="bg-[#fff] text-black p-4 area-sidebar">
-        <div className="profile-sidebare">
+    <aside className={`area-sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
+      {/* Your existing sidebar content */}
+      <div className="profile-sidebare">
           <div className="sb-s1">
             <img src="" alt="profile" className="sidebare-img-profile" />
             <div className="userName-container">
@@ -43,8 +48,8 @@ function SideBar() {
             </li>
           </ul>
         </div>
-      </aside>
-    </>
+
+    </aside>
   );
 }
 
