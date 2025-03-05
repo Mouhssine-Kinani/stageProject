@@ -5,7 +5,7 @@ const LayoutContext = createContext();
 
 export const LayoutProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(true);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleNotification = () => setIsNotificationOpen(!isNotificationOpen);

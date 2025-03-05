@@ -8,7 +8,7 @@ function SideBar() {
   const { isSidebarOpen } = useLayout();
 
   return (
-    <aside className={`area-sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
+    <aside className={`area-sidebar ${!isSidebarOpen ? 'closed' : 'p-4'}`}>
       {/* Your existing sidebar content */}
       <div className="profile-sidebare">
           <div className="sb-s1">
