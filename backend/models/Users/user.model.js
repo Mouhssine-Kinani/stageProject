@@ -1,15 +1,12 @@
 import mongoose from "mongoose";
+import AutoIncrementFactory from 'mongoose-sequence';
 
+const AutoIncrement = AutoIncrementFactory(mongoose);
 const Schema = mongoose.Schema;
+
 const UserSchema = new Schema(
   {
-    reference: {
-      type: String,
-      required: true,
-      minLength: 3,
-      maxLength: 10,
-      trim: true,
-    },
+    // ex: #US01 reference
     fullName: {
       type: String,
       required: true,
@@ -52,6 +49,6 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-
+UserSchema.plugin(AutoIncrement, { inc_field: 'user_reference' });
 const User = mongoose.model("User", UserSchema);
 export default User;

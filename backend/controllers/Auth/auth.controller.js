@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../../models/Users/user.model.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
   JWT_SECRET,
@@ -11,7 +11,6 @@ import {
 } from "../../config/env.js";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import { info } from "console";
 
 export const signUP = async (req, res, next) => {
   try {
