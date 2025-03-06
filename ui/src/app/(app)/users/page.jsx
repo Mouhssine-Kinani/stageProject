@@ -18,6 +18,12 @@ async function fetchUsers() {
 
 export default function Page() {
   const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5;
+
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginateData = data.slice(startIndex, endIndex)
 
   useEffect(() => {
     async function fetchData() {
@@ -31,9 +37,13 @@ export default function Page() {
   return (
     <div>
       <h2>List of Users</h2> <br />
-      <DataTable columns={columns} data={data} />
-      <div className="mt-2">
-        <PaginationDemo />
+      <DataTable columns={columns} data={paginateData} />
+      <div className="mt-2 flex justify-center">
+      <PaginationDemo
+          currentPage={currentPage}
+          setPageChange={setCurrentPage}
+          totalPages={Math.ceil(data.length / itemsPerPage)}
+      />
       </div>
     </div>
   );
