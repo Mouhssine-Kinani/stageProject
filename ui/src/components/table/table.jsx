@@ -33,7 +33,7 @@ export default function Table({handleSubmit
                     {data.map((user) => (
                         <tr key={user._id}>
                             <td className="px-4 py-2 border-b">#US01</td>
-                            <td className="px-4 py-2 border-b">{user.userName}</td>
+                            <td className="px-4 py-2 border-b">{user.fullName}</td>
                             <td className="px-4 py-2 border-b">{user.role.roleName}</td>
                             <td className="px-4 py-2 border-b">{user.email}</td>
                             <td className="px-4 py-2 border-b">{new Date(user.lastLogin_date).toLocaleString()}</td>

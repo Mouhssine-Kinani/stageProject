@@ -1,48 +1,38 @@
-"use client"
-import Table from '@/components/table/table'
-import axios from 'axios'
+"use client";
 
-async function handleSubmit(){
-    try{
-        const resp = await axios.get(`${process.env.NEXT_PUBLIC_URLAPI}/users/`)
-        return resp.data
-    }catch{
-        console.log('error no usersss')
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { DataTable } from "@/app/(app)/users/data-table";
+import { columns } from "@/app/(app)/users/columns";
+import {PaginationDemo} from "@/app/(app)/users/pagination";
+
+async function fetchUsers() {
+  try {
+    const resp = await axios.get(`${process.env.NEXT_PUBLIC_URLAPI}/users/`);
+    return resp.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+}
+
+export default function Page() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const result = await fetchUsers();
+      setData(result || []); 
     }
+
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      <h2>List of Users</h2> <br />
+      <DataTable columns={columns} data={data} />
+      <PaginationDemo />
+    </div>
+  );
 }
-
-const headers = [ 'Reference', 'Name', 'Role','Email', 'Last login', 'CreatedAt',  'Status']
-const title = 'List of users'
-
-export default function page() { 
-    return (
-        <div>
-            <h2>{title}</h2><br />
-            <Table handleSubmit={handleSubmit}
-            headers={headers}
-            />
-        </div>
-    );
-}
-
-    // const handleSubmits = async (form, setErrors)=>{
-    //     try{
-    //         await loginSchema.validate(form, { abortEarly: false }); 
-    //         setErrors({});
-    //         const response = axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form)
-    //         console.log(response)
-    //     }
-    //     catch (err) {
-    //         const newErrors = {};
-    //         err.inner.forEach((error) => {
-    //             // by field name
-    //             if(!error.path){
-    //                 newErrors[formType] = error.message;
-    //             }
-    //             else{
-    //                 newErrors[error.path] = error.message;
-    //             }
-    //         });
-    //         setErrors(newErrors);
-    //     }
-    // }
