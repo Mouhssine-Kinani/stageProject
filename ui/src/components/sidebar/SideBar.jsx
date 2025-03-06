@@ -10,7 +10,7 @@ function SideBar() {
     <aside className={`area-sidebar ${!isSidebarOpen ? "closed" : "p-4"}`}>
       <div className="profile-sidebare">
         <div className="sb-s1">
-          <img src="" alt="profile" className="sidebare-img-profile" />
+          <img src="gg" alt="profile" className="sidebare-img-profile" />
           <div className="userName-container">
             <h2>user name</h2>
           </div>

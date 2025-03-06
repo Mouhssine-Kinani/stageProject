@@ -1,7 +1,7 @@
 "use client"
 import {User, LockKeyhole} from 'lucide-react'
-import '../css/login.css';
-import SignFromComponent from '@/components/SignFromComponent'
+import '../../(Auth)/css/login.css'
+import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import axios from 'axios'
 import { useState } from 'react';
 import { object, string } from 'yup';
