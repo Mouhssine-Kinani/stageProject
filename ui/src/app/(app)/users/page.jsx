@@ -2,9 +2,9 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { DataTable } from "@/app/(app)/users/data-table";
+import { DataTable } from "@/components/table/data-table";
 import { columns } from "@/app/(app)/users/columns";
-import {PaginationDemo} from "@/app/(app)/users/pagination";
+import {PaginationDemo} from "@/components/pagination/pagination";
 
 async function fetchUsers() {
   try {
@@ -32,7 +32,9 @@ export default function Page() {
     <div>
       <h2>List of Users</h2> <br />
       <DataTable columns={columns} data={data} />
-      <PaginationDemo />
+      <div className="mt-2">
+        <PaginationDemo />
+      </div>
     </div>
   );
 }

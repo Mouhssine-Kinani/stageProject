@@ -17,24 +17,33 @@ import {
 export const columns = [
   // ...
   {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "user_reference",
+    header: "Reference",
+    cell: ({ row }) => `#US0${row.original.user_reference}`,
   },
   {
     accessorKey: "fullName",
-    header: "Full Name",
+    header: "Name",
   },
   {
     accessorKey: "role.roleName",
     header: "Role",
   },
   {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
     accessorKey: "lastLogin_date",
     header: "Last Login",
+  },
+  {
+    accessorKey: "lastLogin_date",
+    header: "Created at",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
   },
   {
     id: "actions",
