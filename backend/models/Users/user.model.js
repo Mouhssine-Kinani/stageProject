@@ -26,6 +26,7 @@ const UserSchema = new Schema(
     },
     password: { type: String, required: true, minLength: 6 },
     lastLogin_date: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
     logo: { type: String, trim: true },
     status: {
       type: String,
