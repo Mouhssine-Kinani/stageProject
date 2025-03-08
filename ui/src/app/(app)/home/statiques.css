@@ -1,0 +1,42 @@
+.statiques {
+  display: flex;
+  justify-content: space-around;
+  max-width: 970px;
+}
+
+.statiquesDisplay {
+  margin-top: 0.7rem;
+  width: 200px;
+  height: 112px;
+  border: none;
+  border-radius: 16px;
+  padding: 1.3rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  gap: 8px;
+}
+.activeProducts {
+  background-color: #a1e3cb;
+}
+.expiringSoon {
+  background-color: #ffe999;
+}
+.expired {
+  background-color: #fb766b;
+}
+.clients {
+  background-color: #e5ecf6;
+}
+
+.statiquesHeader {
+  grid-column: span 2 / span 2;
+  font-weight: bolder;
+}
+.nbrStatiques {
+  grid-row-start: 2;
+  font-weight: bolder;
+}
+.calc {
+  grid-row-start: 2;
+}
