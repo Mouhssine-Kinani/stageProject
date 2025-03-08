@@ -2,7 +2,7 @@
 import "../globals.css";
 import SideBar from "@/components/sidebar/SideBar";
 import Header from "@/components/header/Header";
-import Content from "@/components/content/dashbord"; // Assure-toi du bon chemin
+import Content from "@/components/content/dashbord";
 import NotificationPanel from "@/components/notification/NotificationPanel";
 import { LayoutProvider } from "@/contexts/LayoutContext";
 

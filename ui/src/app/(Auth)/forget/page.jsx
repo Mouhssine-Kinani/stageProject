@@ -1,7 +1,7 @@
 "use client"
 import {User} from 'lucide-react'
-import '../css/login.css';
-import SignFromComponent from '@/components/SignFromComponent'
+import '../../(Auth)/css/login.css'
+import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import { object, string } from 'yup';
 
 const fields = [
