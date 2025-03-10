@@ -99,10 +99,6 @@ function Page() {
     return today > dateFin;
   });
 
-  console.log(products);
-
-  
-
   return (
     <div className="container">
       <div className="day">

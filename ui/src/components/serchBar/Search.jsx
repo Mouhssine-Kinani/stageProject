@@ -11,7 +11,7 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center border-2 border-gray-500 rounded-md p-2 w-full max-w-lg justify-between">
+    <div className="flex items-center border-2 border-gray-500 rounded-md p-2 w-full justify-between">
       {/* Boutons (à gauche) */}
       <div className="flex items-center gap-2">
         <DialogDemo buttonTitle="+" />
@@ -24,7 +24,7 @@ const SearchBar = ({ onSearch }) => {
       </div>
 
       {/* Champ de recherche (à droite) */}
-      <div className="flex items-center border border-gray-400 rounded-md px-2">
+      <div className="flex items-center border border-gray-400 rounded-md px-2 w-full max-w-[37%]">
         <input
           type="text"
           placeholder="Search..."
