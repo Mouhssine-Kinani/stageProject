@@ -9,10 +9,15 @@ export function useProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/products");
+        const API_URL = process.env.NEXT_PUBLIC_URLAPI;
+        if (!API_URL) throw new Error("API URL is not defined in env variables");
+
+        const response = await axios.get(`${API_URL}/products`);
         if (response.data.success) {
           setProducts(response.data.data);
-        } else throw new Error("Failed to fetch products");
+        } else {
+          throw new Error("Failed to fetch products");
+        }
       } catch (err) {
         setError(err.message || "An error occurred");
       } finally {

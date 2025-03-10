@@ -14,7 +14,7 @@ export default function Header() {
         <p>dashboard / digital products</p>
       </div>
       <div className="div2">
-        <input type="text" placeholder="Search" className="search-input" />
+        <input type="text" placeholder="  Search" className="search-input" />
         <div className="iconsHolder">
           <button >
             <img src="/headerIcon/them.svg" alt="Theme" />

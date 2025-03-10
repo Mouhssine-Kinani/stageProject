@@ -1,0 +1,71 @@
+.container{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 8px;
+}
+/* ______________________________________ */
+
+.mapContainer{
+    max-width: 564px;
+    max-height: 252px;
+    border: 3px solid red;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+}
+.logoContainer{
+    grid-row: span 2 / span 2;
+    border: 3px solid red;
+}
+.TheAddressInMap{
+    grid-column-start: 2;
+    border: 3px solid red;
+}
+
+
+/* ______________________________________ */
+.statiqueContainer{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+    max-width: 600px;
+}
+.statiquesDisplay {
+    margin-top: 0.7rem;
+    width: 264px;
+    min-width: 200px;
+    height: 112px;
+    border: none;
+    border-radius: 16px;
+    padding: 1.3rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 8px;
+  }
+  .activeProducts {
+    background-color: #a1e3cb;
+  }
+  .expiringSoon {
+    background-color: #ffe999;
+  }
+  .expired {
+    background-color: #fb766b;
+  }
+  .clients {
+    background-color: #e5ecf6;
+  }
+  .statiquesHeader {
+    grid-column: span 2 / span 2;
+    font-weight: bolder;
+  }
+  .nbrStatiques {
+    grid-row-start: 2;
+    font-weight: bolder;
+  }
+  .calc {
+    grid-row-start: 2;
+  }

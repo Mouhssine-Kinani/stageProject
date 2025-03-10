@@ -28,7 +28,7 @@ export default function Page() {
   useEffect(() => {
     async function fetchData() {
       const result = await fetchUsers();
-      setData(result || []); 
+      setData(result || []);
     }
 
     fetchData();
