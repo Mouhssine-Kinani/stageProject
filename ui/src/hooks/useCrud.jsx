@@ -3,7 +3,7 @@ import axios from "axios";
 
 const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
 
-export function useCrud(Category) {
+export function useCrud(Category, searchQuery = "") {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,7 +14,10 @@ export function useCrud(Category) {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const resp = await axios.get(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
+      const searchParam = searchQuery ? `&search=${searchQuery}` : "";
+      const resp = await axios.get(
+        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}`
+      );
       setData(resp.data.users || []);
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
@@ -40,10 +43,10 @@ export function useCrud(Category) {
     }
   };
 
-  // Fetch data when page changes
+  // Fetch data when page, Category, or searchQuery changes
   useEffect(() => {
     fetchData();
-  }, [currentPage, Category]);
+  }, [currentPage, Category, searchQuery]);
 
   return {
     data,
@@ -53,6 +56,6 @@ export function useCrud(Category) {
     currentPage,
     setCurrentPage,
     totalPages,
-    fetchData
+    fetchData,
   };
 }

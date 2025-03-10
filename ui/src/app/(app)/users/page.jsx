@@ -8,6 +8,7 @@ import { DialogDemo } from "@/components/popup/dialogDemo";
 import SearchBar from "@/components/serchBar/Search";
 
 export default function Page() {
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     data,
     error,
@@ -16,24 +17,13 @@ export default function Page() {
     currentPage,
     setCurrentPage,
     totalPages,
-  } = useCrud("users");
+  } = useCrud("users", searchQuery);
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filtrage des utilisateurs en fonction de la recherche
-  const filteredData =
-    data?.filter(
-      (user) =>
-        (user.name &&
-          user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (user.email &&
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()))
-    ) || [];
   return (
     <div>
       <h1>List of Users</h1>
 
-      {/* Barre de recherche */}
+      {/* Search bar */}
       <SearchBar onSearch={setSearchQuery} />
       <br />
       <br />
@@ -41,7 +31,7 @@ export default function Page() {
         <div>Loading...</div>
       ) : (
         <>
-          <UserTable data={filteredData} onDelete={deleteItem} />
+          <UserTable data={data} onDelete={deleteItem} />
           <div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}

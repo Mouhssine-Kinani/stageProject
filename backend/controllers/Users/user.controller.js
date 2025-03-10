@@ -3,20 +3,56 @@ import User from "../../models/Users/user.model.js";
 
 
 // funciton that fetches all users
+// export const getUsers = async (req, res, next) => {
+//   try {
+//     let page = parseInt(req.query.page) || 1;
+//     let limit = parseInt(req.query.limit) || 10;
+//     let skip = (page - 1) * limit;
+
+//     const users = await User.find().skip(skip).limit(limit).select("-password");
+//     const countUsers = await User.countDocuments();
+//     const totalPages = Math.ceil(countUsers / limit)
+//     res.status(200).json({users , totalPages});
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const getUsers = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const users = await User.find().skip(skip).limit(limit).select("-password");
-    const countUsers = await User.countDocuments();
-    const totalPages = Math.ceil(countUsers / limit)
-    res.status(200).json({users , totalPages});
+    // Build a query object: if a search query is provided, add search criteria; otherwise, return all.
+    let query = {};
+    if (req.query.search && req.query.search.trim() !== "") {
+      const regex = new RegExp(req.query.search, "i"); // case-insensitive search
+      query = {
+        $or: [
+          { fullName: { $regex: regex } },
+          { email: { $regex: regex } }
+          // You can add more fields here if needed
+        ]
+      };
+    }
+
+    // Find users based on the query (either filtered or normal)
+    const users = await User.find(query)
+      .skip(skip)
+      .limit(limit)
+      .select("-password");
+
+    // Count matching users for pagination
+    const countUsers = await User.countDocuments(query);
+    const totalPages = Math.ceil(countUsers / limit);
+
+    res.status(200).json({ users, totalPages });
   } catch (error) {
     next(error);
   }
 };
+
 
 // function that fetches a single user
 export const getUser = async (req, res, next) => {
@@ -36,17 +72,17 @@ export const getUser = async (req, res, next) => {
 // function that creates a new user
 export const createUser = async (req, res, next) => {
   try {
-    const { reference, fullName, email, password , role, status } = req.body;
-    console.log(password)
-    let finalPassword = password ? password : 'admin';
+    const { reference, fullName, email, password, role, status } = req.body;
     // check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      const error = new Error("User already exists");
+      error.statusCode = 409;
+      throw error;
     }
     // hash the password
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(finalPassword, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
       reference,
