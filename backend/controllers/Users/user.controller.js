@@ -36,17 +36,17 @@ export const getUser = async (req, res, next) => {
 // function that creates a new user
 export const createUser = async (req, res, next) => {
   try {
-    const { reference, fullName, email, password, role, status } = req.body;
+    const { reference, fullName, email, password , role, status } = req.body;
+    console.log(password)
+    let finalPassword = password ? password : 'admin';
     // check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      const error = new Error("User already exists");
-      error.statusCode = 409;
-      throw error;
+      return res.status(409).json({ success: false, message: "User already exists" });
     }
     // hash the password
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(finalPassword, salt);
 
     const newUser = new User({
       reference,

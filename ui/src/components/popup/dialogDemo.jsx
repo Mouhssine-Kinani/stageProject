@@ -11,14 +11,12 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {SquarePen, Image} from 'lucide-react'
+import {SquarePen, Image, Plus} from 'lucide-react'
 import { useState } from "react"
 
 import axios from 'axios'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { object, string } from 'yup';
-
-import { Plus } from "lucide-react"
 
 // Define Yup validation schema
 const userSchema = object({
@@ -48,6 +46,7 @@ const userSchema = object({
 });
 
 export function DialogDemo({buttonTitle}) {
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -100,32 +99,79 @@ export function DialogDemo({buttonTitle}) {
     }
   };
   
+  const handleCancel = () => {
+    setOpen(false);
+    setFormData({
+      fullName: '',
+      email: '',
+      phone: '',
+      status: '',
+      roleName: '',
+      logo: null
+    });
+    setSelectedFile(null);
+    setErrors({});
+  };
+
   const handleSubmit = async () => {
     try {
       // Validate form data using Yup
       await userSchema.validate(formData, { abortEarly: false });
       
+      const submitData = {...formData, 
+        role: {roleName: formData.roleName}
+      }
+      // Remove the `roleName` property
+      delete submitData.roleName
       // If validation passes, you can proceed with form submission
-      console.log('Form submitted successfully:', formData);
+      // console.log('Form submitted successfully:', submitData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/users/create`, submitData)
+      console.log(response);
       
-      // Reset form and close dialog
-      // resetForm();
-      // closeDialog();
+      // Close dialog and reset form on success
+      setOpen(false);
+      handleCancel(); // Reset form data
       
-    } catch (validationError) {
+    } catch (error) {
       // Handle validation errors
-      const newErrors = {};
-      validationError.inner.forEach(err => {
-        newErrors[err.path] = err.message;
-      });
-      setErrors(newErrors);
+      if(error.inner){
+        const newErrors = {};
+        error.inner.forEach(err => {
+          newErrors[err.path] = err.message;
+        });
+        setErrors(newErrors);
+      }
+      // Handle server errors
+      else if (axios.isAxiosError(error)) {
+        console.log("Axios error:", error);
+        
+        // Get the error message from the response if it exists
+        let errorMessage = "Server error";
+        if (error.response || error.response.data) {
+          // The server responded with a status code outside of 2xx
+          errorMessage = error.response.data.message || 
+                        "Server returned error: " + error.response.status;
+        } else if (error.request) {
+          // The request was made but no response was received
+          errorMessage = "No response received from server";
+        } else {
+          // Something happened in setting up the request
+          errorMessage = error.message || "Error in request setup";
+        }
+        
+        setErrors((prev) => ({...prev, submit: errorMessage}));
+        }else {
+        // Unknown error
+        setErrors((prev) => ({ ...prev, submit: "Error" }));
+      }
+      
     }
   };
   
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex bg-transparent items-center gap-2">
+        <Button className="flex bg-transparent items-center gap-2" onClick={() => setOpen(true)}>
           <Plus color="gray"/>
         </Button>
       </DialogTrigger>
@@ -135,8 +181,8 @@ export function DialogDemo({buttonTitle}) {
         </DialogHeader>
         
         <div className="flex flex-col md:flex-row gap-6 py-4">
-          {/* Left side - First div */}
-          <div className="flex-1 space-y-6">
+          {/* Left column - Main form fields */}
+          <div className="flex-1 space-y-6 order-1">
             {/* Full name and phone in parallel */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -190,54 +236,10 @@ export function DialogDemo({buttonTitle}) {
                 )}
               </div>
             </div>
-            
-            {/* Logo section */}
-            <div className="space-y-2">
-              <Label htmlFor="logo">Profile picture</Label>
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 bg-slate-100 flex items-center justify-center rounded-full border">
-                  {selectedFile ? (
-                    <img 
-                      src={URL.createObjectURL(selectedFile)}
-                      alt="Preview" 
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    // <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    //   <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                    //   <circle cx="12" cy="7" r="4"></circle>
-                    // </svg>
-                    <Image size={30}  />
-                  )}
-                </div>
-                
-                <div className="flex-1 space-y-1">
-                  <label htmlFor="logoInput">
-                    <Button variant="outline" className="w-40" type="button" onClick={() => document.getElementById('logoInput').click()}>
-                      Choose a file
-                    </Button>
-                    <input
-                      type="file"
-                      id="logoInput"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                  <p className="text-xs text-gray-500">Please choose a square image, less than 100Kb</p>
-                  <p className="text-sm text-gray-600">
-                    {selectedFile ? selectedFile.name : "No file"}
-                  </p>
-                  {errors.logo && (
-                    <p className="text-xs text-red-500">{errors.logo}</p>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
           
-          {/* Right side - Second div */}
-          <div className="flex-1 space-y-6">
+          {/* Right column - Email and role */}
+          <div className="flex-1 space-y-6 order-2">
             {/* Email takes full width */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -276,15 +278,59 @@ export function DialogDemo({buttonTitle}) {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Logo section - Now a separate section that will appear last in the flow */}
+        <div className="space-y-2 mt-6 order-3">
+          <Label htmlFor="logo">Profile picture</Label>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 bg-slate-100 flex items-center justify-center rounded-full border">
+              {selectedFile ? (
+                <img 
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Preview" 
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <Image size={30} />
+              )}
+            </div>
             
-            {/* Empty space to push buttons to bottom */}
-            <div className="flex-grow"></div>
+            <div className="flex-1 space-y-1">
+              <label htmlFor="logoInput">
+                <Button variant="outline" className="w-40" type="button" onClick={() => document.getElementById('logoInput').click()}>
+                  Choose a file
+                </Button>
+                <input
+                  type="file"
+                  id="logoInput"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-gray-500">Please choose a square image, less than 100Kb</p>
+              <p className="text-sm text-gray-600">
+                {selectedFile ? selectedFile.name : "No file"}
+              </p>
+              {errors.logo && (
+                <p className="text-xs text-red-500">{errors.logo}</p>
+              )}
+              {errors.submit && (
+                <div className="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <p className="text-sm font-medium">{errors.submit}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
         {/* Footer buttons aligned to bottom right */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" className="px-6">Cancel</Button>
+          <Button variant="outline" className="px-6" onClick={handleCancel}>
+            Cancel
+          </Button>
           <Button 
             className="bg-black text-white hover:bg-gray-800 px-6" 
             onClick={handleSubmit}
