@@ -10,7 +10,9 @@ export const getUsers = async (req, res, next) => {
     let skip = (page - 1) * limit;
 
     const users = await User.find().skip(skip).limit(limit).select("-password");
-    res.status(200).json(users);
+    const countUsers = await User.countDocuments();
+    const totalPages = Math.ceil(countUsers / limit)
+    res.status(200).json({users , totalPages});
   } catch (error) {
     next(error);
   }

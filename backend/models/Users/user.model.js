@@ -24,8 +24,15 @@ const UserSchema = new Schema(
       minLength: 5,
       maxLength: 100,
     },
+    phone: {
+      type: String,
+      match: [/^\d{10,15}$/, "Phone number must be between 10-15 digits"],
+      minLength: 10,
+      maxLength: 15,
+    },
     password: { type: String, required: true, minLength: 6 },
     lastLogin_date: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
     logo: { type: String, trim: true },
     status: {
       type: String,
@@ -35,10 +42,8 @@ const UserSchema = new Schema(
     role: {
       roleName: {
         type: String,
+        enum: ["User", "Admin", "Super Admin"],
         required: true,
-        minLength: 3,
-        maxLength: 50,
-        trim: true,
       },
       description: { type: String, maxLength: 200, trim: true },
       privileges: [{ type: String, minLength: 3, maxLength: 50, trim: true }],
