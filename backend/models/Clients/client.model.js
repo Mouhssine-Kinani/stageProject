@@ -46,7 +46,7 @@ const ClientSchema = new Schema(
   { timestamps: true }
 );
 
-ClientSchema.plugin(AutoIncrement, { inc_field: 'client_reference' }); 
+ClientSchema.plugin(AutoIncrement, { inc_field: 'client_reference' });
 
 const Client = mongoose.model('Client', ClientSchema);
 

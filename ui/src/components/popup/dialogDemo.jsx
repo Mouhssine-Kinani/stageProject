@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {SquarePen, Image} from 'lucide-react'
+import {SquarePen, Image, Plus} from 'lucide-react'
 import { useState } from "react"
 
 import axios from 'axios'
@@ -171,8 +171,8 @@ export function DialogDemo({buttonTitle}) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2" onClick={() => setOpen(true)}>
-          Add a user
+        <Button className="flex bg-transparent items-center gap-2" onClick={() => setOpen(true)}>
+          <Plus color="gray"/>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">

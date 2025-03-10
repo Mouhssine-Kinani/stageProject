@@ -1,0 +1,31 @@
+.HomeItems {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fetchedData {
+    margin-block: 2rem;
+    width: 891px;
+    height: 414px;
+    border: 1px solid #e5e7eb;
+    background-color: #f7f9fb;
+    overflow-x: auto; /* Permet le scroll horizontal */
+    overflow-y: auto; /* Permet le scroll vertical si nécessaire */
+    padding: 1rem; /* Ajoute un petit espace pour éviter que le texte touche les bords */
+    white-space: nowrap; /* Empêche le retour à la ligne dans le tableau */
+}
+
+  .graphes {
+    display: flex;
+    gap: 2rem;
+  }
+  .graphe1 {
+    background-color: #f7f9fb;
+    width: 432px;
+    height: 280px;
+  }
+  .graphe2 {
+    background-color: #f7f9fb;
+    width: 432px;
+    height: 280px;
+  }
