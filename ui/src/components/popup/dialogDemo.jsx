@@ -18,6 +18,8 @@ import axios from 'axios'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { object, string } from 'yup';
 
+import { Plus } from "lucide-react"
+
 // Define Yup validation schema
 const userSchema = object({
   fullName: string()
@@ -123,8 +125,8 @@ export function DialogDemo({buttonTitle}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          Add a user
+        <Button className="flex bg-transparent items-center gap-2">
+          <Plus color="gray"/>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">

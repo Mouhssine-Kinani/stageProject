@@ -7,11 +7,15 @@ import "./statiques.css";
 import { DataTable } from "@/components/table/data-table";
 
 import { useProducts } from "@/components/getStatiques/getAllProducts";
+import { useClients } from "@/components/getStatiques/getAllClients";
+
 
 function Page() {
   const [data, setData] = useState([]);
+  const [allClients,setAllClients]= useState([]);
 
   const { products, loading, error } = useProducts();
+  const {clients, clintsLoading, ClientError} = useClients();
 
   useEffect(() => {
     const oneMonthInMillis = 31 * 24 * 60 * 60 * 1000;
@@ -24,6 +28,12 @@ function Page() {
 
     setData(productExpiringSoon);
   }, [products]);
+
+  useEffect(
+    ()=>{
+      setAllClients(clients);
+    },[clients]
+  )
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
@@ -90,6 +100,9 @@ function Page() {
   });
 
   console.log(products);
+
+  
+
   return (
     <div className="container">
       <div className="day">
@@ -122,8 +135,8 @@ function Page() {
 
         <div className="clients statiquesDisplay">
           <h1 className="statiquesHeader">Clients</h1>
-          <h2 className="nbrStatiques">120</h2>
-          <p className="calc">11%</p>
+          <h2 className="nbrStatiques">{allClients.length}</h2>
+          {/* <p className="calc">11%</p> */}
         </div>
       </div>
       <div className="HomeItems">
