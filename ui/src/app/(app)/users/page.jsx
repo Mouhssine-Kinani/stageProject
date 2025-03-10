@@ -3,6 +3,7 @@
 import { UserTable } from "@/app/(app)/users/columns";
 import { PaginationDemo } from "@/components/pagination/pagination";
 import { useCrud } from '@/hooks/useCrud';
+import {DialogDemo} from "@/components/popup/dialogDemo";
 
 export default function Page() {
   const {
@@ -14,11 +15,14 @@ export default function Page() {
     setCurrentPage,
     totalPages
   } = useCrud('users');
-
+const buttonTitle = '+'
 
   return (
     <div>
       <h2>List of Users</h2>
+      <br />
+      {/* <button className="ml-5" onClick={DialogDemo}>+</button> */}
+      <DialogDemo buttonTitle={buttonTitle}/>
       <br />
       {isLoading ? (
         <div>Loading...</div>
