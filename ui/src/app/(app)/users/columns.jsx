@@ -1,9 +1,6 @@
-
-
 "use client"
 
 import { MoreHorizontal } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,9 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DataTable } from "@/components/table/data-table";
+import {useMemo} from "react";
 
-export const columns = [
-  // ...
+// Define columns outside the component to prevent recreation on each render
+const getColumns = (onDelete) => [
   {
     accessorKey: "user_reference",
     header: "Reference",
@@ -38,7 +37,7 @@ export const columns = [
     header: "Last Login",
   },
   {
-    accessorKey: "lastLogin_date",
+    accessorKey: "createdAt",
     header: "Created at",
   },
   {
@@ -48,7 +47,7 @@ export const columns = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original
+      const user = row.original;
 
       return (
         <DropdownMenu>
@@ -61,34 +60,24 @@ export const columns = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem> <span className="text-red-500">Delete</span> </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(user._id)}
+            >
+              <span className="text-red-500">Delete</span>
+            </DropdownMenuItem>
             <DropdownMenuItem>Edit</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
     },
   },
-]
+];
 
-// export const columns = [
-//   {
-//     accessorKey: "status",
-//     header: "Status",
-//   },
-//   {
-//     accessorKey: "email",
-//     header: "Email",
-//   },
-//   {
-//     accessorKey: "fullName",
-//     header: "Full Name",
-//   },
-//   {
-//     accessorKey: "role.roleName",
-//     header: "Role",
-//   },
-//   {
-//     accessorKey: "lastLogin_date",
-//     header: "Last Login",
-//   },
-// ];
+export function UserTable({ data, onDelete }) {
+  const columns = useMemo(
+    () => getColumns(onDelete),
+    [onDelete]
+  );
+
+  return <DataTable columns={columns} data={data} />;
+}
