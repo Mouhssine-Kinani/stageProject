@@ -16,6 +16,8 @@ function page() {
     return (
         <>
             <SearchBar onSearch={setSearchQuery}/>
+            <br />
+            
             content products
         </>
     );

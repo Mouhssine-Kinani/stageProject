@@ -88,3 +88,33 @@ export const editProduct = async (req, res, next) => {
         res.status(500).json({ success: false, message: error.message, data: null });
     }
 };
+
+export const countProducts = async (req, res, next) => {
+    try {
+        const totalProducts = await Product.countDocuments();
+        const today = new Date();
+        const plus31Days = new Date();
+        plus31Days.setDate(today.getDate() + 31);
+
+        const activeProducts = await Product.countDocuments({
+            date_fin: { $gt: plus31Days }
+        });
+
+        const expiringSoonProducts = await Product.countDocuments({
+            date_fin: { $lte: plus31Days, $gt: today }
+        });
+
+        const expiredProducts = await Product.countDocuments({
+            date_fin: { $lte: today }
+        });
+
+        res.status(200).json({
+            totalProducts,
+            activeProducts,
+            expiringSoonProducts,
+            expiredProducts
+        });
+    } catch (error) {
+        next(error);
+    }
+};
