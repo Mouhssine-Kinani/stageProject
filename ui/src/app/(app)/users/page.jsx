@@ -4,7 +4,6 @@ import { useState } from "react";
 import { UserTable } from "@/app/(app)/users/columns";
 import { PaginationDemo } from "@/components/pagination/pagination";
 import { useCrud } from "@/hooks/useCrud";
-import { DialogDemo } from "@/components/popup/dialogDemo";
 import SearchBar from "@/components/serchBar/Search";
 
 export default function Page() {
@@ -29,10 +28,9 @@ export default function Page() {
         (user.email &&
           user.email.toLowerCase().includes(searchQuery.toLowerCase()))
     ) || [];
+
   return (
     <div>
-      <h1>List of Users</h1>
-
       {/* Barre de recherche */}
       <SearchBar onSearch={setSearchQuery} />
       <br />
