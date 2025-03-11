@@ -10,6 +10,7 @@ export const getUsers = async (req, res, next) => {
     let skip = (page - 1) * limit;
 
     const users = await User.find().skip(skip).limit(limit).select("-password");
+    if(!users) res.status(404).json({ success: false, message: "No user found" });
     const countUsers = await User.countDocuments();
     const totalPages = Math.ceil(countUsers / limit)
     res.status(200).json({users , totalPages});
@@ -23,9 +24,10 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      // const error = new Error("User not found");
+      // error.statusCode = 404;
+      // throw error;
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
