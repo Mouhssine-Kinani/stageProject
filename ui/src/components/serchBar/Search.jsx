@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
-import { DialogDemo } from "@/components/popup/dialogDemo";
-
+import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState("");
 
@@ -14,7 +13,7 @@ const SearchBar = ({ onSearch }) => {
     <div className="flex items-center border-2 border-gray-500 rounded-md p-2 w-full justify-between">
       {/* Boutons (à gauche) */}
       <div className="flex items-center gap-2">
-        <DialogDemo buttonTitle="+" />
+        <AddUserDialog />
         <button className="p-2 text-gray-500 hover:text-gray-700">
           <Filter size={18} />
         </button>
