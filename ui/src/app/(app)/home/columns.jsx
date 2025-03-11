@@ -13,36 +13,41 @@ import {
 import { DataTable } from "@/components/table/data-table";
 import { useMemo } from "react";
 
-// Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [
-  {
-    accessorKey: "product_reference",
-    header: "Reference",
-    cell: ({ row }) => `#US0${row.original.product_reference}`,
-  },
-  {
-    accessorKey: "productName",
-    header: "product Name",
-  },
-  {
-    accessorKey: "category",
-    header: "category",
-  },
+  { accessorKey: "product_reference", header: "Ref" },
+  { accessorKey: "productName", header: "Product Name" },
+  { accessorKey: "category", header: "Category" },
+  { accessorKey: "provider", header: "Provider" },
   {
     accessorKey: "billing_cycle",
-    header: "Billing cycle",
+    header: "Billing Cycle",
+    cell: ({ getValue }) => (
+      <div className="flex items-center gap-2">
+        <img
+          src="/tableIcons/iconCalender.svg"
+          alt="Calendar Icon"
+          className="w-5 h-5"
+        />
+        <span className="font-medium">{getValue()}</span>
+      </div>
+    ),
   },
+  { accessorKey: "price", header: "Renewal Price" },
   {
-    accessorKey: "price",
-    header: "Price",
-  },
-  {
-    accessorKey: "productAddedDate",
-    header: "Product added",
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
+    accessorKey: "date_fin",
+    header: "Renewal Status",
+    cell: ({ getValue }) => {
+      const dateFin = getValue() ? new Date(getValue()) : null;
+      if (!dateFin) return <span className="text-green-500">OK</span>;
+
+      const today = new Date();
+      const diffInDays = Math.ceil((dateFin - today) / (1000 * 60 * 60 * 24));
+
+      if (diffInDays < 0) return <span className="text-red-500">Expired</span>;
+      if (diffInDays <= 31)
+        return <span className="text-yellow-500">Expiring Soon</span>;
+      return <span className="text-green-500">OK</span>;
+    },
   },
   {
     id: "actions",
@@ -60,15 +65,9 @@ const getColumns = (onDelete) => [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                console.log("Deleting product:", product);
-                onDelete(product._id);
-              }}
-            >
+            <DropdownMenuItem onClick={() => onDelete(product._id)}>
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
-
             <DropdownMenuItem>Edit</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -77,7 +76,8 @@ const getColumns = (onDelete) => [
   },
 ];
 
-export function ProductTable({ data, onDelete }) {
+
+export function ProductHomeTable({ data, onDelete }) {
   const columns = useMemo(() => getColumns(onDelete), [onDelete]);
   return <DataTable columns={columns} data={data} />;
 }

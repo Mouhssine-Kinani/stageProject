@@ -10,11 +10,21 @@ import { useProducts } from "@/components/getStatiques/getAllProducts";
 import { useClients } from "@/components/getStatiques/getAllClients";
 import { useProductsStats } from "@/hooks/useProductsStats";
 
+import { ProductHomeTable } from "./columns";
+import { useCrud } from "@/hooks/useCrud";
+
 function Page() {
   const [data, setData] = useState([]);
   const { products, loading, error } = useProducts();
   const { clients, clintsLoading, ClientError } = useClients();
   const { productsCount, loading: loadingStats, error: errorStats } = useProductsStats();
+    const {
+    isLoading,
+    deleteItem,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+  } = useCrud("users");
 
   useEffect(() => {
     const oneMonthInMillis = 31 * 24 * 60 * 60 * 1000;
@@ -75,7 +85,7 @@ function Page() {
       </div>
       <div className="HomeItems">
         <div className="tableContainer">
-          <DataTable
+          {/* <DataTable
             columns={[
               { accessorKey: "product_reference", header: "Ref" },
               { accessorKey: "productName", header: "Product Name" },
@@ -109,7 +119,8 @@ function Page() {
               },
             ]}
             data={data}
-          />
+          /> */}
+          <ProductHomeTable data={data} onDelete={deleteItem}/>
         </div>
 
         <div className="graphes">

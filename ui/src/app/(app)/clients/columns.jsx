@@ -2,6 +2,7 @@
 
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Box } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,33 +17,43 @@ import { useMemo } from "react";
 // Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [
   {
-    accessorKey: "product_reference",
+    accessorKey: "client_reference",
     header: "Reference",
-    cell: ({ row }) => `#US0${row.original.product_reference}`,
+    cell: ({ row }) => `#US0${row.original.client_reference}`,
   },
   {
-    accessorKey: "productName",
-    header: "product Name",
+    accessorKey: "logo",
+    header: "Client",
   },
   {
-    accessorKey: "category",
-    header: "category",
+    accessorKey: "name",
+    header: "Client Name",
   },
   {
-    accessorKey: "billing_cycle",
-    header: "Billing cycle",
+    accessorKey: "email",
+    header: "Email",
   },
   {
-    accessorKey: "price",
-    header: "Price",
+    accessorKey: "products",
+    header: "Number of products",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Box />
+        <p> {row.original.products?.length || 0}</p>
+      </div>
+    ),
   },
   {
-    accessorKey: "productAddedDate",
-    header: "Product added",
+    accessorKey: "renewal_status",
+    header: "Renewal Status",
+    // cell:({getValue})=>{
+    //     const 
+    // }
   },
   {
-    accessorKey: "type",
-    header: "Type",
+    accessorKey: "totalPrice",
+    header: "Total Price",
+    cell: ({ row }) => `${row.original.totalPrice.toFixed(2)} $`,
   },
   {
     id: "actions",
@@ -60,15 +71,9 @@ const getColumns = (onDelete) => [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                console.log("Deleting product:", product);
-                onDelete(product._id);
-              }}
-            >
+            <DropdownMenuItem onClick={() => onDelete(product._id)}>
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
-
             <DropdownMenuItem>Edit</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -77,7 +82,7 @@ const getColumns = (onDelete) => [
   },
 ];
 
-export function ProductTable({ data, onDelete }) {
+export function ClientsTable({ data, onDelete }) {
   const columns = useMemo(() => getColumns(onDelete), [onDelete]);
   return <DataTable columns={columns} data={data} />;
 }

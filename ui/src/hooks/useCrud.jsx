@@ -18,9 +18,13 @@ export function useCrud(Category, searchQuery = "") {
       const resp = await axios.get(
         `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}`
       );
-      setData(resp.data.users || []);
+      // setData(resp.data.users || []);
+      setData(resp.data.data || []);
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
+      console.log(`Fetching: ${URLAPI}/products?page=${currentPage}&limit=5&search=${searchQuery}`);
+      console.log("API response:", resp.data);
+      console.log("data : ", data)
     } catch (err) {
       console.error(`Error fetching ${Category}:`, err);
       setError(err);
@@ -33,10 +37,18 @@ export function useCrud(Category, searchQuery = "") {
 
   const deleteItem = async (id) => {
     try {
-      await axios.delete(`${URLAPI}/${Category}/${id}`);
-      // Refresh data after successful deletion
-      await fetchData();
-      setError(null);
+      console.log(`Trying to delete item with ID: ${id}`);
+
+      // Vérifie si la route nécessite "/delete/"
+      const needsDeletePath = ["products", "clients"].includes(Category);
+      const url = needsDeletePath
+        ? `${URLAPI}/${Category}/delete/${id}`
+        : `${URLAPI}/${Category}/${id}`;
+
+      const response = await axios.delete(url);
+
+      console.log("Delete response:", response.data);
+      await fetchData(); // Recharge les données après suppression
     } catch (err) {
       console.error(`Error deleting ${Category}:`, err);
       setError(err);
@@ -45,19 +57,19 @@ export function useCrud(Category, searchQuery = "") {
 
   // Fetch data when page, Category, or searchQuery changes
   // New function to handle file validation
-  const validateFile = (file, options = { maxSize: 102400, type: 'image' }) => {
-    if (!file) return { isValid: false, error: 'No file provided' };
+  const validateFile = (file, options = { maxSize: 102400, type: "image" }) => {
+    if (!file) return { isValid: false, error: "No file provided" };
 
     // Check file type
-    if (options.type === 'image' && !file.type.startsWith('image/')) {
-      return { isValid: false, error: 'Please select an image file' };
+    if (options.type === "image" && !file.type.startsWith("image/")) {
+      return { isValid: false, error: "Please select an image file" };
     }
 
     // Check file size (default 100KB = 102400 bytes)
     if (file.size > options.maxSize) {
-      return { 
-        isValid: false, 
-        error: `File must be less than ${Math.round(options.maxSize / 1024)}KB` 
+      return {
+        isValid: false,
+        error: `File must be less than ${Math.round(options.maxSize / 1024)}KB`,
       };
     }
 
@@ -68,36 +80,42 @@ export function useCrud(Category, searchQuery = "") {
   const createItem = async (itemData) => {
     try {
       setIsLoading(true);
-      const response = await axios.post(`${URLAPI}/${Category}/create`, itemData);
-      
+      const response = await axios.post(
+        `${URLAPI}/${Category}/create`,
+        itemData
+      );
+
       // Get total count to determine the last page
-      const countResponse = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
+      const countResponse = await axios.get(
+        `${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`
+      );
       const newTotalPages = countResponse.data.totalPages || 1;
-      
+
       // Set to the last page where the new item will be
       setCurrentPage(newTotalPages);
-      
+
       // Refresh data after successful creation
       await fetchData();
       setError(null);
-      
+
       return { success: true, data: response.data };
     } catch (error) {
       let errorMessage = "Server error";
-      
+
       if (error.response?.data) {
-        errorMessage = error.response.data.message || 
-                      "Server returned error: " + error.response.status;
+        errorMessage =
+          error.response.data.message ||
+          "Server returned error: " + error.response.status;
       } else if (error.request) {
         errorMessage = "No response received from server";
       } else {
         errorMessage = error.message || "Error in request setup";
       }
-      
+
       setError({ message: errorMessage });
-      return { 
-        success: false, 
-        error: errorMessage 
+      return {
+        success: false,
+        error: errorMessage,
       };
     } finally {
       setIsLoading(false);
