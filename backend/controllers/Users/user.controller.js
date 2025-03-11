@@ -24,30 +24,32 @@ export const getUsers = async (req, res, next) => {
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    // Build a query object: if a search query is provided, add search criteria; otherwise, return all.
+    // Build a query object based on search criteria
     let query = {};
     if (req.query.search && req.query.search.trim() !== "") {
-      const regex = new RegExp(req.query.search, "i"); // case-insensitive search
+      const regex = new RegExp(req.query.search, "i"); // Case-insensitive search
       query = {
         $or: [
           { fullName: { $regex: regex } },
           { email: { $regex: regex } }
-          // You can add more fields here if needed
         ]
       };
     }
 
-    // Find users based on the query (either filtered or normal)
-    const users = await User.find(query)
-      .skip(skip)
-      .limit(limit)
-      .select("-password");
+    // Fetch users based on query
+    const users = await User.find(query).skip(skip).limit(limit).select("-password");
 
-    // Count matching users for pagination
+    // Count the total matching users
     const countUsers = await User.countDocuments(query);
     const totalPages = Math.ceil(countUsers / limit);
 
-    res.status(200).json({ users, totalPages });
+    // Handle case when no users are found
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: "No users found" });
+    }
+
+    // Send response
+    res.status(200).json({ success: true, users, totalPages });
   } catch (error) {
     next(error);
   }
@@ -59,9 +61,10 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      // const error = new Error("User not found");
+      // error.statusCode = 404;
+      // throw error;
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
