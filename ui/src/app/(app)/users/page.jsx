@@ -39,7 +39,7 @@ export default function Page() {
         <div>Loading...</div>
       ) : (
         <>
-          <UserTable data={data} onDelete={deleteItem} >
+          <UserTable data={data} onDelete={deleteItem} />
           <div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}
