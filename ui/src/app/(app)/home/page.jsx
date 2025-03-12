@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import "./homepage.css";
 import "./homeitems.css";
 import "./statiques.css";
-import { DataTable } from "@/components/table/data-table";
 
 import { useProducts } from "@/components/getStatiques/getAllProducts";
-import { useClients } from "@/components/getStatiques/getAllClients";
+import { useClientsCount } from "@/components/getStatiques/getAllClients";
 import { useProductsStats } from "@/hooks/useProductsStats";
 
 import { ProductHomeTable } from "./columns";
@@ -16,15 +15,9 @@ import { useCrud } from "@/hooks/useCrud";
 function Page() {
   const [data, setData] = useState([]);
   const { products, loading, error } = useProducts();
-  const { clients, clintsLoading, ClientError } = useClients();
+  const { clientsCount, clintsLoading, ClientError } = useClientsCount();
   const { productsCount, loading: loadingStats, error: errorStats } = useProductsStats();
-    const {
-    isLoading,
-    deleteItem,
-    currentPage,
-    setCurrentPage,
-    totalPages,
-  } = useCrud("users");
+  const { deleteItem } = useCrud("users");
 
   useEffect(() => {
     const oneMonthInMillis = 31 * 24 * 60 * 60 * 1000;
@@ -46,7 +39,6 @@ function Page() {
   const activeProducts = productsCount.activeProducts || 0;
   const expiringSoon = productsCount.expiringSoonProducts || 0;
   const expiredProducts = productsCount.expiredProducts || 0;
-  const totalClients = clients.length || 0;
 
   return (
     <div className="container">
@@ -80,49 +72,13 @@ function Page() {
 
         <div className="clients statiquesDisplay">
           <h1 className="statiquesHeader">Clients</h1>
-          <h2 className="nbrStatiques">{totalClients}</h2>
+          <h2 className="nbrStatiques">{clientsCount}</h2>
         </div>
       </div>
       <div className="HomeItems">
         <div className="tableContainer">
-          {/* <DataTable
-            columns={[
-              { accessorKey: "product_reference", header: "Ref" },
-              { accessorKey: "productName", header: "Product Name" },
-              { accessorKey: "category", header: "Category" },
-              { accessorKey: "provider", header: "Provider" },
-              {
-                accessorKey: "billing_cycle",
-                header: "Billing Cycle",
-                cell: ({ getValue }) => (
-                  <div className="flex items-center gap-2">
-                    <img src="/tableIcons/iconCalender.svg" alt="Calendar Icon" className="w-5 h-5" />
-                    <span className="font-medium">{getValue()}</span>
-                  </div>
-                ),
-              },
-              { accessorKey: "price", header: "Renewal Price" },
-              {
-                accessorKey: "date_fin",
-                header: "Renewal Status",
-                cell: ({ getValue }) => {
-                  const dateFin = getValue() ? new Date(getValue()) : null;
-                  if (!dateFin) return <span className="text-green-500">OK</span>;
-
-                  const today = new Date();
-                  const diffInDays = Math.ceil((dateFin - today) / (1000 * 60 * 60 * 24));
-
-                  if (diffInDays < 0) return <span className="text-red-500">Expired</span>;
-                  if (diffInDays <= 31) return <span className="text-yellow-500">Expiring Soon</span>;
-                  return <span className="text-green-500">OK</span>;
-                },
-              },
-            ]}
-            data={data}
-          /> */}
-          <ProductHomeTable data={data} onDelete={deleteItem}/>
+          <ProductHomeTable data={data} onDelete={deleteItem} />
         </div>
-
         <div className="graphes">
           <div className="graphe1">
             <h1 className="grapheTitle">Traffic by Device</h1>
@@ -135,4 +91,5 @@ function Page() {
     </div>
   );
 }
+
 export default Page;

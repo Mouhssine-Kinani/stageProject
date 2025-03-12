@@ -49,7 +49,7 @@ export const getUsers = async (req, res, next) => {
     }
 
     // Send response
-    res.status(200).json({ success: true, users, totalPages });
+    res.status(200).json({ success: true, data : users, totalPages });
   } catch (error) {
     next(error);
   }

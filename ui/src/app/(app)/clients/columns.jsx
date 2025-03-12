@@ -2,7 +2,7 @@
 
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Box } from "lucide-react";
+import { Box, DollarSign } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ const getColumns = (onDelete) => [
   {
     accessorKey: "client_reference",
     header: "Reference",
-    cell: ({ row }) => `#US0${row.original.client_reference}`,
+    cell: ({ row }) => `#CL0${row.original.client_reference}`,
   },
   {
     accessorKey: "logo",
@@ -35,30 +35,46 @@ const getColumns = (onDelete) => [
   },
   {
     accessorKey: "products",
-    header: "Number of products",
+    header: "Products",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Box />
-        <p> {row.original.products?.length || 0}</p>
+        <Box className="h-4 w-4 " />
+        <p>{row.original.products?.length || 0}</p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "totalPrice",
+    header: "Total Value",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4 text-green-500" />
+        <p>{row.original.totalPrice ? `${row.original.totalPrice.toFixed(2)}` : "0.00"}</p>
       </div>
     ),
   },
   {
     accessorKey: "renewal_status",
     header: "Renewal Status",
-    // cell:({getValue})=>{
-    //     const 
-    // }
-  },
-  {
-    accessorKey: "totalPrice",
-    header: "Total Price",
-    cell: ({ row }) => `${row.original.totalPrice.toFixed(2)} $`,
+    cell: ({ row }) => {
+      const status = row.original.renewal_status;
+      let statusClass = "px-2 py-1 rounded text-xs font-medium";
+      
+      if (status === "ok") {
+        statusClass += " bg-green-100 text-green-800";
+      } else if (status === "Overdue") {
+        statusClass += " bg-red-100 text-red-800";
+      } else if (status === "Expiring") {
+        statusClass += " bg-yellow-100 text-yellow-800";
+      }
+      
+      return <span className={statusClass}>{status}</span>;
+    }
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const product = row.original;
+      const client = row.original;
 
       return (
         <DropdownMenu>
@@ -71,10 +87,11 @@ const getColumns = (onDelete) => [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onDelete(product._id)}>
+            <DropdownMenuItem onClick={() => onDelete(client._id)}>
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
             <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem>View Details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

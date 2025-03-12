@@ -11,20 +11,60 @@ export function useCrud(Category, searchQuery = "") {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
 
+  // const fetchData = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const searchParam = searchQuery ? `&search=${searchQuery}` : "";
+  //     // Add populate=true parameter for clients to get their products
+  //     const populateParam = Category === "clients" ? "&populate=true" : "";
+      
+  //     const resp = await axios.get(
+  //       `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
+  //     );
+      
+  //     let processedData = resp.data.data || [];
+      
+  //     // If we're working with clients, calculate the total price for each client
+  //     if (Category === "clients" && processedData.length > 0) {
+  //       processedData = processedData.map(client => {
+  //         // Calculate the total price of all products if products are populated
+  //         const totalPrice = client.products && client.products.length > 0
+  //           ? client.products.reduce((sum, product) => sum + (product.price || 0), 0)
+  //           : 0;
+            
+  //         return {
+  //           ...client,
+  //           totalPrice
+  //         };
+  //       });
+  //     }
+      
+  //     setData(processedData);
+  //     setTotalPages(resp.data.totalPages || 1);
+  //     setError(null);
+  //   } catch (err) {
+  //     console.error(`Error fetching ${Category}:`, err);
+  //     setError(err);
+  //     setData([]);
+  //     setTotalPages(1);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const searchParam = searchQuery ? `&search=${searchQuery}` : "";
+      const populateParam = Category === "clients" ? "&populate=true" : "";
+  
       const resp = await axios.get(
-        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}`
+        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
       );
-      // setData(resp.data.users || []);
-      setData(resp.data.data || []);
+  
+      setData(resp.data.data || []); // Les données incluent déjà totalPrice si backend mis à jour
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
-      console.log(`Fetching: ${URLAPI}/products?page=${currentPage}&limit=5&search=${searchQuery}`);
-      console.log("API response:", resp.data);
-      console.log("data : ", data)
     } catch (err) {
       console.error(`Error fetching ${Category}:`, err);
       setError(err);
@@ -34,7 +74,7 @@ export function useCrud(Category, searchQuery = "") {
       setIsLoading(false);
     }
   };
-
+  
   const deleteItem = async (id) => {
     try {
       console.log(`Trying to delete item with ID: ${id}`);
@@ -55,7 +95,6 @@ export function useCrud(Category, searchQuery = "") {
     }
   };
 
-  // Fetch data when page, Category, or searchQuery changes
   // New function to handle file validation
   const validateFile = (file, options = { maxSize: 102400, type: "image" }) => {
     if (!file) return { isValid: false, error: "No file provided" };
@@ -76,7 +115,7 @@ export function useCrud(Category, searchQuery = "") {
     return { isValid: true, error: null };
   };
 
-  // New function to create an item
+  // Create an item function
   const createItem = async (itemData) => {
     try {
       setIsLoading(true);
@@ -122,7 +161,7 @@ export function useCrud(Category, searchQuery = "") {
     }
   };
 
-  // Fetch data when page changes
+  // Fetch data when page, Category, or searchQuery changes
   useEffect(() => {
     fetchData();
   }, [currentPage, Category, searchQuery]);

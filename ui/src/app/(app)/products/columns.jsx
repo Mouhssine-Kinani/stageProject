@@ -18,7 +18,7 @@ const getColumns = (onDelete) => [
   {
     accessorKey: "product_reference",
     header: "Reference",
-    cell: ({ row }) => `#US0${row.original.product_reference}`,
+    cell: ({ row }) => `#DP0${row.original.product_reference}`,
   },
   {
     accessorKey: "productName",
