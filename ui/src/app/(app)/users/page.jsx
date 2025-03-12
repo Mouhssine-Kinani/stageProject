@@ -7,6 +7,7 @@ import { useCrud } from "@/hooks/useCrud";
 import SearchBar from "@/components/serchBar/Search";
 
 export default function Page() {
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     data,
     error,
@@ -15,9 +16,7 @@ export default function Page() {
     currentPage,
     setCurrentPage,
     totalPages,
-  } = useCrud("users");
-
-  const [searchQuery, setSearchQuery] = useState("");
+  } = useCrud("users", searchQuery);
 
   // Filtrage des utilisateurs en fonction de la recherche
   const filteredData =
@@ -39,7 +38,7 @@ export default function Page() {
         <div>Loading...</div>
       ) : (
         <>
-          <UserTable data={filteredData} onDelete={deleteItem} />
+          <UserTable data={data} onDelete={deleteItem} />
           <div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}

@@ -3,29 +3,68 @@ import User from "../../models/Users/user.model.js";
 
 
 // funciton that fetches all users
+// export const getUsers = async (req, res, next) => {
+//   try {
+//     let page = parseInt(req.query.page) || 1;
+//     let limit = parseInt(req.query.limit) || 10;
+//     let skip = (page - 1) * limit;
+
+//     const users = await User.find().skip(skip).limit(limit).select("-password");
+//     const countUsers = await User.countDocuments();
+//     const totalPages = Math.ceil(countUsers / limit)
+//     res.status(200).json({users , totalPages});
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const getUsers = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const users = await User.find().skip(skip).limit(limit).select("-password");
-    const countUsers = await User.countDocuments();
-    const totalPages = Math.ceil(countUsers / limit)
-    res.status(200).json({users , totalPages});
+    // Build a query object based on search criteria
+    let query = {};
+    if (req.query.search && req.query.search.trim() !== "") {
+      const regex = new RegExp(req.query.search, "i"); // Case-insensitive search
+      query = {
+        $or: [
+          { fullName: { $regex: regex } },
+          { email: { $regex: regex } }
+        ]
+      };
+    }
+
+    // Fetch users based on query
+    const users = await User.find(query).skip(skip).limit(limit).select("-password");
+
+    // Count the total matching users
+    const countUsers = await User.countDocuments(query);
+    const totalPages = Math.ceil(countUsers / limit);
+
+    // Handle case when no users are found
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: "No users found" });
+    }
+
+    // Send response
+    res.status(200).json({ success: true, data : users, totalPages });
   } catch (error) {
     next(error);
   }
 };
+
 
 // function that fetches a single user
 export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      // const error = new Error("User not found");
+      // error.statusCode = 404;
+      // throw error;
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
@@ -36,17 +75,17 @@ export const getUser = async (req, res, next) => {
 // function that creates a new user
 export const createUser = async (req, res, next) => {
   try {
-    const { reference, fullName, email, password , role, status } = req.body;
-    console.log(password)
-    let finalPassword = password ? password : 'admin';
+    const { reference, fullName, email, password, role, status } = req.body;
     // check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      const error = new Error("User already exists");
+      error.statusCode = 409;
+      throw error;
     }
     // hash the password
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(finalPassword, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
       reference,

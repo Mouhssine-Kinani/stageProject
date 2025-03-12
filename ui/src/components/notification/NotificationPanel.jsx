@@ -1,19 +1,30 @@
 'use client';
 import { useLayout } from "@/contexts/LayoutContext";
+import "./notification.css"
 
 export default function NotificationPanel() {
   const { isNotificationOpen } = useLayout();
 
   return (
     <div className={`notification-panel ${!isNotificationOpen ? 'closed' : ''}`}>
-      {/* Your notification content */}
-      <div className="notification-content">
-        <h3>Notifications</h3>
-        <div className="notification-list">
-          {/* Add your notifications here */}
-          <div>New message received</div>
-          <div>System update available</div>
-          <div>Payment reminder</div>
+      <div className="not-container  flex flex-col p-2">
+        <div className="notificationList flex flex-col p-1">
+          <h3>Notication</h3>
+          <div className="notifications flex flex-col p-1">
+            content
+          </div>
+        </div>
+        <div className="activitiesList flex flex-col p-1">
+          <h3>Activities</h3>
+          <div className="activities flex flex-col p-1">
+            content
+          </div>
+        </div>
+        <div className="contactsList flex flex-col p-1">
+          <h3>Contacts</h3>
+          <div className="contacts flex flex-col p-1">
+            content
+          </div>
         </div>
       </div>
     </div>

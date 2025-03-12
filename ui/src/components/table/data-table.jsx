@@ -47,16 +47,6 @@ export function DataTable({ columns, data }) {
 
   return (
     <div className=" border">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter name..."
-          value={(table.getColumn("fullName")?.getFilterValue()) ?? ""}
-          onChange={(event) =>
-            table.getColumn("fullName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm ml-2"
-        />
-      </div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

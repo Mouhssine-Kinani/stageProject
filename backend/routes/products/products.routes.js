@@ -6,6 +6,7 @@ import {
   deleteProduct,
   showEditProductPage,
   editProduct,
+  countProducts
 } from '../../controllers/products/products.controller.js';
 
 const productRoute = Router();
@@ -17,6 +18,8 @@ productRoute.post('/products/create', insertProduct);
 
 // Get all products
 productRoute.get('/products', showProducts);
+// get stats abouts products
+productRoute.get('/products/stats', countProducts);
 
 // Delete a product
 productRoute.delete('/products/delete/:id', deleteProduct);

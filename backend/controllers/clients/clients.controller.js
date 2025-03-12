@@ -24,24 +24,94 @@ export const createClient = async (req, res) => {
     }
 };
 
-// Get all clients
-export const getAllClients = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-        const clients = await Client.find().skip(skip).limit(limit);
-
-        if(!clients){
-            res.status(500).json({ success: false, message: 'No clients found', data: null });
-        }
-        res.status(200).json({ success: true, message: 'Clients retrieved successfully', data: clients });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message, data: null });
-    }
-};
+// export const getAllClients = async (req, res) => {
+//     try {
+//       const page = parseInt(req.query.page) || 1;
+//       const limit = parseInt(req.query.limit) || 10;
+//       const skip = (page - 1) * limit;
+  
+//       // Si une recherche est demandée
+//       let filter = {};
+//       if (req.query.search) {
+//         const searchRegex = new RegExp(req.query.search, 'i');
+//         filter = {
+//           $or: [
+//             { name: searchRegex },
+//             { email: searchRegex }
+//             // Ajoutez d'autres champs si besoin
+//           ]
+//         };
+//       }
+  
+//       // Récupérer les clients en appliquant le filtre et la pagination
+//       const clients = await Client.find(filter).skip(skip).limit(limit);
+//       const totalClients = await Client.countDocuments(filter);
+//       const totalPages = Math.ceil(totalClients / limit);
+  
+//       res.status(200).json({ 
+//         success: true, 
+//         message: 'Clients retrieved successfully', 
+//         data: clients,
+//         totalPages
+//       });
+//     } catch (error) {
+//       res.status(500).json({ success: false, message: error.message, data: null });
+//     }
+//   };
+  
+  
 
 // Get a single client by ID
+
+export const getAllClients = async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      let filter = {};
+      if (req.query.search) {
+          const searchRegex = new RegExp(req.query.search, 'i');
+          filter = {
+              $or: [
+                  { name: searchRegex },
+                  { email: searchRegex }
+              ]
+          };
+      }
+
+      // Récupération des clients avec calcul du total des prix
+      const clients = await Client.aggregate([
+          { $match: filter },
+          { $lookup: {
+              from: "products",
+              localField: "products",
+              foreignField: "_id",
+              as: "productsDetails"
+          }},
+          { $addFields: {
+              totalPrice: { $sum: "$productsDetails.price" }
+          }},
+          { $skip: skip },
+          { $limit: limit }
+      ]);
+
+      const totalClients = await Client.countDocuments(filter);
+      const totalPages = Math.ceil(totalClients / limit);
+
+      res.status(200).json({
+          success: true,
+          message: "Clients retrieved successfully",
+          data: clients,
+          totalPages
+      });
+  } catch (error) {
+      res.status(500).json({ success: false, message: error.message, data: null });
+  }
+};
+
+
+
 export const getClientById = async (req, res) => {
     try {
         const client = await Client.findById(req.params.id);
@@ -92,3 +162,23 @@ export const deleteClient = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+// Récupérer le nombre total de clients
+export const getClientsCount = async (req, res) => {
+    try {
+      const count = await Client.countDocuments();
+      res.status(200).json({
+        success: true,
+        message: "Clients count retrieved successfully",
+        count,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+        count: 0,
+      });
+    }
+  };
+  

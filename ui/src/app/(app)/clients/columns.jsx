@@ -1,0 +1,105 @@
+"use client";
+
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Box, DollarSign } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DataTable } from "@/components/table/data-table";
+import { useMemo } from "react";
+
+// Define columns outside the component to prevent recreation on each render
+const getColumns = (onDelete) => [
+  {
+    accessorKey: "client_reference",
+    header: "Reference",
+    cell: ({ row }) => `#CL0${row.original.client_reference}`,
+  },
+  {
+    accessorKey: "logo",
+    header: "Client",
+  },
+  {
+    accessorKey: "name",
+    header: "Client Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "products",
+    header: "Products",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Box className="h-4 w-4 " />
+        <p>{row.original.products?.length || 0}</p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "totalPrice",
+    header: "Total Value",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4 text-green-500" />
+        <p>{row.original.totalPrice ? `${row.original.totalPrice.toFixed(2)}` : "0.00"}</p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "renewal_status",
+    header: "Renewal Status",
+    cell: ({ row }) => {
+      const status = row.original.renewal_status;
+      let statusClass = "px-2 py-1 rounded text-xs font-medium";
+      
+      if (status === "ok") {
+        statusClass += " bg-green-100 text-green-800";
+      } else if (status === "Overdue") {
+        statusClass += " bg-red-100 text-red-800";
+      } else if (status === "Expiring") {
+        statusClass += " bg-yellow-100 text-yellow-800";
+      }
+      
+      return <span className={statusClass}>{status}</span>;
+    }
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const client = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onDelete(client._id)}>
+              <span className="text-red-500">Delete</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem>View Details</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
+
+export function ClientsTable({ data, onDelete }) {
+  const columns = useMemo(() => getColumns(onDelete), [onDelete]);
+  return <DataTable columns={columns} data={data} />;
+}
