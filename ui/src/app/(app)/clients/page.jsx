@@ -40,13 +40,19 @@ function Page() {
       ) : (
         <>
           <ClientsTable data={clients} onDelete={deleteItem} />
-          <div className="mt-2 flex justify-center">
+          {
+
+            clients.length >= 2 ? (
+                  <div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}
               setPageChange={setCurrentPage}
               totalPages={totalPages}
             />
           </div>
+            ) : ("")
+          }
+      
         </>
       )}
     </div>

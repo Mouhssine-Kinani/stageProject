@@ -11,57 +11,24 @@ export function useCrud(Category, searchQuery = "") {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
 
-  // const fetchData = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const searchParam = searchQuery ? `&search=${searchQuery}` : "";
-  //     // Add populate=true parameter for clients to get their products
-  //     const populateParam = Category === "clients" ? "&populate=true" : "";
-      
-  //     const resp = await axios.get(
-  //       `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
-  //     );
-      
-  //     let processedData = resp.data.data || [];
-      
-  //     // If we're working with clients, calculate the total price for each client
-  //     if (Category === "clients" && processedData.length > 0) {
-  //       processedData = processedData.map(client => {
-  //         // Calculate the total price of all products if products are populated
-  //         const totalPrice = client.products && client.products.length > 0
-  //           ? client.products.reduce((sum, product) => sum + (product.price || 0), 0)
-  //           : 0;
-            
-  //         return {
-  //           ...client,
-  //           totalPrice
-  //         };
-  //       });
-  //     }
-      
-  //     setData(processedData);
-  //     setTotalPages(resp.data.totalPages || 1);
-  //     setError(null);
-  //   } catch (err) {
-  //     console.error(`Error fetching ${Category}:`, err);
-  //     setError(err);
-  //     setData([]);
-  //     setTotalPages(1);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  // Fetch data when page, Category, or searchQuery changes
+  useEffect(() => {
+    setCurrentPage(1); // Réinitialiser la page à 1 quand la recherche change
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, Category, searchQuery]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const searchParam = searchQuery ? `&search=${searchQuery}` : "";
       const populateParam = Category === "clients" ? "&populate=true" : "";
-  
       const resp = await axios.get(
         `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
       );
-  
+
       setData(resp.data.data || []); // Les données incluent déjà totalPrice si backend mis à jour
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
@@ -74,7 +41,7 @@ export function useCrud(Category, searchQuery = "") {
       setIsLoading(false);
     }
   };
-  
+
   const deleteItem = async (id) => {
     try {
       console.log(`Trying to delete item with ID: ${id}`);

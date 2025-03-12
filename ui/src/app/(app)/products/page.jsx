@@ -43,13 +43,16 @@ function ProductsPage() {
             data={products}
             onDelete={deleteItem}
           />
-          <div className="mt-2 flex justify-center">
+          {
+            products.length >=2 ? (<div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}
               setPageChange={setCurrentPage}
               totalPages={totalPages}
             />
-          </div>
+          </div>) : ('')
+          }
+
         </>
       )}
       {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
