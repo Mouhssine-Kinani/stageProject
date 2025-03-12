@@ -36,7 +36,7 @@ const userSchema = object({
 })
 
 export function AddUserDialog() {
-  const { createItem, validateFile } = useCrud("users")
+  const { createItem, validateFile, setCurrentPage, totalPages } = useCrud("users")
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState({
     fullName: '',
@@ -109,7 +109,6 @@ export function AddUserDialog() {
       const result = await createItem(submitData)
       
       if (result.success) {
-        setOpen(false)
         handleCancel()
       } else {
         setErrors(prev => ({ ...prev, submit: result.error }))

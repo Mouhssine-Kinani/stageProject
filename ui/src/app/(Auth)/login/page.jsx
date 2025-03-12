@@ -27,20 +27,25 @@ const handleSubmit = async (form, setErrors)=>{
     try{
         await loginSchema.validate(form, { abortEarly: false }); 
         setErrors({});
-        const response = axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form)
-        console.log(response)
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form);
+        console.log(response);
     }
     catch (err) {
         const newErrors = {};
-        err.inner.forEach((error) => {
-            // by field name
-            if(!error.path){
-                newErrors[formType] = error.message;
-            }
-            else{
-                newErrors[error.path] = error.message;
-            }
-        });
+        if (err.name === 'AxiosError') {
+            // Handle API error response
+            newErrors[formType] = err.response.data.message;
+        } else {
+            // Handle validation errors
+            err.inner?.forEach((error) => {
+                if(!error.path){
+                    newErrors[formType] = error.message;
+                }
+                else{
+                    newErrors[error.path] = error.message;
+                }
+            });
+        }
         setErrors(newErrors);
     }
 }

@@ -23,7 +23,7 @@ const SearchBar = ({ onSearch }) => {
       </div>
 
       {/* Champ de recherche (à droite) */}
-      <div className="flex items-center border border-gray-400 rounded-md px-2 w-full max-w-[37%]">
+      {/* <div className="flex items-center border border-gray-400 rounded-md px-2 w-full max-w-[37%]">
         <input
           type="text"
           placeholder="Search..."
@@ -34,7 +34,7 @@ const SearchBar = ({ onSearch }) => {
         <button className="p-2 text-gray-500 hover:text-gray-700">
           <Search size={18} />
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

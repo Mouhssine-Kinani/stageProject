@@ -9,10 +9,30 @@ export const getUsers = async (req, res, next) => {
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    const users = await User.find().skip(skip).limit(limit).select("-password");
-    const countUsers = await User.countDocuments();
-    const totalPages = Math.ceil(countUsers / limit)
-    res.status(200).json({users , totalPages});
+    // Build a query object: if a search query is provided, add search criteria; otherwise, return all.
+    let query = {};
+    if (req.query.search && req.query.search.trim() !== "") {
+      const regex = new RegExp(req.query.search, "i"); // case-insensitive search
+      query = {
+        $or: [
+          { fullName: { $regex: regex } },
+          { email: { $regex: regex } }
+          // You can add more fields here if needed
+        ]
+      };
+    }
+
+    // Find users based on the query (either filtered or normal)
+    const users = await User.find(query)
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order (-1)
+      .skip(skip)
+      .limit(limit)
+      .select("-password");
+    // Count matching users for pagination
+    const countUsers = await User.countDocuments(query);
+    const totalPages = Math.ceil(countUsers / limit);
+
+    res.status(200).json({ users, totalPages });
   } catch (error) {
     next(error);
   }
@@ -23,9 +43,9 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      res.status(404).json({
+        message: "User not found",
+      });
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
@@ -82,9 +102,9 @@ export const updateUser = async (req, res, next) => {
       new: true,
     }).select("-password");
     if (!updatedUser) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      res.status(404).json({
+        message: "User not found",
+      });
     }
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
@@ -99,9 +119,9 @@ export const deleteUser = async (req, res, next) => {
     const userId = req.params.id;
     const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      res.status(404).json({
+        message: "User not found",
+      });
     }
 
     res

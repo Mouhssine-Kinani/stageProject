@@ -7,30 +7,36 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination"
+  import { useEffect } from "react";
   
-  export function PaginationDemo({ currentPage, setPageChange, totalPages }) {
+  export function PaginationDemo({ currentPage, setCurrentPage, totalPages }) {
+    useEffect(() => {
+        alert(currentPage + " " +  totalPages + "GGGGGGG////");
+    }, [currentPage, totalPages]);
     return (
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" onClick={() => setPageChange(Math.max(1, currentPage - 1)) } />
+            <PaginationPrevious href="#" onClick={() => setCurrentPage(Math.max(1, currentPage - 1)) } />
           </PaginationItem>
           {[...Array(totalPages)].map((_, index) => (
           <PaginationItem key={index}>
             <PaginationLink
               href="#"
               isActive={currentPage === index + 1}
-              onClick={() => setPageChange(index + 1)}
+              onClick={() => setCurrentPage(index + 1)}
             >
               {index + 1}
             </PaginationLink>
           </PaginationItem>
         ))}
+          {totalPages > 5 && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
           <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#"onClick={() => setPageChange(Math.min(totalPages, currentPage + 1)) } />
+            <PaginationNext href="#"onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1)) } />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

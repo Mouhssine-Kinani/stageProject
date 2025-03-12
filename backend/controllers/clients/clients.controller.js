@@ -30,7 +30,7 @@ export const getAllClients = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        const clients = await Client.find().skip(skip).limit(limit);
+        const clients = await Client.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
 
         if(!clients){
             res.status(500).json({ success: false, message: 'No clients found', data: null });

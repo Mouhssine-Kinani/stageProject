@@ -23,8 +23,8 @@ export default function Page() {
   const filteredData =
     data?.filter(
       (user) =>
-        (user.name &&
-          user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (user.fullName &&
+          user.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (user.email &&
           user.email.toLowerCase().includes(searchQuery.toLowerCase()))
     ) || [];
@@ -39,11 +39,11 @@ export default function Page() {
         <div>Loading...</div>
       ) : (
         <>
-          <UserTable data={filteredData} onDelete={deleteItem} />
+          <UserTable data={data} onDelete={deleteItem} >
           <div className="mt-2 flex justify-center">
             <PaginationDemo
               currentPage={currentPage}
-              setPageChange={setCurrentPage}
+              setCurrentPage={setCurrentPage}
               totalPages={totalPages}
             />
           </div>

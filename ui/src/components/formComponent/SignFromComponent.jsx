@@ -76,11 +76,11 @@ export default function SignFromComponent({
                     )}
                 </div>
                 {errors[field.name] && (
-                  <div className="text-red-500 text-sm">{errors[field.name]}</div>
+                  <div className="text-red-500 text-start mt-2">{errors[field.name]}</div>
                 )}
               </div>
             ))}
-            {errors[formType] && <div className="text-red-500 text-center">{errors.login}</div>}
+            {errors[formType] && <div className="text-red-500 text-start">{errors[formType]}</div>}
             <div className="text-right">
               <Link href={link} className="text-[#5570F1]">
                 {linkText}

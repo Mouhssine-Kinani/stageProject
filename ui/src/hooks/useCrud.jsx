@@ -11,10 +11,23 @@ export function useCrud(Category) {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
 
+  // Fetch data when page changes
+  useEffect(() => {
+    console.log("useEffect running, currentPage:", currentPage);
+    async function fetchDataInsideUseEffect() {
+      await fetchData();
+    }
+    fetchDataInsideUseEffect();
+  }, [currentPage, Category]);
+  useEffect(() => {
+    console.log("data changed:", data);
+  }, [data]);
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const resp = await axios.get(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
+      console.log(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
+      console.log(resp.data.users);
       setData(resp.data.users || []);
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
@@ -31,7 +44,6 @@ export function useCrud(Category) {
   const deleteItem = async (id) => {
     try {
       await axios.delete(`${URLAPI}/${Category}/${id}`);
-      // Refresh data after successful deletion
       await fetchData();
       setError(null);
     } catch (err) {
@@ -65,22 +77,26 @@ export function useCrud(Category) {
     try {
       setIsLoading(true);
       const response = await axios.post(`${URLAPI}/${Category}/create`, itemData);
-      
-      // Get total count to determine the last page
+      console.table(response.data);
+  
+      // Get the last page number
       const countResponse = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
+      console.log(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
       const newTotalPages = countResponse.data.totalPages || 1;
+      setTotalPages(newTotalPages);
       
-      // Set to the last page where the new item will be
-      setCurrentPage(newTotalPages);
+      // First update the page state
+      setCurrentPage(1);
       
-      // Refresh data after successful creation
-      await fetchData();
+      // Then immediately fetch the data for page 1
+      const firstPageData = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
+      setData(firstPageData.data.users || []);
+      
       setError(null);
-      
-      return { success: true, data: response.data };
+      return { success: true };
     } catch (error) {
       let errorMessage = "Server error";
-      
+  
       if (error.response?.data) {
         errorMessage = error.response.data.message || 
                       "Server returned error: " + error.response.status;
@@ -89,7 +105,7 @@ export function useCrud(Category) {
       } else {
         errorMessage = error.message || "Error in request setup";
       }
-      
+  
       setError({ message: errorMessage });
       return { 
         success: false, 
@@ -99,11 +115,7 @@ export function useCrud(Category) {
       setIsLoading(false);
     }
   };
-
-  // Fetch data when page changes
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, Category]);
+  
 
   return {
     data,
