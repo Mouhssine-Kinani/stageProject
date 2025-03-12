@@ -10,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DataTable } from "@/components/table/data-table";
+// import { DataTable } from "@/components/table/data-table";
 import {useMemo} from "react";
+import { DataTable } from "./dialog/data-table"
 
 // Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [

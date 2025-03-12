@@ -1,3 +1,13 @@
+"use client"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,7 +18,8 @@ import { object, string } from 'yup'
 import { BaseDialog } from "@/components/popup/BaseDialog"
 import { useCrud } from "@/hooks/useCrud"
 
-// Yup validation schema
+
+
 const userSchema = object({
   fullName: string()
     .required('Full name is required')
@@ -34,6 +45,8 @@ const userSchema = object({
     .required('Role is required')
     .oneOf(['User', 'Admin', 'Super Admin'], 'Invalid role')
 })
+
+
 
 export function AddUserDialog() {
   const { createItem, validateFile, setCurrentPage, totalPages } = useCrud("users")
@@ -125,9 +138,21 @@ export function AddUserDialog() {
     }
   }
 
-  const formContent = (
-    <>
-      <div className="flex flex-col md:flex-row gap-6 py-4">
+  return (
+    <Dialog open={open}>
+      <DialogTrigger asChild onClick={() => setOpen(true)}>
+        <Button variant="ghost" size="icon">
+          <Plus color="gray"/>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]" onInteractOutside={() => setOpen(false)}>
+      <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <SquarePen size={22} strokeWidth={1.75} className="inline-block"/>
+            Add User
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col md:flex-row gap-6 py-4">
         {/* Left column - Main form fields */}
         <div className="flex-1 space-y-6">
           <div className="grid grid-cols-2 gap-4">
@@ -268,24 +293,20 @@ export function AddUserDialog() {
           </div>
         </div>
       </div>
-    </>
-  )
-
-  return (
-    <BaseDialog
-      open={open}
-      onOpenChange={setOpen}
-      title="Add User"
-      icon={SquarePen}
-      onCancel={handleCancel}
-      onSubmit={handleSubmit}
-      triggerButton={
-        <Button className="flex bg-transparent items-center gap-2">
-          <Plus color="gray"/>
-        </Button>
-      }
-    >
-      {formContent}
-    </BaseDialog>
+      <div className="flex justify-end gap-2 mt-6">
+          <Button variant="outline" className="px-6" onClick={handleCancel}>
+            {/* {cancelLabel} */}
+            Cancel
+          </Button>
+          <Button 
+            className="bg-black text-white hover:bg-gray-800 px-6" 
+            onClick={handleSubmit}
+          >
+            {/* {submitLabel} */}
+            Save
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 } 

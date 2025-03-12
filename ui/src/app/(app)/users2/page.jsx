@@ -1,6 +1,6 @@
 "use client";
 
-import { UserTable } from "@/app/(app)/users/columns";
+import { UserTable } from "@/app/(app)/users2/columns";
 import { useCrud } from "@/hooks/useCrud";
 
 export default function Page() {

@@ -10,9 +10,9 @@ import {
   import { useEffect } from "react";
   
   export function PaginationDemo({ currentPage, setCurrentPage, totalPages }) {
-    useEffect(() => {
-        alert(currentPage + " " +  totalPages + "GGGGGGG////");
-    }, [currentPage, totalPages]);
+    // useEffect(() => {
+    //     alert(currentPage + " " +  totalPages + "GGGGGGG////");
+    // }, [currentPage, totalPages]);
     return (
       <Pagination>
         <PaginationContent>

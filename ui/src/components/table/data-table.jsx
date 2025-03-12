@@ -28,14 +28,27 @@ import {
 
 import {useState} from "react";
 import { Input } from "@/components/ui/input"
+import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
+import { PaginationDemo } from "@/components/pagination/pagination";
+import SearchBar from "@/components/serchBar/Search";
 
+export function DataTable({ columns, data, currentPage, setCurrentPage, totalPages }) {
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-export function DataTable({ columns, data }) {
-  const [columnFilters, setColumnFilters] = useState(
-    []
-  )
+  // Filter data based on search query
+  const filteredData = data?.filter(
+    (item) => {
+      const searchFields = ['fullName', 'email']; // Add more fields as needed
+      return searchFields.some(field => {
+        const value = item[field];
+        return value && value.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    }
+  ) || [];
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
@@ -46,57 +59,62 @@ export function DataTable({ columns, data }) {
   });
 
   return (
-    <div className=" border">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter name..."
-          value={(table.getColumn("fullName")?.getFilterValue()) ?? ""}
-          onChange={(event) =>
-            table.getColumn("fullName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm ml-2"
-        />
-      </div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() ? "selected" : undefined}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div>
+      {/* Search bar */}
+      {/* <SearchBar onSearch={setSearchQuery} /> */}
+      
+      <div className="border mt-4">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() ? "selected" : undefined}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-4 flex justify-center">
+        <PaginationDemo
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+        />
+      </div>
+      <AddUserDialog />
     </div>
   );
 }
