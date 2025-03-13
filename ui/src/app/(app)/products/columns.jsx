@@ -46,6 +46,10 @@ const getColumns = (onDelete) => [
     },
   },
   {
+    accessorKey:"povider.logo",
+    header:"provider"
+  },
+  {
     accessorKey: "price",
     header: "Price",
   },
