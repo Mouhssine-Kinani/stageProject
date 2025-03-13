@@ -24,7 +24,15 @@ const getColumns = (onDelete) => [
   {
     accessorKey: "logo",
     header: "Client",
+    cell: ({ row }) => (
+      <img
+        src={row.original.logo}
+        alt="Client Logo"
+        style={{ width: 30, height: 30, borderRadius: "50%" }}
+      />
+    ),
   },
+
   {
     accessorKey: "name",
     header: "Client Name",
