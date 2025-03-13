@@ -96,7 +96,7 @@ export function DataTable() {
     //   setCurrentPage(1)
     // }
 
-    const {data, createItem} = useCrud("users")
+    const {data, createItem, setCurrentPage, currentPage , totalPages} = useCrud("users")
 
     const handleCancel = () => {
         setOpen(false)
@@ -357,7 +357,7 @@ export function DataTable() {
           </Table>
         </div>
   
-        {/* <div className="py-4 flex items-center justify-end">
+        <div className="py-4 flex items-center justify-end">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -400,7 +400,7 @@ export function DataTable() {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </div> */}
+        </div>
   
         {/* <AddUserDialog
           open={isDialogOpen}
