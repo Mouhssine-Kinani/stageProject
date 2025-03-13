@@ -46,8 +46,23 @@ const getColumns = (onDelete) => [
     },
   },
   {
-    accessorKey:"povider.logo",
-    header:"provider"
+    accessorKey: "provider.logo",
+    header: "Provider",
+    cell: ({ row }) => {
+      const providers = row.original.provider;
+
+      if (Array.isArray(providers) && providers.length > 0) {
+        return (
+          <img
+            src={providers[0].logo} // Affiche le logo du premier provider
+            alt="Provider Logo"
+            style={{ width: "30px", height: "30px", borderRadius: "50%" }}
+          />
+        );
+      }
+
+      return "No Logo";
+    },
   },
   {
     accessorKey: "price",

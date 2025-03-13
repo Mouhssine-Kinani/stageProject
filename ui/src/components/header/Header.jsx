@@ -1,25 +1,24 @@
 "use client";
-
 import "./header.css";
 import { useLayout } from "@/contexts/LayoutContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "next/navigation";
 import { useClient } from "@/hooks/useOneClients";
+import { Moon} from "lucide-react";
+import { Sun } from "lucide-react";
 
 export default function Header() {
   const { toggleSidebar, toggleNotification } = useLayout();
+  const { toggleTheme } = useTheme();
   const pathname = usePathname();
 
-  // Découpage du chemin
+  // Path processing
   const parts = pathname.split("/").filter(Boolean);
-
-  // Déterminer si on est sur une page client
   const isClientPage = parts.length >= 2 && parts[0] === "clients";
-  const clientId = isClientPage ? parts[1] : null; // L'ID est en position 1
+  const clientId = isClientPage ? parts[1] : null;
 
-  // Récupération du client si c'est une page client
   const { client, clientLoading } = useClient(clientId);
 
-  // Construction du breadcrumb
   let breadcrumb = parts.map((part, index) => {
     if (index === 1 && isClientPage) {
       return clientLoading ? "Chargement..." : client?.client_reference ? `Client #CL0${client.client_reference}` : part;
@@ -39,7 +38,7 @@ export default function Header() {
       <div className="div2">
         <input type="text" placeholder="  Search" className="search-input" />
         <div className="iconsHolder">
-          <button>
+          <button onClick={toggleTheme}>
             <img src="/headerIcon/them.svg" alt="Theme" />
           </button>
           <img src="/headerIcon/history.svg" alt="History" />

@@ -14,10 +14,28 @@ import { DataTable } from "@/components/table/data-table";
 import { useMemo } from "react";
 
 const getColumns = (onDelete) => [
-  { accessorKey: "product_reference", header: "Ref" },
+  { accessorKey: "product_reference", header: "Ref" ,cell: ({ row }) => `#PR0${row.original.product_reference}`,},
   { accessorKey: "productName", header: "Product Name" },
   { accessorKey: "category", header: "Category" },
-  { accessorKey: "provider", header: "Provider" },
+  {
+    accessorKey: "provider.logo",
+    header: "Provider",
+    cell: ({ row }) => {
+      const providers = row.original.provider;
+
+      if (Array.isArray(providers) && providers.length > 0) {
+        return (
+          <img
+            src={providers[0].logo} // Affiche le logo du premier provider
+            alt="Provider Logo"
+            style={{ width: "30px", height: "30px", borderRadius: "50%" }}
+          />
+        );
+      }
+
+      return "No Logo";
+    },
+  },
   {
     accessorKey: "billing_cycle",
     header: "Billing Cycle",
@@ -75,7 +93,6 @@ const getColumns = (onDelete) => [
     },
   },
 ];
-
 
 export function ProductHomeTable({ data, onDelete }) {
   const columns = useMemo(() => getColumns(onDelete), [onDelete]);

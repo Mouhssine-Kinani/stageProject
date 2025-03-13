@@ -53,7 +53,7 @@ const getColumns = (onDelete) => [
           <img
             src={providers[0].logo} // Affiche le logo du premier provider
             alt="Provider Logo"
-            style={{ width: "16px", height: "16px", borderRadius: "50%" }}
+            style={{ width: "30px", height: "30px", borderRadius: "50%" }}
           />
         );
       }
