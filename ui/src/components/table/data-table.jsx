@@ -48,7 +48,7 @@ export function DataTable({ columns, data, currentPage, setCurrentPage, totalPag
   ) || [];
 
   const table = useReactTable({
-    data: filteredData,
+    data: data,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),

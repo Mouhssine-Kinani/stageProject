@@ -80,18 +80,16 @@ export function useCrud(Category) {
       console.table(response.data);
   
       // Get the last page number
-      const countResponse = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
-      console.log(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
-      const newTotalPages = countResponse.data.totalPages || 1;
-      setTotalPages(newTotalPages);
-      
+      // const countResponse = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
+      // console.log(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
+      // const newTotalPages = countResponse.data.totalPages || 1;
+      // setTotalPages(newTotalPages);
+      await fetchData();
       // First update the page state
       setCurrentPage(1);
       
       // Then immediately fetch the data for page 1
-      const firstPageData = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
-      setData(firstPageData.data.users || []);
-      
+
       setError(null);
       return { success: true };
     } catch (error) {

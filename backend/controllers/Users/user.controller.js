@@ -34,7 +34,7 @@ export const getUsers = async (req, res, next) => {
 
     res.status(200).json({ users, totalPages });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -49,7 +49,7 @@ export const getUser = async (req, res, next) => {
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -84,7 +84,7 @@ export const createUser = async (req, res, next) => {
       data: newUser,
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -108,7 +108,7 @@ export const updateUser = async (req, res, next) => {
     }
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -132,6 +132,6 @@ export const deleteUser = async (req, res, next) => {
         data: deletedUser,
       });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

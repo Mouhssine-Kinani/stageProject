@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SquarePen, Image, Plus } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { object, string } from 'yup'
 import { BaseDialog } from "@/components/popup/BaseDialog"
+import { object, string } from 'yup'
 import { useCrud } from "@/hooks/useCrud"
 
 // Yup validation schema
@@ -53,7 +53,7 @@ export function AddUserDialog() {
   const handleChange = (e) => {
     const { id, value } = e.target
     setFormData(prev => ({ ...prev, [id]: value }))
-    
+  
     if (errors[id]) {
       setErrors(prev => ({ ...prev, [id]: undefined }))
     }
@@ -96,8 +96,9 @@ export function AddUserDialog() {
     setErrors({})
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
     try {
+      // e.preventDefault()
       await userSchema.validate(formData, { abortEarly: false })
       
       const submitData = {

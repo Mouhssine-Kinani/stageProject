@@ -42,6 +42,7 @@ import { AddUserDialog } from "./add-user-dialog"
 
 export function DataTable({ columns, data, currentPage, setCurrentPage, totalPages }) {
   const [columnFilters, setColumnFilters] = useState([]);
+  const [open, setOpen] = useState(false)
   const [users, setUsers] = useState([])
   // const [currentPage, setCurrentPage] = useState(1)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -76,6 +77,7 @@ export function DataTable({ columns, data, currentPage, setCurrentPage, totalPag
     setIsDialogOpen(false)
     // Move to the first page when a new user is added
     setCurrentPage(1)
+    alert('goood')
   }
 
   // Pagination logic
@@ -88,8 +90,7 @@ export function DataTable({ columns, data, currentPage, setCurrentPage, totalPag
       <div className=" mb-4">
         {/* <Button onClick={() => setIsDialogOpen(true)}>Add User</Button> */}
         {/* <AddUserDialog /> */}
-        <AddUserDialog
-      />
+        <AddUserDialog currentPage={currentPage} setCurrentPage={setCurrentPage} open={open} onOpenChange={setOpen} onSubmit={addUser} />
       </div>
 
       <div className="rounded-md border">
