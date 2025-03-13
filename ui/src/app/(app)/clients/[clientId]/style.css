@@ -4,24 +4,39 @@
     grid-template-rows: repeat(1, 1fr);
     gap: 8px;
 }
+h1{
+  font-weight: bold;
+}
+.clientTitle{
+  font-size: x-large;
+  font-weight: bolder;
+  margin-inline-start: 2rem;
+}
 /* ______________________________________ */
 
 .mapContainer{
     max-width: 564px;
     max-height: 252px;
-    border: 3px solid red;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 8px;
+    background-color: #F7F9FB;
+    padding: .7rem;
+    border-radius: 8px;
 }
 .logoContainer{
     grid-row: span 2 / span 2;
-    border: 3px solid red;
 }
 .TheAddressInMap{
     grid-column-start: 2;
-    border: 3px solid red;
+    height: 150px;
+    border: 2px solid rgb(190, 190, 190);
+    border-radius: 10px;
+}
+.TheAddress{
+  display: flex;
+  flex-direction: column;
 }
 
 

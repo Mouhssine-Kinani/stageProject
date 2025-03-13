@@ -16,13 +16,11 @@ export const insertProduct = async (req, res, next) => {
     });
 
     await newProduct.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Product added successfully",
-        data: newProduct,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Product added successfully",
+      data: newProduct,
+    });
   } catch (error) {
     res
       .status(500)
@@ -39,31 +37,34 @@ export const showProducts = async (req, res, next) => {
     // Si une recherche est demandée
     let filter = {};
     if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
+      const searchRegex = new RegExp(req.query.search, "i");
       filter = {
         $or: [
           { productName: searchRegex },
-          { category: searchRegex }
+          { category: searchRegex },
           // Ajoutez d'autres champs si nécessaire
-        ]
+        ],
       };
     }
 
-    // Récupérer les produits en appliquant le filtre et la pagination
-    const products = await Product.find(filter).skip(skip).limit(limit);
+    // Récupérer les produits en appliquant le filtre, la pagination et en incluant les infos du provider
+    const products = await Product.find(filter)
+      .populate("provider")
+      .skip(skip)
+      .limit(limit);
 
     // Calculer le nombre total de produits filtrés pour la pagination
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
     if (!products) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Products not found", 
-        data: null 
+      return res.status(404).json({
+        success: false,
+        message: "Products not found",
+        data: null,
       });
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully",
@@ -71,16 +72,13 @@ export const showProducts = async (req, res, next) => {
       totalPages,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message, 
-      data: null 
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
     });
   }
 };
-
-
-
 
 export const deleteProduct = async (req, res, next) => {
   try {
@@ -91,13 +89,11 @@ export const deleteProduct = async (req, res, next) => {
         .json({ success: false, message: "Product not found", data: null });
     }
     await Product.findByIdAndDelete(req.params.id);
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product deleted successfully",
-        data: productExist,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      data: productExist,
+    });
   } catch (error) {
     res
       .status(500)
@@ -107,19 +103,17 @@ export const deleteProduct = async (req, res, next) => {
 
 export const showEditProductPage = async (req, res, next) => {
   try {
-    const productExist = await Product.findById(req.params.id);
+    const productExist = await Product.findById(req.params.id).populate('provider');
     if (!productExist) {
       return res
         .status(404)
         .json({ success: false, message: "Product not found", data: null });
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product retrieved successfully",
-        data: productExist,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Product retrieved successfully",
+      data: productExist,
+    });
   } catch (error) {
     res
       .status(500)
@@ -154,13 +148,11 @@ export const editProduct = async (req, res, next) => {
       updatedProduct,
       { new: true }
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product updated successfully",
-        data: newUpdatedProduct,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: newUpdatedProduct,
+    });
   } catch (error) {
     res
       .status(500)

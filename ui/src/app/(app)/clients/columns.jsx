@@ -1,8 +1,8 @@
 "use client";
-
+import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Box, DollarSign } from "lucide-react";
+import { Box } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,8 +48,12 @@ const getColumns = (onDelete) => [
     header: "Total Value",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4 text-green-500" />
-        <p>{row.original.totalPrice ? `${row.original.totalPrice.toFixed(2)}` : "0.00"}</p>
+        <p>
+          {row.original.totalPrice
+            ? `${row.original.totalPrice.toFixed(2)}`
+            : "0.00"}{" "}
+          MAD
+        </p>
       </div>
     ),
   },
@@ -59,7 +63,7 @@ const getColumns = (onDelete) => [
     cell: ({ row }) => {
       const status = row.original.renewal_status;
       let statusClass = "px-2 py-1 rounded text-xs font-medium";
-      
+
       if (status === "ok") {
         statusClass += " bg-green-100 text-green-800";
       } else if (status === "Overdue") {
@@ -67,9 +71,9 @@ const getColumns = (onDelete) => [
       } else if (status === "Expiring") {
         statusClass += " bg-yellow-100 text-yellow-800";
       }
-      
+
       return <span className={statusClass}>{status}</span>;
-    }
+    },
   },
   {
     id: "actions",
@@ -91,7 +95,10 @@ const getColumns = (onDelete) => [
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
             <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>View Details</DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <Link href={`/clients/${client._id}`}>View Details</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

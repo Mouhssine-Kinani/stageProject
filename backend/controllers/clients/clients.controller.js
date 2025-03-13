@@ -1,4 +1,5 @@
 import Client from "../../models/Clients/client.model.js";
+import Product from "../../models/Products/product.model.js";
 
 // Create a new client
 export const createClient = async (req, res) => {
@@ -196,3 +197,53 @@ export const getClientsCount = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+// Supprimer un produit d'un client
+export const deleteProductFromClient = async (req, res) => {
+  const { clientId, productId } = req.params;
+
+  try {
+    // Retirer le produit du tableau des produits du client
+    const client = await Client.findByIdAndUpdate(
+      clientId,
+      { $pull: { products: productId } },
+      { new: true }
+    );
+
+    // Si le client n'existe pas, retourner une erreur
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found",
+        data: null,
+      });
+    }
+
+    // Supprimer le document du produit de la collection
+    const product = await Product.findByIdAndDelete(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted from client successfully",
+      data: client,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
