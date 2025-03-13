@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/table/data-table";
 import { useMemo } from "react";
+import { Calendar } from "lucide-react";
 
 // Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [
@@ -31,6 +32,18 @@ const getColumns = (onDelete) => [
   {
     accessorKey: "billing_cycle",
     header: "Billing cycle",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
+          <p>
+            {row.original.billing_cycle
+              ? `${row.original.billing_cycle}`
+              : "0.00"}
+          </p>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "price",

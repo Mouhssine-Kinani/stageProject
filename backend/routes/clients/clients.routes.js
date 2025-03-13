@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createClient, getAllClients, deleteClient, updateClient, getClientById, showEditClientPage, getClientsCount } from '../../controllers/clients/clients.controller.js';
+import { createClient, getAllClients, deleteClient, updateClient, getClientById, showEditClientPage, getClientsCount, deleteProductFromClient } from '../../controllers/clients/clients.controller.js';
 import upload from '../../middleware/upload.middleware.js';
 
 const clientRoute = Router();
@@ -16,6 +16,10 @@ clientRoute.delete('/clients/delete/:id', deleteClient);
 clientRoute.get('/clients/edit/:id', showEditClientPage);
 
 clientRoute.put('/clients/edit/:id', updateClient);
+
+// Ajout de la route pour supprimer un produit d'un client
+clientRoute.delete('/clients/:clientId/product/:productId', deleteProductFromClient);
+
 
 
 
