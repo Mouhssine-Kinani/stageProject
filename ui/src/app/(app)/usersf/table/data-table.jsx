@@ -73,7 +73,7 @@ const userSchema = object({
     .oneOf(['User', 'Admin', 'Super Admin'], 'Invalid role')
 })
 
-export function DataTable() {
+export function DataTable({columns}) {
     const [open, setOpen] = useState(false)
     const [errors, setErrors] = useState({})
     const [selectedFile, setSelectedFile] = useState(null)
@@ -87,16 +87,16 @@ export function DataTable() {
         logo: null
       })
     
-    // const addUser = (newUser) => {
-    //   // Add new user at the beginning with the highest ID
-    //   const newId = Math.max(...users.map(user => user.id), 0) + 1
-    //   setUsers([{ ...newUser, id: newId }, ...users])
-    //   setIsDialogOpen(false)
-    //   // Move to the first page when a new user is added
-    //   setCurrentPage(1)
-    // }
-
     const {data, createItem, setCurrentPage, currentPage , totalPages} = useCrud("users")
+
+    const table = useReactTable({
+      data,
+      columns,
+      getCoreRowModel: getCoreRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
+      getSortedRowModel: getSortedRowModel(),
+      getFilteredRowModel: getFilteredRowModel(),
+    })
 
     const handleCancel = () => {
         setOpen(false)
@@ -339,20 +339,42 @@ export function DataTable() {
         <div className="rounded-md border">
           <Table>
             <TableHeader>
-              <TableRow>
-                {/* <TableHead>Name</TableHead> */}
-                <TableHead>Email</TableHead>
-                {/* <TableHead>Role</TableHead> */}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((user) => (
-                <TableRow key={user.id}>
-                  {/* <TableCell>{user.name}</TableCell> */}
-                  <TableCell>{user.email}</TableCell>
-                  {/* <TableCell>{user.role}</TableCell> */}
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

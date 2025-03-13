@@ -20,11 +20,11 @@ export default function Page() {
         <div>Loading...</div>
       ) : (
         <UserTable 
-          data={data} 
-          onDelete={deleteItem}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
+        data={data} 
+        onDelete={deleteItem}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         />
       )}
 
