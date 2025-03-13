@@ -44,13 +44,24 @@ const getColumns = (onDelete) => [
   },
   {
     accessorKey: "products.provider.logo",
-    header: "provider",
-    cell: ({ row }) =>
-      // Si provider est un tableau, on peut afficher le premier élément ou une concaténation
-      Array.isArray(row.original.provider)
-        ? row.original.provider.join(", ")
-        : row.original.provider,
+    header: "Provider",
+    cell: ({ row }) => {
+      const providers = row.original.provider;
+
+      if (Array.isArray(providers) && providers.length > 0) {
+        return (
+          <img
+            src={providers[0].logo} // Affiche le logo du premier provider
+            alt="Provider Logo"
+            style={{ width: "16px", height: "16px", borderRadius: "50%" }}
+          />
+        );
+      }
+
+      return "No Logo";
+    },
   },
+
   {
     accessorKey: "createdAt",
     header: "Date Deployed",

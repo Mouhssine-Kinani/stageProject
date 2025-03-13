@@ -19,13 +19,11 @@ export const createClient = async (req, res) => {
       client.logo = req.file.path;
     }
     const newClient = await client.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Client created successfully",
-        data: newClient,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Client created successfully",
+      data: newClient,
+    });
   } catch (error) {
     res
       .status(500)
@@ -85,7 +83,12 @@ export const getAllClients = async (req, res) => {
 
 export const getClientById = async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id).populate("products");
+    const client = await Client.findById(req.params.id).populate({
+      path: "products",
+      populate: {
+        path: "provider",
+      },
+    });
 
     if (!client) {
       return res.status(404).json({
@@ -118,13 +121,11 @@ export const showEditClientPage = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Client not found", data: null });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Client retrieved successfully",
-        data: client,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Client retrieved successfully",
+      data: client,
+    });
   } catch (error) {
     res
       .status(500)
@@ -145,13 +146,11 @@ export const updateClient = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Client not found", data: null });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Client updated successfully",
-        data: updatedClient,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Client updated successfully",
+      data: updatedClient,
+    });
   } catch (error) {
     res
       .status(400)
@@ -168,13 +167,11 @@ export const deleteClient = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Client not found", data: null });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Client deleted successfully",
-        data: deletedClient,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Client deleted successfully",
+      data: deletedClient,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -197,10 +194,6 @@ export const getClientsCount = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 // Supprimer un produit d'un client
 export const deleteProductFromClient = async (req, res) => {
@@ -246,4 +239,3 @@ export const deleteProductFromClient = async (req, res) => {
     });
   }
 };
-
