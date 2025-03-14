@@ -7,7 +7,7 @@ export default function UsersPage() {
   const {
       error,
       isLoading,
-      onDelete,
+      deleteItem,
     } = useCrud("users");
   return (
     <div className="container mx-auto py-10">
@@ -18,7 +18,7 @@ export default function UsersPage() {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        <UserTable onDelete={onDelete} />
+        <UserTable onDelete={deleteItem} />
       )}
 
     </div>
