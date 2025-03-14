@@ -2,12 +2,17 @@
 
 import { UserTable } from "../usersf/columns"
 import { useCrud } from "@/hooks/useCrud"
+// import PaginationComponent from "./pagination/pagination"
+import AddUserDialog from "./dialog/add-user-dialog"  
+import { useState } from "react"
 
 export default function UsersPage() {
+  const [open, setOpen] = useState(false);
   const {
       error,
       isLoading,
       deleteItem,
+      setCurrentPage, currentPage , totalPages
     } = useCrud("users");
   return (
     <div className="container mx-auto py-10">
@@ -18,7 +23,11 @@ export default function UsersPage() {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        <UserTable onDelete={deleteItem} />
+        <>
+          {/* <AddUserDialog open={open} onOpenChange={setOpen}/> */}
+          <UserTable onDelete={deleteItem} />
+          {/* <PaginationComponent currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} /> */}
+        </>
       )}
 
     </div>
