@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
 import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
-const SearchBar = ({ onSearch }) => {
+
+const SearchBar = ({ onSearch, onSort }) => {
   const [query, setQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // État du tri
 
   const handleChange = (e) => {
     setQuery(e.target.value);
     onSearch(e.target.value);
+  };
+
+  const handleSort = () => {
+    const newOrder = sortOrder === "asc" ? "desc" : "asc"; // Alterner entre asc et desc
+    setSortOrder(newOrder);
+    onSort(newOrder); // Appeler la fonction de tri
   };
 
   return (
@@ -17,7 +25,10 @@ const SearchBar = ({ onSearch }) => {
         <button className="p-2 text-gray-500 hover:text-gray-700">
           <Filter size={18} />
         </button>
-        <button className="p-2 text-gray-500 hover:text-gray-700">
+        <button
+          className="p-2 text-gray-500 hover:text-gray-700"
+          onClick={handleSort}
+        >
           <ArrowUpDown size={18} />
         </button>
       </div>

@@ -66,7 +66,9 @@ const getColumns = (onDelete) => [
   },
   {
     accessorKey: "price",
-    header: "Price",
+    header: "Renewal Price",
+    cell: ({ row }) =>
+      row.original.price ? `${row.original.price} MAD` : "N/A",
   },
   {
     accessorKey: "productAddedDate",

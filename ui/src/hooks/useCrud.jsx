@@ -44,7 +44,7 @@ export function useCrud(Category, searchQuery = "") {
 
   const deleteItem = async (id) => {
     try {
-      console.log(`Trying to delete item with ID: ${id}`);
+      // console.log(`Trying to delete item with ID: ${id}`);
 
       // Vérifie si la route nécessite "/delete/"
       const needsDeletePath = ["products", "clients"].includes(Category);
@@ -54,7 +54,7 @@ export function useCrud(Category, searchQuery = "") {
 
       const response = await axios.delete(url);
 
-      console.log("Delete response:", response.data);
+      // console.log("Delete response:", response.data);
       await fetchData(); // Recharge les données après suppression
     } catch (err) {
       console.error(`Error deleting ${Category}:`, err);

@@ -7,6 +7,8 @@ import { useCrud } from "@/hooks/useCrud";
 
 function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // État pour le tri
+
   const {
     data: products,
     isLoading,
@@ -31,28 +33,38 @@ function ProductsPage() {
     setFilteredData(filtered);
   }, [products, searchQuery]);
 
+  // Fonction pour basculer l'ordre du tri
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  // Appliquer le tri sur product_reference
+  const sortedProducts = filteredData
+    ? [...filteredData].sort((a, b) => {
+        const refA = Number(a.product_reference) || 0;
+        const refB = Number(b.product_reference) || 0;
+        return sortOrder === "asc" ? refA - refB : refB - refA;
+      })
+    : [];
+
   return (
     <div>
-      <SearchBar onSearch={setSearchQuery} />
+      <SearchBar onSearch={setSearchQuery} onSort={toggleSortOrder} />
       <br />
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <ProductTable
-            data={products}
-            onDelete={deleteItem}
-          />
-          {
-            products.length >=2 ? (<div className="mt-2 flex justify-center">
-            <PaginationDemo
-              currentPage={currentPage}
-              setPageChange={setCurrentPage}
-              totalPages={totalPages}
-            />
-          </div>) : ('')
-          }
-
+          <ProductTable data={sortedProducts} onDelete={deleteItem} />
+          {products.length >= 2 && (
+            <div className="mt-2 flex justify-center">
+              <PaginationDemo
+                currentPage={currentPage}
+                setPageChange={setCurrentPage}
+                totalPages={totalPages}
+              />
+            </div>
+          )}
         </>
       )}
       {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
