@@ -1,5 +1,5 @@
 import { Router } from "express";
-import upload from '../../middleware/upload.middleware.js'
+import upload from '../../middleware/upload.middleware.js';
 import {
   getUsers,
   getUser,
@@ -7,22 +7,39 @@ import {
   updateUser,
   deleteUser,
 } from "../../controllers/Users/user.controller.js";
+import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 
 const userRouter = Router();
 
-// Route to fetch all users
+// Route pour récupérer tous les utilisateurs (accessible à tous)
 userRouter.get("/", getUsers);
 
-// Route to fetch a single user
+// Route pour récupérer un utilisateur (accessible à tous)
 userRouter.get("/:id", getUser);
 
-// POST / users -> create a new user
-userRouter.post("/create", upload.single('logo'), createUser);
+// Création d'un utilisateur (seulement pour admin et superadmin)
+userRouter.post(
+  "/create",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  upload.single('logo'),
+  createUser
+);
 
-// PUT / users -> update user profile
-userRouter.put("/:id", updateUser);
+// Mise à jour d'un utilisateur (seulement pour admin et superadmin)
+userRouter.put(
+  "/:id",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  updateUser
+);
 
-// DELETE / users -> delete user profile
-userRouter.delete("/:id", deleteUser);
+// Suppression d'un utilisateur (seulement pour admin et superadmin)
+userRouter.delete(
+  "/:id",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  deleteUser
+);
 
 export default userRouter;
