@@ -16,6 +16,7 @@ export const signUP = async (req, res, next) => {
   try {
     const { reference, fullName, email, password, role, status } = req.body;
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       const error = new Error("Email is already in use");
       error.statusCode = 409;
@@ -34,17 +35,25 @@ export const signUP = async (req, res, next) => {
       status,
     });
 
-    await newUser.save(); // Sauvegarde directe sans transaction
+    await newUser.save();
 
-    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, {
+    // Création du token avec l'ID et le rôle
+    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE_INS,
     });
 
     res.status(201).json({
       message: "User created successfully",
       data: {
-        token: token,
-        user: newUser,
+        token, // Ajout du token ici
+        user: {
+          _id: newUser._id,
+          reference: newUser.reference,
+          fullName: newUser.fullName,
+          email: newUser.email,
+          role: newUser.role,
+          status: newUser.status,
+        },
       },
     });
   } catch (error) {
@@ -52,14 +61,15 @@ export const signUP = async (req, res, next) => {
   }
 };
 
+
 export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(404).json({
         message: "User not found",
-        data: { email, password },
       });
     }
 
@@ -69,20 +79,31 @@ export const signIn = async (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+
+    // Création du token avec ID et rôle
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE_INS,
     });
+
     res.status(200).json({
       message: "User logged in successfully",
       data: {
-        token: token,
-        user: user,
+        token, // Ajout du token ici
+        user: {
+          _id: user._id,
+          reference: user.reference,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+        },
       },
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 export const requestPasswordReset = async (req, res, next) => {
   try {

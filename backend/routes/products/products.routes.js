@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import upload from '../../middleware/upload.middleware.js'
+import upload from '../../middleware/upload.middleware.js';
+import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 import {
   insertProduct,
   showProducts,
@@ -11,23 +12,42 @@ import {
 
 const productRoute = Router();
 
-// check if i should add a route get for product creation
+// Création d'un produit (seulement pour admin et superadmin)
+productRoute.post(
+  '/products/create',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  insertProduct
+);
 
-// Create a new product
-productRoute.post('/products/create', insertProduct);
-
-// Get all products
+// Récupérer tous les produits (accessible à tous)
 productRoute.get('/products', showProducts);
-// get stats abouts products
+
+// Statistiques sur les produits (accessible à tous)
 productRoute.get('/products/stats', countProducts);
 
-// Delete a product
-productRoute.delete('/products/delete/:id', deleteProduct);
+// Suppression d'un produit (seulement pour admin et superadmin)
+productRoute.delete(
+  '/products/delete/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  deleteProduct
+);
 
-// Show the edit page for a product
-productRoute.get('/products/edit/:id', showEditProductPage);
+// Afficher la page d'édition d'un produit (seulement pour admin et superadmin)
+productRoute.get(
+  '/products/edit/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  showEditProductPage
+);
 
-// Update a product
-productRoute.put('/products/edit/:id', editProduct);
+// Mise à jour d'un produit (seulement pour admin et superadmin)
+productRoute.put(
+  '/products/edit/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  editProduct
+);
 
 export default productRoute;
