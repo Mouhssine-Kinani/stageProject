@@ -7,6 +7,7 @@ import { PaginationDemo } from "@/components/pagination/pagination";
 
 function Page() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
   const {
     data: clients,
     isLoading,
@@ -15,44 +16,52 @@ function Page() {
     setCurrentPage,
     totalPages,
   } = useCrud("clients", searchQuery);
+
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
     // Filtrer côté client si nécessaire
-    const filtered = clients?.filter(
+    let filtered = clients?.filter(
       (client) =>
         (client.name &&
           client.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (client.email &&
           client.email.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+
+    // Trier les données
+// Trier les données
+filtered.sort((a, b) => {
+  const refA = a.client_reference || 0; // Assurer une valeur par défaut
+  const refB = b.client_reference || 0;
+
+  return sortOrder === "asc" ? refA - refB : refB - refA;
+});
+
+
     setFilteredData(filtered);
-  }, [clients, searchQuery]);
+  }, [clients, searchQuery, sortOrder]);
 
   return (
     <div>
       <div className="w-full searchbar">
-        <SearchBar onSearch={setSearchQuery} />
+        <SearchBar onSearch={setSearchQuery} onSort={setSortOrder} />
       </div>
       <br />
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <ClientsTable data={clients} onDelete={deleteItem} />
-          {
-
-            clients.length >= 2 ? (
-                  <div className="mt-2 flex justify-center">
-            <PaginationDemo
-              currentPage={currentPage}
-              setPageChange={setCurrentPage}
-              totalPages={totalPages}
-            />
-          </div>
-            ) : ("")
-          }
-      
+          <ClientsTable data={filteredData} onDelete={deleteItem} />
+          {clients.length >= 2 && (
+            <div className="mt-2 flex justify-center">
+              <PaginationDemo
+                currentPage={currentPage}
+                setPageChange={setCurrentPage}
+                totalPages={totalPages}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

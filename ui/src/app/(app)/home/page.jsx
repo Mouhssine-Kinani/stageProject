@@ -16,7 +16,11 @@ function Page() {
   const [data, setData] = useState([]);
   const { products, loading, error } = useProducts();
   const { clientsCount, clintsLoading, ClientError } = useClientsCount();
-  const { productsCount, loading: loadingStats, error: errorStats } = useProductsStats();
+  const {
+    productsCount,
+    loading: loadingStats,
+    error: errorStats,
+  } = useProductsStats();
   const { deleteItem } = useCrud("users");
 
   useEffect(() => {
@@ -33,7 +37,11 @@ function Page() {
 
   if (loading || clintsLoading || loadingStats) return <p>Loading...</p>;
   if (error || ClientError || errorStats)
-    return <p className="text-red-500">Error: {error || ClientError || errorStats}</p>;
+    return (
+      <p className="text-red-500">
+        Error: {error || ClientError || errorStats}
+      </p>
+    );
 
   const totalProducts = productsCount.totalProducts || 0;
   const activeProducts = productsCount.activeProducts || 0;
@@ -50,7 +58,10 @@ function Page() {
           <h1 className="statiquesHeader">Active Products</h1>
           <h2 className="nbrStatiques">{activeProducts}</h2>
           <p className="calc">
-            {totalProducts > 0 ? ((activeProducts / totalProducts) * 100).toFixed(2) : 0}%
+            {totalProducts > 0
+              ? ((activeProducts / totalProducts) * 100).toFixed(2)
+              : 0}
+            %
           </p>
         </div>
 
@@ -58,7 +69,10 @@ function Page() {
           <h1 className="statiquesHeader">Expiring Soon</h1>
           <h2 className="nbrStatiques">{expiringSoon}</h2>
           <p className="calc">
-            {totalProducts > 0 ? ((expiringSoon / totalProducts) * 100).toFixed(2) : 0}%
+            {totalProducts > 0
+              ? ((expiringSoon / totalProducts) * 100).toFixed(2)
+              : 0}
+            %
           </p>
         </div>
 
@@ -66,7 +80,10 @@ function Page() {
           <h1 className="statiquesHeader">Expired</h1>
           <h2 className="nbrStatiques">{expiredProducts}</h2>
           <p className="calc">
-            {totalProducts > 0 ? ((expiredProducts / totalProducts) * 100).toFixed(2) : 0}%
+            {totalProducts > 0
+              ? ((expiredProducts / totalProducts) * 100).toFixed(2)
+              : 0}
+            %
           </p>
         </div>
 
@@ -77,7 +94,10 @@ function Page() {
       </div>
       <div className="HomeItems">
         <div className="tableContainer">
-          <ProductHomeTable data={data} onDelete={deleteItem} />
+          <ProductHomeTable
+            data={Array.isArray(data) ? data : []}
+            onDelete={deleteItem}
+          />
         </div>
         <div className="graphes">
           <div className="graphe1">

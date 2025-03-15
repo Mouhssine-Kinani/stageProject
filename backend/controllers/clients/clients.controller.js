@@ -31,6 +31,56 @@ export const createClient = async (req, res) => {
   }
 };
 
+// export const getAllClients = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     let filter = {};
+//     if (req.query.search) {
+//       const searchRegex = new RegExp(req.query.search, "i");
+//       filter = {
+//         $or: [{ name: searchRegex }, { email: searchRegex }],
+//       };
+//     }
+
+//     // Récupération des clients avec calcul du total des prix
+//     const clients = await Client.aggregate([
+//       { $match: filter },
+//       {
+//         $lookup: {
+//           from: "products",
+//           localField: "products",
+//           foreignField: "_id",
+//           as: "productsDetails",
+//         },
+//       },
+//       {
+//         $addFields: {
+//           totalPrice: { $sum: "$productsDetails.price" },
+//         },
+//       },
+//       { $skip: skip },
+//       { $limit: limit },
+//     ]);
+
+//     const totalClients = await Client.countDocuments(filter);
+//     const totalPages = Math.ceil(totalClients / limit);
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Clients retrieved successfully",
+//       data: clients,
+//       totalPages,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ success: false, message: error.message, data: null });
+//   }
+// };
+
 export const getAllClients = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -45,25 +95,23 @@ export const getAllClients = async (req, res) => {
       };
     }
 
-    // Récupération des clients avec calcul du total des prix
-    const clients = await Client.aggregate([
-      { $match: filter },
-      {
-        $lookup: {
-          from: "products",
-          localField: "products",
-          foreignField: "_id",
-          as: "productsDetails",
+    // Récupération des clients avec leurs produits et fournisseurs via populate
+    const clients = await Client.find(filter)
+      .populate({
+        path: "products",
+        populate: {
+          path: "provider",
         },
-      },
-      {
-        $addFields: {
-          totalPrice: { $sum: "$productsDetails.price" },
-        },
-      },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Convertit en objets JS purs pour de meilleures performances
+
+    // Ajout du calcul du prix total pour chaque client
+    const clientsWithTotalPrice = clients.map((client) => ({
+      ...client,
+      totalPrice: client.products.reduce((sum, product) => sum + product.price, 0),
+    }));
 
     const totalClients = await Client.countDocuments(filter);
     const totalPages = Math.ceil(totalClients / limit);
@@ -71,15 +119,19 @@ export const getAllClients = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Clients retrieved successfully",
-      data: clients,
+      data: clientsWithTotalPrice,
       totalPages,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: error.message, data: null });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
   }
 };
+
+
 
 export const getClientById = async (req, res) => {
   try {

@@ -12,7 +12,7 @@ import { deleteProductFromClient } from "@/lib/api"; // Assurez-vous que cette f
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`
-  
+
   // Utilisation du hook personnalisé qui gère la recherche et la pagination des produits
   const {
     client,
@@ -33,6 +33,7 @@ function ClientPage({ params }) {
     expired: 0,
     totalPrice: 0,
   });
+  const [sortOrder, setSortOrder] = useState("asc"); // État pour le tri
 
   // Récupération des coordonnées à partir de l'adresse du client
   useEffect(() => {
@@ -50,7 +51,6 @@ function ClientPage({ params }) {
   }, [client]);
 
   // Mise à jour des statistiques en se basant sur l'ensemble des produits du client
-
   // Fonction pour convertir "monthly", "yearly", "biennial" en mois
   const billingCycleToMonths = (billingCycle) => {
     switch (billingCycle) {
@@ -105,9 +105,6 @@ function ClientPage({ params }) {
       });
     }
   }, [client]);
-  
-
-
 
   // Fonction pour supprimer un produit d'un client
   const deleteItem = async (productId) => {
@@ -119,6 +116,18 @@ function ClientPage({ params }) {
       alert("Une erreur est survenue lors de la suppression du produit.");
     }
   };
+
+  // Fonction pour basculer l'ordre du tri
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  // Appliquer le tri sur product_reference
+  const sortedProducts = [...paginatedProducts].sort((a, b) => {
+    const refA = Number(a.product_reference) || 0;
+    const refB = Number(b.product_reference) || 0;
+    return sortOrder === "asc" ? refA - refB : refB - refA;
+  });
 
   if (clientLoading) return <p>Loading...</p>;
   if (clientError) return <p>Error: {clientError}</p>;
@@ -150,13 +159,13 @@ function ClientPage({ params }) {
       </div>
       <br />
       <div>
-        {/* Barre de recherche pour filtrer les produits */}
-        <SearchBar onSearch={setSearchQuery} onDelete={deleteItem} />
+        {/* Barre de recherche pour filtrer les produits et gérer le tri */}
+        <SearchBar onSearch={setSearchQuery} onSort={toggleSortOrder} />
       </div>
       <br />
       <div className="data">
-        {/* Affichage des produits paginés */}
-        <ClientTable data={paginatedProducts} onDelete={deleteItem} />
+        {/* Affichage des produits paginés triés */}
+        <ClientTable data={sortedProducts} onDelete={deleteItem} />
         {totalPages > 1 && (
           <div className="mt-2 flex justify-center">
             <PaginationDemo
