@@ -32,9 +32,9 @@ export function DataTable({columns}) {
     const {data, setCurrentPage, currentPage, totalPages, fetchData} = useCrud("users")
     
     // Add a useEffect to fetch data when component mounts
-    useEffect(() => {
-        fetchData()
-    }, [])
+    // useEffect(() => {
+    //     fetchData()
+    // }, [])
     
     // Create the table with the current data
     const table = useReactTable({
@@ -48,7 +48,7 @@ export function DataTable({columns}) {
     
     const handleUserAdded = async () => {
         // Refresh data when a user is added
-        // await fetchData()
+        await fetchData()
         setCurrentPage(1)
     }
   
