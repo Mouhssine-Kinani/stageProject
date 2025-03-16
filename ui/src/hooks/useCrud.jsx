@@ -26,8 +26,8 @@ export function useCrud(Category) {
     setIsLoading(true);
     try {
       const resp = await axios.get(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
-      console.log(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
-      console.log(resp.data.users);
+      // console.log(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
+      // console.log(resp.data.users);
       setData(resp.data.users || []);
       setTotalPages(resp.data.totalPages || 1);
       setError(null);
@@ -78,15 +78,7 @@ export function useCrud(Category) {
       setIsLoading(true);
       const response = await axios.post(`${URLAPI}/${Category}/create`, itemData);
       console.table(response.data);
-  
-      // Get the last page number
-      // const countResponse = await axios.get(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
-      // console.log(`${URLAPI}/${Category}?page=1&limit=${itemsPerPage}`);
-      // const newTotalPages = countResponse.data.totalPages || 1;
-      // setTotalPages(newTotalPages);
       await fetchData();
-      // First update the page state
-      setCurrentPage(1);
       
       // Then immediately fetch the data for page 1
 

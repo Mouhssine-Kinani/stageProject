@@ -1,6 +1,6 @@
 "use client"
 
-import { UserTable } from "../usersf/columns"
+import { UserTable } from "./columns"
 import { useCrud } from "@/hooks/useCrud"
 // import PaginationComponent from "./pagination/pagination"
 import AddUserDialog from "./components/add-user-dialog"  
@@ -12,7 +12,6 @@ export default function UsersPage() {
       error,
       isLoading,
       deleteItem,
-      setCurrentPage, currentPage , totalPages
     } = useCrud("users");
   return (
     <div className="container mx-auto py-10">

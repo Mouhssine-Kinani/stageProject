@@ -43,7 +43,7 @@ const userSchema = object({
     .oneOf(['User', 'Admin', 'Super Admin'], 'Invalid role')
 })
 
-export default function AddUserDialog({open, onOpenChange}) {
+export default function AddUserDialog({open, onOpenChange, onUserAdded}) {
   const [errors, setErrors] = useState({})
   const [selectedFile, setSelectedFile] = useState(null)
   const usersPerPage = 2
@@ -55,7 +55,7 @@ export default function AddUserDialog({open, onOpenChange}) {
       roleName: 'User',
       logo: null
     })
-    const {data, createItem, setCurrentPage, currentPage , totalPages} = useCrud("users")
+    const {data, createItem, setCurrentPage, currentPage, totalPages, fetchData} = useCrud("users")
 
     const handleCancel = () => {
         onOpenChange(false)
@@ -111,9 +111,13 @@ export default function AddUserDialog({open, onOpenChange}) {
         const result = await createItem(submitData)
         
         if (result.success) {
-        handleCancel()
+            handleCancel()
+            // Notify parent component that a user was added
+            if (onUserAdded) {
+                onUserAdded()
+            }
         } else {
-        setErrors(prev => ({ ...prev, submit: result.error }))
+            setErrors(prev => ({ ...prev, submit: result.error }))
         }
         
     } catch (error) {

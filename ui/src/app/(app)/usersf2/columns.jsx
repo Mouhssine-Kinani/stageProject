@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 // import { DataTable } from "@/components/table/data-table";
 import {useMemo} from "react";
-import { DataTable } from "./components/data-table"
+import { DataTable } from "./data-table"
 
 // Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [
