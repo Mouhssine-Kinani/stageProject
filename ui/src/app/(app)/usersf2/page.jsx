@@ -24,6 +24,7 @@ export default function UsersPage() {
       ) : (
         <>
           {/* <AddUserDialog open={open} onOpenChange={setOpen}/> */}
+          
           <UserTable onDelete={deleteItem} />
           {/* <PaginationComponent currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} /> */}
         </>
