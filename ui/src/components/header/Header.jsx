@@ -1,18 +1,30 @@
 "use client";
-
 import "./header.css";
 import { useLayout } from "@/contexts/LayoutContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "next/navigation";
+import { useClient } from "@/hooks/useOneClients";
+import { Moon} from "lucide-react";
+import { Sun } from "lucide-react";
 
 export default function Header() {
   const { toggleSidebar, toggleNotification } = useLayout();
+  const { toggleTheme } = useTheme();
   const pathname = usePathname();
 
-  // Transformer le chemin en format lisible
-  const breadcrumb = pathname
-    .split("/")
-    .filter(Boolean) // Supprime les éléments vides
-    .map((part) => decodeURIComponent(part.replace(/-/g, " "))); // Décoder les %20 et remplacer "-" par un espace
+  // Path processing
+  const parts = pathname.split("/").filter(Boolean);
+  const isClientPage = parts.length >= 2 && parts[0] === "clients";
+  const clientId = isClientPage ? parts[1] : null;
+
+  const { client, clientLoading } = useClient(clientId);
+
+  let breadcrumb = parts.map((part, index) => {
+    if (index === 1 && isClientPage) {
+      return clientLoading ? "Chargement..." : client?.client_reference ? `Client #CL0${client.client_reference}` : part;
+    }
+    return decodeURIComponent(part.replace(/-/g, " "));
+  });
 
   return (
     <header className="area-header">
@@ -21,12 +33,12 @@ export default function Header() {
           <img src="/headerIcon/side.svg" alt="Toggle sidebar" />
         </button>
         <img src="/headerIcon/star.svg" alt="" />
-        <p> dashboard / {breadcrumb.join(" / ") || "dashboard"}</p>
+        <p>dashboard / {breadcrumb.join(" / ")}</p>
       </div>
       <div className="div2">
         <input type="text" placeholder="  Search" className="search-input" />
         <div className="iconsHolder">
-          <button>
+          <button onClick={toggleTheme}>
             <img src="/headerIcon/them.svg" alt="Theme" />
           </button>
           <img src="/headerIcon/history.svg" alt="History" />

@@ -1,19 +1,67 @@
-import { Router } from 'express';
-import { createClient, getAllClients, deleteClient, updateClient, getClientById, showEditClientPage } from '../../controllers/clients/clients.controller.js';
-import upload from '../../middleware/upload.middleware.js';
+import { Router } from "express";
+import {
+  createClient,
+  getAllClients,
+  deleteClient,
+  updateClient,
+  getClientById,
+  showEditClientPage,
+  getClientsCount,
+  deleteProductFromClient,
+} from "../../controllers/clients/clients.controller.js";
+import upload from "../../middleware/upload.middleware.js";
+import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 
 const clientRoute = Router();
 
-clientRoute.post('/clients/create', upload.single('logo'), createClient);
+// Création d'un client (seulement pour admin et superadmin)
+clientRoute.post(
+  "/clients/create",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  upload.single("logo"),
+  createClient
+);
 
-clientRoute.get('/clients', getAllClients);
+// Récupérer tous les clients (accessible à tous)
+clientRoute.get("/clients", getAllClients);
 
-clientRoute.get('/clients/:id', getClientById);
+// Récupérer le nombre de clients (accessible à tous)
+clientRoute.get("/clients/count", getClientsCount);
 
-clientRoute.delete('/clients/delete/:id', deleteClient);
+// Récupérer un client par son id (accessible à tous)
+clientRoute.get("/clients/:id", getClientById);
 
-clientRoute.get('/clients/edit/:id', showEditClientPage);
+// Suppression d'un client (seulement pour admin et superadmin)
+clientRoute.delete(
+  "/clients/delete/:id",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  deleteClient
+);
 
-clientRoute.put('/clients/edit/:id', updateClient);
+// Afficher la page d'édition d'un client (seulement pour admin et superadmin)
+clientRoute.get(
+  "/clients/edit/:id",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  showEditClientPage
+);
+
+// Mise à jour d'un client (seulement pour admin et superadmin)
+clientRoute.put(
+  "/clients/edit/:id",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  updateClient
+);
+
+// Suppression d'un produit d'un client (seulement pour admin et superadmin)
+clientRoute.delete(
+  "/clients/:clientId/product/:productId",
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  deleteProductFromClient
+);
 
 export default clientRoute;

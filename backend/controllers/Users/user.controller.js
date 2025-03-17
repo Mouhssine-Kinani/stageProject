@@ -3,6 +3,21 @@ import User from "../../models/Users/user.model.js";
 
 
 // funciton that fetches all users
+// export const getUsers = async (req, res, next) => {
+//   try {
+//     let page = parseInt(req.query.page) || 1;
+//     let limit = parseInt(req.query.limit) || 10;
+//     let skip = (page - 1) * limit;
+
+//     const users = await User.find().skip(skip).limit(limit).select("-password");
+//     const countUsers = await User.countDocuments();
+//     const totalPages = Math.ceil(countUsers / limit)
+//     res.status(200).json({users , totalPages});
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const getUsers = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;
@@ -17,7 +32,6 @@ export const getUsers = async (req, res, next) => {
         $or: [
           { fullName: { $regex: regex } },
           { email: { $regex: regex } }
-          // You can add more fields here if needed
         ]
       };
     }
@@ -32,11 +46,12 @@ export const getUsers = async (req, res, next) => {
     const countUsers = await User.countDocuments(query);
     const totalPages = Math.ceil(countUsers / limit);
 
-    res.status(200).json({ users, totalPages });
+    res.status(200).json({ data: users, totalPages });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // function that fetches a single user
 export const getUser = async (req, res, next) => {
@@ -56,17 +71,22 @@ export const getUser = async (req, res, next) => {
 // function that creates a new user
 export const createUser = async (req, res, next) => {
   try {
-    const { reference, fullName, email, password , role, status } = req.body;
-    console.log(password)
-    let finalPassword = password ? password : 'admin';
+    const { reference, fullName, email, password, role, status } = req.body;
     // check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      const error = new Error("User already exists");
+      error.statusCode = 409;
+      throw error;
     }
+    
+    // Set default password if none provided
+    const passwordToHash = password || "changeme";
+    // const passwordToHash = password || "changeme";
+    
     // hash the password
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(finalPassword, salt);
+    const hashedPassword = await bcrypt.hash(passwordToHash, salt);
 
     const newUser = new User({
       reference,
@@ -79,9 +99,14 @@ export const createUser = async (req, res, next) => {
 
     await newUser.save();
 
+    // Prepare response data - don't include the password
+    const userData = newUser.toObject();
+    delete userData.password;
+
     res.status(201).json({
       message: "User created successfully",
-      data: newUser,
+      data: userData,
+      ...(password ? {} : { note: "Default password 'changeme' has been set for this user" })
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

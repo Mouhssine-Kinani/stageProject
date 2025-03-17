@@ -3,7 +3,7 @@ import axios from "axios";
 
 const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
 
-export function useCrud(Category) {
+export function useCrud(Category, searchQuery = "") {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -11,25 +11,32 @@ export function useCrud(Category) {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
 
-  // Fetch data when page changes
+
+  // useEffect(() => {
+  //   console.log("data changed:", data);
+  // }, [data]);
+  
+  // Fetch data when page, Category, or searchQuery changes
   useEffect(() => {
-    console.log("useEffect running, currentPage:", currentPage);
-    async function fetchDataInsideUseEffect() {
-      await fetchData();
-    }
-    fetchDataInsideUseEffect();
-  }, [currentPage, Category]);
+    setCurrentPage(1); // Réinitialiser la page à 1 quand la recherche change
+  }, [searchQuery]);
+
   useEffect(() => {
-    console.log("data changed:", data);
-  }, [data]);
+    fetchData();
+  }, [currentPage, Category, searchQuery]);
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const resp = await axios.get(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
-      // console.log(`${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`);
-      // console.log(resp.data.users);
-      setData(resp.data.users || []);
+      const searchParam = searchQuery ? `&search=${searchQuery}` : "";
+      const populateParam = Category === "clients" ? "&populate=true" : "";
+      const resp = await axios.get(
+        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
+      );
+
+      setData(resp.data.data || []); // Les données incluent déjà totalPrice si backend mis à jour
       setTotalPages(resp.data.totalPages || 1);
+      console.log(resp.data.data)
       setError(null);
     } catch (err) {
       console.error(`Error fetching ${Category}:`, err);
@@ -43,9 +50,18 @@ export function useCrud(Category) {
 
   const deleteItem = async (id) => {
     try {
-      await axios.delete(`${URLAPI}/${Category}/${id}`);
-      await fetchData();
-      setError(null);
+      // console.log(`Trying to delete item with ID: ${id}`);
+
+      // Vérifie si la route nécessite "/delete/"
+      const needsDeletePath = ["products", "clients"].includes(Category);
+      const url = needsDeletePath
+        ? `${URLAPI}/${Category}/delete/${id}`
+        : `${URLAPI}/${Category}/${id}`;
+
+      const response = await axios.delete(url);
+
+      // console.log("Delete response:", response.data);
+      await fetchData(); // Recharge les données après suppression
     } catch (err) {
       console.error(`Error deleting ${Category}:`, err);
       setError(err);
@@ -53,26 +69,26 @@ export function useCrud(Category) {
   };
 
   // New function to handle file validation
-  const validateFile = (file, options = { maxSize: 102400, type: 'image' }) => {
-    if (!file) return { isValid: false, error: 'No file provided' };
+  const validateFile = (file, options = { maxSize: 102400, type: "image" }) => {
+    if (!file) return { isValid: false, error: "No file provided" };
 
     // Check file type
-    if (options.type === 'image' && !file.type.startsWith('image/')) {
-      return { isValid: false, error: 'Please select an image file' };
+    if (options.type === "image" && !file.type.startsWith("image/")) {
+      return { isValid: false, error: "Please select an image file" };
     }
 
     // Check file size (default 100KB = 102400 bytes)
     if (file.size > options.maxSize) {
-      return { 
-        isValid: false, 
-        error: `File must be less than ${Math.round(options.maxSize / 1024)}KB` 
+      return {
+        isValid: false,
+        error: `File must be less than ${Math.round(options.maxSize / 1024)}KB`,
       };
     }
 
     return { isValid: true, error: null };
   };
 
-  // New function to create an item
+  // Create an item function
   const createItem = async (itemData) => {
     try {
       setIsLoading(true);
@@ -88,8 +104,9 @@ export function useCrud(Category) {
       let errorMessage = "Server error";
   
       if (error.response?.data) {
-        errorMessage = error.response.data.message || 
-                      "Server returned error: " + error.response.status;
+        errorMessage =
+          error.response.data.message ||
+          "Server returned error: " + error.response.status;
       } else if (error.request) {
         errorMessage = "No response received from server";
       } else {
@@ -129,14 +146,19 @@ export function useCrud(Category) {
       }
   
       setError({ message: errorMessage });
-      return { 
-        success: false, 
-        error: errorMessage 
+      return {
+        success: false,
+        error: errorMessage,
       };
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fetch data when page, Category, or searchQuery changes
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, Category, searchQuery]);
 
   return {
     data,
@@ -149,6 +171,6 @@ export function useCrud(Category) {
     currentPage,
     setCurrentPage,
     totalPages,
-    fetchData
+    fetchData,
   };
 }

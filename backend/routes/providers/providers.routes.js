@@ -1,19 +1,50 @@
 import { Router } from 'express';
-import {Insertprovider, showProviders, deleteProvider, editProvider, showEditProviderPage} from '../../controllers/providers/providers.controller.js'
-import upload from '../../middleware/upload.middleware.js'
+import {
+  Insertprovider,
+  showProviders,
+  deleteProvider,
+  editProvider,
+  showEditProviderPage
+} from '../../controllers/providers/providers.controller.js';
+import upload from '../../middleware/upload.middleware.js';
+import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 
-const providerRoute = Router()
+const providerRoute = Router();
 
+// Création d'un provider (seulement pour admin et superadmin)
+providerRoute.post(
+  '/providers/create',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  upload.single('logo'),
+  Insertprovider
+);
 
-providerRoute.post('/providers/create', upload.single('logo'), Insertprovider);
+// Récupérer tous les providers (accessible à tous)
+providerRoute.get('/providers', showProviders);
 
-providerRoute.get('/providers', showProviders)
+// Suppression d'un provider (seulement pour admin et superadmin)
+providerRoute.delete(
+  '/providers/delete/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  deleteProvider
+);
 
-providerRoute.delete('/providers/delete/:id', deleteProvider)
+// Afficher la page d'édition (seulement pour admin et superadmin)
+providerRoute.get(
+  '/providers/edit/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  showEditProviderPage
+);
 
-providerRoute.get('/providers/edit/:id', showEditProviderPage)
+// Édition d'un provider (seulement pour admin et superadmin)
+providerRoute.put(
+  '/providers/edit/:id',
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
+  editProvider
+);
 
-providerRoute.put('/providers/edit/:id', editProvider)
-
-
-export default providerRoute
+export default providerRoute;
