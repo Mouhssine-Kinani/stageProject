@@ -18,7 +18,6 @@ export const isAuthenticated = (req, res, next) => {
   }
 };
 
-// Middleware pour vérifier le rôle de l'utilisateur
 export const hasRole = (roles) => (req, res, next) => {
   const userRole = req.user?.role?.roleName; // Accès correct au rôle
   console.log("User role in middleware:", userRole); 

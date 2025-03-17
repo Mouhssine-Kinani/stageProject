@@ -56,7 +56,7 @@ function SideBar() {
               Utilisateurs
             </li>
           </Link>
-          <Link href="">
+          <Link href="/settings">
             <li>
               <img src="/sideBarIcon/settings.svg" alt="icon" />
               Reglage

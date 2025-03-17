@@ -21,7 +21,7 @@ providerRoute.post(
 );
 
 // Récupérer tous les providers (accessible à tous)
-providerRoute.get('/providers', showProviders);
+providerRoute.get('/providers',isAuthenticated, showProviders);
 
 // Suppression d'un provider (seulement pour admin et superadmin)
 providerRoute.delete(

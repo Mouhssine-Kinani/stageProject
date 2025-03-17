@@ -12,10 +12,10 @@ import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 const userRouter = Router();
 
 // Route pour récupérer tous les utilisateurs (accessible à tous)
-userRouter.get("/", getUsers);
+userRouter.get("/",isAuthenticated, getUsers);
 
 // Route pour récupérer un utilisateur (accessible à tous)
-userRouter.get("/:id", getUser);
+userRouter.get("/:id", isAuthenticated, getUser);
 
 // Création d'un utilisateur (seulement pour admin et superadmin)
 userRouter.post(

@@ -24,13 +24,13 @@ clientRoute.post(
 );
 
 // Récupérer tous les clients (accessible à tous)
-clientRoute.get("/clients", getAllClients);
+clientRoute.get("/clients",isAuthenticated, getAllClients);
 
 // Récupérer le nombre de clients (accessible à tous)
-clientRoute.get("/clients/count", getClientsCount);
+clientRoute.get("/clients/count", isAuthenticated, getClientsCount);
 
 // Récupérer un client par son id (accessible à tous)
-clientRoute.get("/clients/:id", getClientById);
+clientRoute.get("/clients/:id", isAuthenticated, getClientById);
 
 // Suppression d'un client (seulement pour admin et superadmin)
 clientRoute.delete(

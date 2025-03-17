@@ -9,8 +9,11 @@ import { PORT } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import authRouter from './routes/Auth/auth.routes.js'
 import cors from 'cors'
+
+
 const app = express();
 
+app.use(cookieParser()); // Middleware pour lire les cookies
 // Middleware pour analyser le corps de la requête en JSON
 app.use(express.json()); // parse json bodies in requests
 app.use(express.urlencoded({ extended: false })); // parse urlencoded bodies in requests
