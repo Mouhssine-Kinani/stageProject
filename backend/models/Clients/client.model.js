@@ -31,7 +31,7 @@ const ClientSchema = new Schema(
     renewal_status: {
       type: String,
       enum: ["ok", "Overdue", "Expiring"],
-      required: true,
+      // required: true,
     },
     phone: {
       type: String,

@@ -177,7 +177,7 @@ export const requestPasswordReset = async (req, res, next) => {
     // Generate a reset token (you can set your own expiry time)
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000; // Token expires in 1 hour
+    user.resetTokenExpiry = Date.now() + 3600; // Token expires in 1 hour
 
     await user.save();
     

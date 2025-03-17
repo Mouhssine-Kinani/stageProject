@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Box } from "lucide-react";
 import {
@@ -99,10 +99,28 @@ const getColumns = (onDelete) => [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onDelete(client._id)}>
+            <DropdownMenuItem 
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete this client?")) {
+                  onDelete(client._id);
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                // Dispatch custom event for editing
+                const event = new CustomEvent("editClient", {
+                  detail: client,
+                });
+                window.dispatchEvent(event);
+              }}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
 
             <DropdownMenuItem>
               <Link href={`/clients/${client._id}`}>View Details</Link>
@@ -114,7 +132,7 @@ const getColumns = (onDelete) => [
   },
 ];
 
-export function ClientsTable({ data, onDelete }) {
+export function ClientsTable({ data, onDelete, isLoading }) {
   const columns = useMemo(() => getColumns(onDelete), [onDelete]);
-  return <DataTable columns={columns} data={data} />;
+  return <DataTable columns={columns} data={data} isLoading={isLoading} />;
 }
