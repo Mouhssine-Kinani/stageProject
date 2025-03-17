@@ -21,9 +21,9 @@ import {
 } from "@tanstack/react-table"
 import { useEffect } from "react"
 import { useState } from "react"
-import PaginationComponent from "./components/pagination"
+import PaginationComponent from "../../../components/pagination/pagination"
 import { useCrud } from "@/hooks/useCrud"
-import AddUserDialog  from "@/app/(app)/usersf2/components/add-user-dialog";
+import AddUserDialog from "./components/add-user-dialog"
 import SearchBar from "@/components/serchBar/Search";
 
 
@@ -35,48 +35,50 @@ export function DataTable({columns}) {
     
     // Add a useEffect to fetch data when component mounts
     // useEffect(() => {
-      //     fetchData()
-      // }, [])
-      // Handle user added event
-      const handleUserAdded = async () => {
-          // Refresh data when a user is added
-          await fetchData()
-          setCurrentPage(1)
-      }
-    // Filtrage des utilisateurs en fonction de la recherche
- const filteredData =
-   data?.filter(
-     (user) =>
-       (user.name &&
-         user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (user.email &&
-         user.email.toLowerCase().includes(searchQuery.toLowerCase()))
-     ) || [];
+    //     fetchData()
+    // }, [])
+    
     // Create the table with the current data
     const table = useReactTable({
-      data: filteredData || [],
+      data: data || [],
       columns,
       getCoreRowModel: getCoreRowModel(),
       getPaginationRowModel: getPaginationRowModel(),
       getSortedRowModel: getSortedRowModel(),
       getFilteredRowModel: getFilteredRowModel(),
     })
-
+    
+    
+    const handleUserAdded = async () => {
+        // Refresh data when a user is added
+        await fetchData()
+        setCurrentPage(1)
+    }
+  
+    const toggleSortOrder = () => {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    };
+  
     return (
       <div className="w-full">
-         <SearchBar 
-           onSearch={setSearchQuery} 
-           open={open} 
-           setOpen={setOpen} 
-           handleUserAdded={handleUserAdded}
-         >
-           <AddUserDialog
-             open={open}
-             onOpenChange={setOpen}
-             onUserAdded={handleUserAdded}
-           />
-         </SearchBar>
-          <br />
+        {/* <div className=" mb-4">
+          <Button onClick={() => setIsDialogOpen(true)}>Add User</Button>
+        </div> */}
+        {/* <AddUserDialog
+          open={open}
+          onOpenChange={setOpen}
+          onUserAdded={handleUserAdded}
+        /> */}
+        <SearchBar searchQuery={searchQuery}
+          onSort={toggleSortOrder} 
+          onSearch={setSearchQuery} 
+          Children={AddUserDialog}
+          ChildrenProps={{
+            open: open,
+            onOpenChange: setOpen,
+            onUserAdded: handleUserAdded
+          }}
+        />
           <div className="rounded-md border">
           <Table>
             <TableHeader>

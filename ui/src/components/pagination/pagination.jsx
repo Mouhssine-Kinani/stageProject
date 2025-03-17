@@ -1,45 +1,57 @@
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination"
-  import { useEffect } from "react";
-  
-  export function PaginationDemo({ currentPage, setCurrentPage, totalPages }) {
-    // useEffect(() => {
-    //     alert(currentPage + " " +  totalPages + "GGGGGGG////");
-    // }, [currentPage, totalPages]);
-    return (
-      <Pagination>
+
+export default function PaginationComponent({ currentPage, totalPages, setCurrentPage }) {
+  return (
+    <div className="py-4 flex items-center justify-end">
+        <Pagination>
         <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" onClick={() => setCurrentPage(Math.max(1, currentPage - 1)) } />
-          </PaginationItem>
-          {[...Array(totalPages)].map((_, index) => (
-          <PaginationItem key={index}>
-            <PaginationLink
-              href="#"
-              isActive={currentPage === index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
-          {totalPages > 5 && (
             <PaginationItem>
-              <PaginationEllipsis />
+            <PaginationPrevious 
+                href="#"
+                onClick={(e) => {
+                e.preventDefault()
+                setCurrentPage(prev => Math.max(1, prev - 1))
+                }}
+                aria-disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
             </PaginationItem>
-          )}
-          <PaginationItem>
-            <PaginationNext href="#"onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1)) } />
-          </PaginationItem>
+
+            {Array.from({length: totalPages}, (_, i) => i + 1).map((page) => (
+            <PaginationItem key={page}>
+                <PaginationLink
+                href="#"
+                onClick={(e) => {
+                    e.preventDefault()
+                    setCurrentPage(page)
+                }}
+                isActive={currentPage === page}
+                >
+                {page}
+                </PaginationLink>
+            </PaginationItem>
+            ))}
+
+            <PaginationItem>
+            <PaginationNext
+                href="#"
+                onClick={(e) => {
+                e.preventDefault()
+                setCurrentPage(prev => Math.min(totalPages, prev + 1))
+                }}
+                aria-disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
+            </PaginationItem>
         </PaginationContent>
-      </Pagination>
-    )
-  }
-  
+        </Pagination>
+    </div>
+  );
+}
