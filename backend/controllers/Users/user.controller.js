@@ -36,22 +36,19 @@ export const getUsers = async (req, res, next) => {
       };
     }
 
-    // Fetch users based on query
-    const users = await User.find(query).skip(skip).limit(limit).select("-password");
-
-    // Count the total matching users
+    // Find users based on the query (either filtered or normal)
+    const users = await User.find(query)
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order (-1)
+      .skip(skip)
+      .limit(limit)
+      .select("-password");
+    // Count matching users for pagination
     const countUsers = await User.countDocuments(query);
     const totalPages = Math.ceil(countUsers / limit);
 
-    // Handle case when no users are found
-    if (users.length === 0) {
-      return res.status(404).json({ success: false, message: "No users found" });
-    }
-
-    // Send response
-    res.status(200).json({ success: true, data : users, totalPages });
+    res.status(200).json({ data: users, totalPages });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -68,7 +65,7 @@ export const getUser = async (req, res, next) => {
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -83,9 +80,14 @@ export const createUser = async (req, res, next) => {
       error.statusCode = 409;
       throw error;
     }
+    
+    // Set default password if none provided
+    const passwordToHash = password || "changeme";
+    // const passwordToHash = password || "changeme";
+    
     // hash the password
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(passwordToHash, salt);
 
     const newUser = new User({
       reference,
@@ -98,12 +100,17 @@ export const createUser = async (req, res, next) => {
 
     await newUser.save();
 
+    // Prepare response data - don't include the password
+    const userData = newUser.toObject();
+    delete userData.password;
+
     res.status(201).json({
       message: "User created successfully",
-      data: newUser,
+      data: userData,
+      ...(password ? {} : { note: "Default password 'changeme' has been set for this user" })
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -121,13 +128,13 @@ export const updateUser = async (req, res, next) => {
       new: true,
     }).select("-password");
     if (!updatedUser) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      res.status(404).json({
+        message: "User not found",
+      });
     }
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -138,9 +145,9 @@ export const deleteUser = async (req, res, next) => {
     const userId = req.params.id;
     const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      res.status(404).json({
+        message: "User not found",
+      });
     }
 
     res
@@ -151,6 +158,6 @@ export const deleteUser = async (req, res, next) => {
         data: deletedUser,
       });
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

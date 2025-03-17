@@ -1,7 +1,7 @@
 "use client";
 import SearchBar from "@/components/serchBar/Search";
 import { useState, useEffect } from "react";
-import { PaginationDemo } from "@/components/pagination/pagination";
+import  PaginationComponent  from "@/components/pagination/pagination";
 import { ProductTable } from "./columns";
 import { useCrud } from "@/hooks/useCrud";
 
@@ -58,7 +58,7 @@ function ProductsPage() {
           <ProductTable data={sortedProducts} onDelete={deleteItem} />
           {products.length >= 2 && (
             <div className="mt-2 flex justify-center">
-              <PaginationDemo
+              <PaginationComponent
                 currentPage={currentPage}
                 setPageChange={setCurrentPage}
                 totalPages={totalPages}

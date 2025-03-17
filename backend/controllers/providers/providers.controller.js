@@ -30,7 +30,7 @@ export const showProviders = async (req, res, next) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        const providers = await Provider.find().skip(skip).limit(limit);
+        const providers = await Provider.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
         if (!providers) {
             return res.status(404).json({ success: false, message: 'Providers not found', data: null });
         }

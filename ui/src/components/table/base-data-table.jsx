@@ -1,11 +1,4 @@
-"use client";
-
-// import {
-//   flexRender,
-//   getCoreRowModel,
-//   useReactTable,
-// } from "@tanstack/react-table";
-
+"use client"
 import {
   Table,
   TableBody,
@@ -13,11 +6,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
+
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -26,27 +17,31 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
-import {useState} from "react";
-import { Input } from "@/components/ui/input"
-
-
-export function DataTable({ columns, data }) {
-  const [columnFilters, setColumnFilters] = useState(
-    []
-  )
+/**
+ * Reusable data table component
+ * @param {Object} props - Component props
+ * @param {Array} props.columns - Table columns configuration
+ * @param {Array} props.data - Table data (already filtered if needed)
+ * @param {boolean} props.showNoResults - Whether to show "No results" message when data is empty
+ * @returns {JSX.Element} - Table component
+ */
+export function DataTable({ 
+  columns, 
+  data = [], 
+  showNoResults = true 
+}) {
+  // Create the table with the provided data (which should already be filtered if needed)
   const table = useReactTable({
-    data,
+    data: data,
     columns,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    state: {
-      columnFilters,
-    },
-  });
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  })
 
   return (
-    <div className=" border">
+    <div className="border">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -65,11 +60,11 @@ export function DataTable({ columns, data }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length ? (
+          {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={row.getIsSelected() ? "selected" : undefined}
+                data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -79,14 +74,16 @@ export function DataTable({ columns, data }) {
               </TableRow>
             ))
           ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
+            showNoResults && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )
           )}
         </TableBody>
       </Table>
     </div>
-  );
-}
+  )
+} 

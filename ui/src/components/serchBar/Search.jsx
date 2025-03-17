@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
-import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
 
-const SearchBar = ({ onSearch, onSort }) => {
+const SearchBar = ({ 
+  onSearch, 
+  onSort, 
+  Children: Children = null, 
+  ChildrenProps = {} 
+}) => {
   const [query, setQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc"); // État du tri
 
@@ -11,23 +15,23 @@ const SearchBar = ({ onSearch, onSort }) => {
     onSearch(e.target.value);
   };
 
-  const handleSort = () => {
-    const newOrder = sortOrder === "asc" ? "desc" : "asc"; // Alterner entre asc et desc
-    setSortOrder(newOrder);
-    onSort(newOrder); // Appeler la fonction de tri
-  };
+  // const handleSort = () => {
+  //   const newOrder = sortOrder === "asc" ? "desc" : "asc"; // Alterner entre asc et desc
+  //   setSortOrder(newOrder);
+  //   onSort(newOrder); // Appeler la fonction de tri
+  // };
 
   return (
     <div className="flex items-center border-2 border-gray-500 rounded-md p-2 w-full justify-between">
       {/* Boutons (à gauche) */}
       <div className="flex items-center gap-2">
-        <AddUserDialog />
+        {Children && <Children {...ChildrenProps} />}
         <button className="p-2 text-gray-500 hover:text-gray-700">
           <Filter size={18} />
         </button>
         <button
           className="p-2 text-gray-500 hover:text-gray-700"
-          onClick={handleSort}
+          // onClick={handleSort}
         >
           <ArrowUpDown size={18} />
         </button>

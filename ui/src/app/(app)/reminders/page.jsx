@@ -3,7 +3,7 @@ import SearchBar from "@/components/serchBar/Search";
 import { useState, useEffect, useMemo } from "react";
 import { useCrud } from "@/hooks/useCrud";
 import { RemindersTable } from "./columns";
-import { PaginationDemo } from "@/components/pagination/pagination";
+import PaginationComponent from "@/components/pagination/pagination";
 
 // Helper function to calculate next renewal date
 const calculateNextRenewal = (productAddedDate, billing_cycle) => {
@@ -87,7 +87,7 @@ function Page() {
           <RemindersTable data={sortedData} onDelete={deleteItem} />
           {reminders.length >= 2 && (
             <div className="mt-2 flex justify-center">
-              <PaginationDemo
+              <PaginationComponent
                 currentPage={currentPage}
                 setPageChange={setCurrentPage}
                 totalPages={totalPages}
