@@ -22,7 +22,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_URLAPI}/products`);
       setProducts(response.data.data);
     } catch (error) {
       console.error("Error fetching products:", error);
