@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import User from "../../models/Users/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import ms from "ms";
 import {
   JWT_SECRET,
   JWT_EXPIRE_INS,
@@ -128,11 +129,10 @@ export const signIn = async (req, res, next) => {
       expiresIn: JWT_EXPIRE_INS,
     });
 
-    // Set the token in an HTTP-only cookie
     res.cookie('token', token, {
-      httpOnly: true, // helps prevent XSS
-      secure: process.env.NODE_ENV === 'production', // send cookie over HTTPS only in production
-      maxAge: JWT_EXPIRE_INS * 1000, // expiration time in milliseconds
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: ms(JWT_EXPIRE_INS), // Convertit '1d' en millisecondes
     });
 
     res.status(200).json({

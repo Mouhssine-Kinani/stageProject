@@ -18,7 +18,7 @@ const clientRoute = Router();
 clientRoute.post(
   "/clients/create",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   upload.single("logo"),
   createClient
 );
@@ -36,7 +36,7 @@ clientRoute.get("/clients/:id", isAuthenticated, getClientById);
 clientRoute.delete(
   "/clients/delete/:id",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   deleteClient
 );
 
@@ -44,7 +44,7 @@ clientRoute.delete(
 clientRoute.get(
   "/clients/edit/:id",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   showEditClientPage
 );
 
@@ -52,7 +52,7 @@ clientRoute.get(
 clientRoute.put(
   "/clients/edit/:id",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   updateClient
 );
 
@@ -60,7 +60,7 @@ clientRoute.put(
 clientRoute.delete(
   "/clients/:clientId/product/:productId",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   deleteProductFromClient
 );
 
