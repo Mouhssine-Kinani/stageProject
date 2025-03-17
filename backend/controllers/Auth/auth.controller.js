@@ -62,6 +62,49 @@ export const signUP = async (req, res, next) => {
 };
 
 
+// export const signIn = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) {
+//       const error = new Error("Invalid password");
+//       error.statusCode = 401;
+//       throw error;
+//     }
+
+//     // Création du token avec ID et rôle
+//     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
+//       expiresIn: JWT_EXPIRE_INS,
+//     });
+
+//     res.status(200).json({
+//       message: "User logged in successfully",
+//       data: {
+//         token, // Ajout du token ici
+//         user: {
+//           _id: user._id,
+//           reference: user.reference,
+//           fullName: user.fullName,
+//           email: user.email,
+//           role: user.role,
+//           status: user.status,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+
 export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -80,15 +123,22 @@ export const signIn = async (req, res, next) => {
       throw error;
     }
 
-    // Création du token avec ID et rôle
+    // Create token with user ID and role
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE_INS,
+    });
+
+    // Set the token in an HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true, // helps prevent XSS
+      secure: process.env.NODE_ENV === 'production', // send cookie over HTTPS only in production
+      maxAge: JWT_EXPIRE_INS * 1000, // expiration time in milliseconds
     });
 
     res.status(200).json({
       message: "User logged in successfully",
       data: {
-        token, // Ajout du token ici
+        token, // also returned in JSON if needed
         user: {
           _id: user._id,
           reference: user.reference,
