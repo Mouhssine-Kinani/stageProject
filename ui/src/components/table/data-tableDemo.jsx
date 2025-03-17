@@ -29,7 +29,7 @@ import {
 import {useState} from "react";
 import { Input } from "@/components/ui/input"
 import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
-import { PaginationDemo } from "@/components/pagination/pagination";
+import { PaginationDemo } from "@/components/pagination/paginationDemo";
 import SearchBar from "@/components/serchBar/Search";
 
 export function DataTable({ columns, data, currentPage, setCurrentPage, totalPages }) {

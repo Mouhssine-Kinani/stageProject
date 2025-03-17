@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import "./homepage.css";
 import "./homeitems.css";
 import "./statiques.css";
-import { DataTable } from "@/components/table/data-table";
+import { DataTable } from "@/components/table/base-data-table";
 
 import { useProducts } from "@/components/getStatiques/getAllProducts";
 import { useClients } from "@/components/getStatiques/getAllClients";

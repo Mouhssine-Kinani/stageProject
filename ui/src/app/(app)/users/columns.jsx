@@ -10,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DataTable } from "@/components/table/data-table";
+// import { DataTable } from "@/components/table/data-table";
 import {useMemo} from "react";
+import { DataTable } from "./data-table"
 
 // Define columns outside the component to prevent recreation on each render
 const getColumns = (onDelete) => [
@@ -73,7 +74,7 @@ const getColumns = (onDelete) => [
   },
 ];
 
-export function UserTable({ data, onDelete, currentPage, setCurrentPage, totalPages }) {
+export function UserTable({ onDelete }) {
   const columns = useMemo(
     () => getColumns(onDelete),
     [onDelete]
@@ -82,10 +83,6 @@ export function UserTable({ data, onDelete, currentPage, setCurrentPage, totalPa
   return (
     <DataTable 
       columns={columns} 
-      data={data} 
-      currentPage={currentPage}
-      setCurrentPage={setCurrentPage}
-      totalPages={totalPages}
     />
   );
 }

@@ -1,34 +1,36 @@
-"use client";
+"use client"
 
-import { UserTable } from "@/app/(app)/users/columns";
-import { useCrud } from "@/hooks/useCrud";
+import { UserTable } from "./columns"
+import { useCrud } from "@/hooks/useCrud"
+// import PaginationComponent from "./pagination/pagination"
+import AddUserDialog from "./components/add-user-dialog"  
+import { useState } from "react"
 
-export default function Page() {
+export default function UsersPage() {
+  const [open, setOpen] = useState(false);
   const {
-    data,
-    error,
-    isLoading,
-    deleteItem,
-    currentPage,
-    setCurrentPage,
-    totalPages,
-  } = useCrud("users");
-
+      error,
+      isLoading,
+      deleteItem,
+    } = useCrud("users");
   return (
-    <div>
+    <div className="container mx-auto py-10">
+      <h1>Users Page</h1>
+      <br />
+      {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
+      <div>
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        <UserTable 
-          data={data} 
-          onDelete={deleteItem}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
-        />
+        <>
+          {/* <AddUserDialog open={open} onOpenChange={setOpen}/> */}
+          
+          <UserTable onDelete={deleteItem} />
+          {/* <PaginationComponent currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} /> */}
+        </>
       )}
 
-      {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
     </div>
-  );
-}
+    </div>
+  )
+} 

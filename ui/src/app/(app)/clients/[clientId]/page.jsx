@@ -4,7 +4,7 @@ import Map from "@/components/map/map";
 import { getCoordinates } from "@/lib/geocode";
 import axios from "axios";
 import { useState,useEffect } from "react";
-import { DataTable } from "@/components/table/data-table";
+import { DataTable } from "@/components/table/base-data-table";
 
 
 function ClientPage({params}) {
