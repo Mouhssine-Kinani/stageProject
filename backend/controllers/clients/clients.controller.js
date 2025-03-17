@@ -103,6 +103,7 @@ export const getAllClients = async (req, res) => {
           path: "provider",
         },
       })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(); // Convertit en objets JS purs pour de meilleures performances

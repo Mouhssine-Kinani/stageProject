@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/table/data-table";
+import { DataTable } from "@/components/table/base-data-table";
 import { useMemo } from "react";
 import { Calendar } from "lucide-react";
 

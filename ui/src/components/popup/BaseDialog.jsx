@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogOverlay
 } from "@/components/ui/dialog"
 
 export function BaseDialog({ 
@@ -39,6 +38,7 @@ export function BaseDialog({
         {children}
 
         {/* Footer buttons aligned to bottom right */}
+        <DialogFooter>
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="outline" className="px-6" onClick={onCancel}>
             {cancelLabel}
@@ -50,6 +50,7 @@ export function BaseDialog({
             {submitLabel}
           </Button>
         </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

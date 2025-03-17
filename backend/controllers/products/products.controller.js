@@ -50,6 +50,7 @@ export const showProducts = async (req, res, next) => {
     // Récupérer les produits en appliquant le filtre, la pagination et en incluant les infos du provider
     const products = await Product.find(filter)
       .populate("provider")
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 

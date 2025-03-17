@@ -75,9 +75,10 @@ export const signIn = async (req, res, next) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      const error = new Error("Invalid password");
-      error.statusCode = 401;
-      throw error;
+      return res.status(401).json({
+        message: "Invalid password",
+        data: { email, password },
+      });
     }
 
     // Création du token avec ID et rôle
@@ -110,16 +111,26 @@ export const requestPasswordReset = async (req, res, next) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      throw error;
+      return res.status(404).json({
+        message: "User not found. Veuillez réessayer."
+      });
     }
+
+    // Check if user has a valid reset token
+    if (user.resetToken && user.resetTokenExpiry && user.resetTokenExpiry > Date.now()) {
+      const timeLeft = Math.ceil((user.resetTokenExpiry - Date.now()) / 1000 / 60); // Convert to minutes
+      return res.status(400).json({
+        message: `Un email de réinitialisation a déjà été envoyé. Veuillez attendre ${timeLeft} minutes avant de réessayer.`
+      });
+    }
+
     // Generate a reset token (you can set your own expiry time)
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000;
+    user.resetTokenExpiry = Date.now() + 3600000; // Token expires in 1 hour
 
     await user.save();
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -127,19 +138,31 @@ export const requestPasswordReset = async (req, res, next) => {
         pass: EMAIL_PASSWORD,
       },
     });
-    const resetLink = `${FRONT_END_URL}/forget/${resetToken}`;
+    
+    // Update the reset link format to match our frontend route
+    const resetLink = `${FRONT_END_URL}/reset?token=${resetToken}`;
+    
     const mailOptions = {
       from: EMAIL_USER,
       to: email,
-      subject: "Password Reset Request",
-      text: `You requested a password reset. Please use the following link to reset your password: ${resetLink}`,
+      subject: "Réinitialisation de mot de passe",
+      html: `
+        <h1>Réinitialisation de mot de passe</h1>
+        <p>Vous avez demandé une réinitialisation de mot de passe.</p>
+        <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
+        <a href="${resetLink}">Réinitialiser mon mot de passe</a>
+        <p>Ce lien expirera dans 1 heure.</p>
+        <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+      `
     };
 
     transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
         const error = new Error("Error sending email");
         error.statusCode = 500;
-        return next(error);
+        return res.status(500).json({
+          message: "Error sending email",
+        });
       }
       res.status(200).json({
         message: "Password reset email sent successfully",
@@ -155,10 +178,10 @@ export const resetPassword = async (req, res, next) => {
     const { resetToken, newPassword } = req.body;
     const user = await User.findOne({ resetToken });
 
-    if (!user || user.resetTokenExpiry < Date.now()) {
-      const error = new Error("Invalid or expired token");
-      error.statusCode = 400;
-      throw error;
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "Invalid or expired token",
+      });
     }
 
     const salt = await bcrypt.genSalt(12);
