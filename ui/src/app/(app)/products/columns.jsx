@@ -97,7 +97,9 @@ const getColumns = (onDelete) => [
             <DropdownMenuItem
               onClick={() => {
                 console.log("Deleting product:", product);
-                onDelete(product._id);
+                if (window.confirm("Are you sure you want to delete this client?")) {
+                  onDelete(product._id);
+                }
               }}
             >
               <span className="text-red-500">Delete</span>
