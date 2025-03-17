@@ -24,10 +24,10 @@ export const getUsers = async (req, res, next) => {
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
-    // Build a query object: if a search query is provided, add search criteria; otherwise, return all.
+    // Build a query object based on search criteria
     let query = {};
     if (req.query.search && req.query.search.trim() !== "") {
-      const regex = new RegExp(req.query.search, "i"); // case-insensitive search
+      const regex = new RegExp(req.query.search, "i"); // Case-insensitive search
       query = {
         $or: [
           { fullName: { $regex: regex } },
@@ -58,9 +58,10 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      res.status(404).json({
-        message: "User not found",
-      });
+      // const error = new Error("User not found");
+      // error.statusCode = 404;
+      // throw error;
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     res.status(200).json({ success: true, data: user });
   } catch (error) {

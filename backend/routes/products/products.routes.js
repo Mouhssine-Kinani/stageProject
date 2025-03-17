@@ -21,14 +21,10 @@ productRoute.post(
 );
 
 // Récupérer tous les produits (accessible à tous)
-productRoute.get('/products', 
-  isAuthenticated,
-  showProducts);
+productRoute.get('/products', showProducts);
 
 // Statistiques sur les produits (accessible à tous)
-productRoute.get('/products/stats', 
-  isAuthenticated,
-  countProducts);
+productRoute.get('/products/stats', countProducts);
 
 // Suppression d'un produit (seulement pour admin et superadmin)
 productRoute.delete(

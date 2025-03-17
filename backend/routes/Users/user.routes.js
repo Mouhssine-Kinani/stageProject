@@ -20,8 +20,8 @@ userRouter.get("/:id", getUser);
 // Création d'un utilisateur (seulement pour admin et superadmin)
 userRouter.post(
   "/create",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["admin", "superadmin"]),
   upload.single('logo'),
   createUser
 );

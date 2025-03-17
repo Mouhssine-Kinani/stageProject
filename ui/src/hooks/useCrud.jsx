@@ -31,7 +31,7 @@ export function useCrud(Category, searchQuery = "") {
       const searchParam = searchQuery ? `&search=${searchQuery}` : "";
       const populateParam = Category === "clients" ? "&populate=true" : "";
       const resp = await axios.get(
-        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`
+        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`
       );
 
       setData(resp.data.data || []); // Les données incluent déjà totalPrice si backend mis à jour
