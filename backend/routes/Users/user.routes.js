@@ -21,7 +21,7 @@ userRouter.get("/:id", getUser);
 userRouter.post(
   "/create",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   upload.single('logo'),
   createUser
 );
@@ -30,7 +30,7 @@ userRouter.post(
 userRouter.put(
   "/:id",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   updateUser
 );
 
@@ -38,7 +38,7 @@ userRouter.put(
 userRouter.delete(
   "/:id",
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   deleteUser
 );
 

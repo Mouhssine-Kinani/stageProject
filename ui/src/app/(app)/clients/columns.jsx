@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/table/data-table";
+import { DataTable } from "@/components/table/base-data-table";
 import { useMemo } from "react";
 
 // Define columns outside the component to prevent recreation on each render

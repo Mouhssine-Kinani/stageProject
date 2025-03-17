@@ -7,7 +7,7 @@ import { useClient } from "@/hooks/useOneClients";
 import { MapPin } from "lucide-react";
 import { ClientTable } from "./columns";
 import SearchBar from "@/components/serchBar/Search";
-import { PaginationDemo } from "@/components/pagination/pagination";
+import PaginationComponent from "@/components/pagination/pagination";
 import { deleteProductFromClient } from "@/lib/api"; // Assurez-vous que cette fonction est exportée correctement
 
 function ClientPage({ params }) {

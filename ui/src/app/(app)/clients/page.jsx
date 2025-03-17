@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useCrud } from "@/hooks/useCrud";
 import SearchBar from "@/components/serchBar/Search";
 import { ClientsTable } from "./columns";
-import { PaginationDemo } from "@/components/pagination/pagination";
+import PaginationComponent from "@/components/pagination/pagination";
 
 function Page() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,7 +55,7 @@ filtered.sort((a, b) => {
           <ClientsTable data={filteredData} onDelete={deleteItem} />
           {clients.length >= 2 && (
             <div className="mt-2 flex justify-center">
-              <PaginationDemo
+              <PaginationComponent
                 currentPage={currentPage}
                 setPageChange={setCurrentPage}
                 totalPages={totalPages}
