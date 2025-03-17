@@ -15,7 +15,7 @@ import {useMemo} from "react";
 import { DataTable } from "./data-table"
 
 // Define columns outside the component to prevent recreation on each render
-const getColumns = (onDelete) => [
+const getColumns = (onDelete, onEdit) => [
   {
     accessorKey: "user_reference",
     header: "Reference",
@@ -66,7 +66,9 @@ const getColumns = (onDelete) => [
             >
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(user)}>
+              Edit
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -76,7 +78,14 @@ const getColumns = (onDelete) => [
 
 export function UserTable({ onDelete }) {
   const columns = useMemo(
-    () => getColumns(onDelete),
+    () => getColumns(onDelete, (user) => {
+      // The DataTable component will handle the edit functionality
+      if (typeof window !== 'undefined' && window.dispatchEvent) {
+        // Create a custom event with the user data
+        const editEvent = new CustomEvent('editUser', { detail: user });
+        window.dispatchEvent(editEvent);
+      }
+    }),
     [onDelete]
   );
 

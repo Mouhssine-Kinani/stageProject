@@ -106,6 +106,37 @@ export function useCrud(Category) {
     }
   };
   
+  // Add updateItem function
+  const updateItem = async (id, itemData) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.put(`${URLAPI}/${Category}/${id}`, itemData);
+      console.table(response.data);
+      await fetchData();
+      
+      setError(null);
+      return { success: true, data: response.data };
+    } catch (error) {
+      let errorMessage = "Server error";
+  
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || 
+                      "Server returned error: " + error.response.status;
+      } else if (error.request) {
+        errorMessage = "No response received from server";
+      } else {
+        errorMessage = error.message || "Error in request setup";
+      }
+  
+      setError({ message: errorMessage });
+      return { 
+        success: false, 
+        error: errorMessage 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     data,
@@ -113,6 +144,7 @@ export function useCrud(Category) {
     isLoading,
     deleteItem,
     createItem,
+    updateItem,
     validateFile,
     currentPage,
     setCurrentPage,

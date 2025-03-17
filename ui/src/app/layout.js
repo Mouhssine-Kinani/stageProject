@@ -1,11 +1,14 @@
 'use client';
 import "./globals.css";
+import { NotificationProvider } from "@/context/NotificationContext";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <NotificationProvider>
+          {children}
+        </NotificationProvider>
       </body>
     </html>
   );
