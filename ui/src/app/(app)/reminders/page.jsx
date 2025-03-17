@@ -89,7 +89,7 @@ function Page() {
             <div className="mt-2 flex justify-center">
               <PaginationComponent
                 currentPage={currentPage}
-                setPageChange={setCurrentPage}
+                setCurrentPage={setCurrentPage}
                 totalPages={totalPages}
               />
             </div>

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+// Set the default to include credentials
+axios.defaults.withCredentials = true;
+
+
 const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
 
 export function useCrud(Category, searchQuery = "") {
@@ -11,11 +15,10 @@ export function useCrud(Category, searchQuery = "") {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
 
-
   // useEffect(() => {
   //   console.log("data changed:", data);
   // }, [data]);
-  
+
   // Fetch data when page, Category, or searchQuery changes
   useEffect(() => {
     setCurrentPage(1); // Réinitialiser la page à 1 quand la recherche change
@@ -31,12 +34,13 @@ export function useCrud(Category, searchQuery = "") {
       const searchParam = searchQuery ? `&search=${searchQuery}` : "";
       const populateParam = Category === "clients" ? "&populate=true" : "";
       const resp = await axios.get(
-        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}`
+        `${URLAPI}/${Category}?page=${currentPage}&limit=${itemsPerPage}${searchParam}${populateParam}`, { withCredentials: true }
       );
+      console.log("test response",resp);
 
       setData(resp.data.data || []); // Les données incluent déjà totalPrice si backend mis à jour
       setTotalPages(resp.data.totalPages || 1);
-      console.log(resp.data.data)
+      console.log(resp.data.data);
       setError(null);
     } catch (err) {
       console.error(`Error fetching ${Category}:`, err);
@@ -92,17 +96,20 @@ export function useCrud(Category, searchQuery = "") {
   const createItem = async (itemData) => {
     try {
       setIsLoading(true);
-      const response = await axios.post(`${URLAPI}/${Category}/create`, itemData);
+      const response = await axios.post(
+        `${URLAPI}/${Category}/create`,
+        itemData
+      );
       console.table(response.data);
       await fetchData();
-      
+
       // Then immediately fetch the data for page 1
 
       setError(null);
       return { success: true };
     } catch (error) {
       let errorMessage = "Server error";
-  
+
       if (error.response?.data) {
         errorMessage =
           error.response.data.message ||
@@ -112,17 +119,17 @@ export function useCrud(Category, searchQuery = "") {
       } else {
         errorMessage = error.message || "Error in request setup";
       }
-  
+
       setError({ message: errorMessage });
-      return { 
-        success: false, 
-        error: errorMessage 
+      return {
+        success: false,
+        error: errorMessage,
       };
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   // Add updateItem function
   const updateItem = async (id, itemData) => {
     try {
@@ -130,21 +137,22 @@ export function useCrud(Category, searchQuery = "") {
       const response = await axios.put(`${URLAPI}/${Category}/${id}`, itemData);
       console.table(response.data);
       await fetchData();
-      
+
       setError(null);
       return { success: true, data: response.data };
     } catch (error) {
       let errorMessage = "Server error";
-  
+
       if (error.response?.data) {
-        errorMessage = error.response.data.message || 
-                      "Server returned error: " + error.response.status;
+        errorMessage =
+          error.response.data.message ||
+          "Server returned error: " + error.response.status;
       } else if (error.request) {
         errorMessage = "No response received from server";
       } else {
         errorMessage = error.message || "Error in request setup";
       }
-  
+
       setError({ message: errorMessage });
       return {
         success: false,

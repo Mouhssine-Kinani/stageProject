@@ -4,7 +4,7 @@ import '../../(Auth)/css/login.css'
 import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import { object, string } from 'yup';
 import axios from 'axios';
-
+axios.defaults.withCredentials = true;
 const fields = [
     {name:'email', icon: User, type: 'email', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer votre email'}
 ];

@@ -1,53 +1,55 @@
-import express from 'express'
-import errorMiddleWare from './middleware/error.middleware.js'
-import providerRoute from './routes/providers/providers.routes.js'
-import productRoute from './routes/Products/products.routes.js'
-import clientRoute from './routes/clients/clients.routes.js'
-import connectDB from './config/db.js'
+import express from 'express';
+import errorMiddleWare from './middleware/error.middleware.js';
+import providerRoute from './routes/providers/providers.routes.js';
+import productRoute from './routes/Products/products.routes.js';
+import clientRoute from './routes/clients/clients.routes.js';
+import connectDB from './config/db.js';
 import userRouter from "./routes/Users/user.routes.js";
-import { PORT } from "./config/env.js";
+import { PORT,FRONT_END_URL } from "./config/env.js";
 import cookieParser from "cookie-parser";
-import authRouter from './routes/Auth/auth.routes.js'
-import cors from 'cors'
-
+import authRouter from './routes/Auth/auth.routes.js';
+import cors from 'cors';
 
 const app = express();
 
-app.use(cookieParser()); // Middleware pour lire les cookies
-// Middleware pour analyser le corps de la requête en JSON
-app.use(express.json()); // parse json bodies in requests
-app.use(express.urlencoded({ extended: false })); // parse urlencoded bodies in requests
-app.use(errorMiddleWare)
-// parse cookies in requests
-app.use(cookieParser());
-app.use(cors())
+app.use(cookieParser()); // Middleware to parse cookies
 
-// Route de test - Changed from app.use to app.get
+// Parse JSON bodies in requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// Configure CORS to allow requests from your frontend and include credentials
+app.use(cors({
+  origin: FRONT_END_URL, // Replace with your frontend URL if different
+  credentials: true,               // Allow cookies to be sent
+}));
+
+// Middleware for error handling
+app.use(errorMiddleWare);
+
+// Test route
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.use('/', providerRoute)
-app.use('/', productRoute)
-app.use('/', clientRoute)
+// Other routes
+app.use('/', providerRoute);
+app.use('/', productRoute);
+app.use('/', clientRoute);
 
-// Route pour les utilisateurs
+// Routes for users and authentication
 app.use("/users", userRouter);
-// auth
-app.use('/auth', authRouter)
+app.use('/auth', authRouter);
 
-
-// Démarrer le serveur
+// Start the server
 app.listen(PORT, async () => {
     try {
-      await connectDB()
+      await connectDB();
       console.log(`Server running at http://localhost:${PORT}`);
     } catch (err) {
       console.error('Failed to connect to MongoDB:', err.message);
-      process.exit(1)
+      process.exit(1);
     }
-  });
+});
 
 export default app;
-
-

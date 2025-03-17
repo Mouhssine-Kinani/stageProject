@@ -29,8 +29,8 @@ export const LayoutProvider = ({ children }) => {
         isNotificationOpen,
         toggleSidebar,
         toggleNotification,
-        theme,
-        toggleTheme,
+        // theme,
+        // toggleTheme,
       }}
     >
       {children}

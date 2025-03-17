@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
+axios.defaults.withCredentials = true;
 const fields = [
     {name:'password', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]' , placeholder: 'Entrer le mot de passe'},
     {name:'passwordConfirmation', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Confirmez le mot de passe'}

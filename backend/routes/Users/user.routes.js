@@ -12,7 +12,9 @@ import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 const userRouter = Router();
 
 // Route pour récupérer tous les utilisateurs (accessible à tous)
-userRouter.get("/",isAuthenticated, getUsers);
+userRouter.get("/",
+  isAuthenticated,
+   getUsers);
 
 // Route pour récupérer un utilisateur (accessible à tous)
 userRouter.get("/:id", isAuthenticated, getUser);

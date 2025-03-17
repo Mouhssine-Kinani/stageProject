@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+axios.defaults.withCredentials = true;
 const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
 
 export async function deleteProductFromClient(clientId, productId) {
