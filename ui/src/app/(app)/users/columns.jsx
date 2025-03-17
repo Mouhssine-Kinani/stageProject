@@ -62,7 +62,12 @@ const getColumns = (onDelete, onEdit) => [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onDelete(user._id)}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete this client?")) {
+                  onDelete(user._id);
+                }
+                }
+              }
             >
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
