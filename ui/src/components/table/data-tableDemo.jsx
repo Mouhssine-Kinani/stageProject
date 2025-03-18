@@ -27,8 +27,7 @@ import {
 } from "@tanstack/react-table"
 
 import {useState} from "react";
-import { Input } from "@/components/ui/input"
-import { AddUserDialog } from "@/app/(app)/users/dialogs/AddUserDialog";
+// import { AddUserDialog } from "@/components/addUserDialog/addUserDialog";
 import { PaginationDemo } from "@/components/pagination/paginationDemo";
 import SearchBar from "@/components/serchBar/Search";
 
@@ -114,7 +113,7 @@ export function DataTable({ columns, data, currentPage, setCurrentPage, totalPag
           totalPages={totalPages}
         />
       </div>
-      <AddUserDialog />
+      {/* <AddUserDialog /> */}
     </div>
   );
 }
