@@ -4,6 +4,8 @@ import '../../(Auth)/css/login.css'
 import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import { object, string } from 'yup';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 axios.defaults.withCredentials = true;
 const fields = [
     {name:'email', icon: User, type: 'email', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Entrer votre email'}
@@ -29,7 +31,9 @@ const handleSubmit = async (form, setErrors)=>{
         
         if (response.data.message) {
             // Show success message
-            alert("Un email de réinitialisation a été envoyé à votre adresse email.");
+            // alert("Un email de réinitialisation a été envoyé à votre adresse email.");
+            
+            toast.success("A reset email has been sent to your email address.");
             // Redirect to login page after a short delay
             setTimeout(() => {
                 window.location.href = '/login';
