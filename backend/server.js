@@ -20,6 +20,8 @@ app.use(cors({
   credentials: true,  // Allow cookies
 }));
 
+app.use("/uploads", express.static("uploads"));
+
 // Parse JSON bodies in requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

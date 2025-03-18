@@ -1,11 +1,7 @@
-// middleware.js
 import { NextResponse } from 'next/server';
 
 export function middleware(req) {
-  // Debug logging to inspect available cookies in the request
-  console.log('Cookies:', req.cookies);
-
-  // Retrieve token from cookies
+  // Access cookies directly from the 'req' object
   const token = req.cookies.get('token');
 
   // If no token is found, redirect to login
@@ -13,7 +9,8 @@ export function middleware(req) {
     console.log('No token found, redirecting to /login');
     return NextResponse.redirect(new URL('/login', req.url));
   }
-  
+
+  // If a token is found, continue with the request
   return NextResponse.next();
 }
 

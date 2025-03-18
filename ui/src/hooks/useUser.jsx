@@ -11,36 +11,6 @@ const useUser = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-//   useEffect(() => {
-//     const fetchUser = async () => {
-//       try {
-//         const token = Cookies.get("token");
-//         const userId = Cookies.get("userId");
-
-//         if (!token || !userId) {
-//           throw new Error("Authentication details not found");
-//         }
-
-//         const response = await axios.get(`${URLAPI}/users/${userId}`, {
-//           headers: {
-//             "Content-Type": "application/json",
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-//         // Adjust based on your API response structure
-//         setUser(response.data.data);
-//       } catch (err) {
-//         console.error("Error fetching user:", err.response || err.message);
-//         setError(err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchUser();
-//   }, []);
-
-
 useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -55,15 +25,7 @@ useEffect(() => {
         if (!token) {
           throw new Error("Authentication token details not found");
         }
-        
-  
-        // const response = await axios.get(`${URLAPI}/users/${userId}`, {
-        //   withCredentials: true, // ✅ Important pour envoyer les cookies
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //     Authorization: `Bearer ${token}`,
-        //   },
-        // });
+
         const response = await axios.get(`${URLAPI}/users/${userId}`, {
           withCredentials: true,  // ✅ Important pour récupérer les cookies
           headers: {

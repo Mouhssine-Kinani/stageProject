@@ -134,7 +134,8 @@ export function useCrud(Category, searchQuery = "") {
   const updateItem = async (id, itemData) => {
     try {
       setIsLoading(true);
-      const response = await axios.put(`${URLAPI}/${Category}/${id}`, itemData);
+      // const response = await axios.put(`${URLAPI}/${Category}/${id}`, itemData);
+      const response = await axios.put(`${URLAPI}/${Category}/edit/${id}`, itemData);
       console.table(response.data);
       await fetchData();
 

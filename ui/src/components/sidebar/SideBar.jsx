@@ -25,10 +25,15 @@ function SideBar() {
       <div className="profile-sidebare">
         <div className="sb-s1">
           <img
-            src={user.logo || "/user.png"}
+            src={
+              user?.logo
+                ? `${process.env.NEXT_PUBLIC_URLAPI}\\${user.logo}`
+                : "/user.png"
+            }
             alt="profile"
             className="sidebare-img-profile"
           />
+
           <div className="userName-container">
             <h2>{user.fullName}</h2>
           </div>

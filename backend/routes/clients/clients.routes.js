@@ -53,6 +53,7 @@ clientRoute.put(
   "/clients/edit/:id",
   isAuthenticated,
   hasRole(["Admin", "Super Admin"]),
+  upload.single("logo"),
   updateClient
 );
 

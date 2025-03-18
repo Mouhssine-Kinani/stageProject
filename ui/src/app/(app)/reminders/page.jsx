@@ -48,14 +48,14 @@ function Page() {
         );
         return {
           client_reference: client.client_reference,
-          clientLogo: client.logo || client.clientLogo || "default-client-logo.png",
+          clientLogo: client.logo || client.clientLogo || "/user.png",
           clientName: client.name,
           productName: product.productName,
           category: product.category,
           providerLogo:
             product.provider && product.provider.length > 0
               ? product.provider[0].logo
-              : "default-provider-logo.png",
+              : "/user.png",
           price: product.price,
           renewal_status: client.renewal_status,
           nextRenewalDate: nextRenewalDate ? nextRenewalDate.toISOString() : null,
@@ -75,8 +75,10 @@ function Page() {
     });
   }, [flattenedData, sortOrder]);
 
+  console.log("reminder data",sortedData)
   return (
     <div>
+      <h1 className="text-3xl font-bold m-1.5 p-0.5">List of reminders</h1>
       <div className="w-full searchbar">
         <SearchBar onSearch={setSearchQuery} onSort={setSortOrder} />
       </div>

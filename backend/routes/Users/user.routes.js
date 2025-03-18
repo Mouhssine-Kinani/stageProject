@@ -30,7 +30,7 @@ userRouter.post(
 
 // Mise à jour d'un utilisateur (seulement pour admin et superadmin)
 userRouter.put(
-  "/:id",
+  "/users/edit/:id",
   isAuthenticated,
   hasRole(["Admin", "Super Admin"]),
   updateUser

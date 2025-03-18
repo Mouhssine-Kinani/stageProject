@@ -64,30 +64,30 @@ function ClientPage({ params }) {
         return 0;
     }
   };
-  
+
   useEffect(() => {
     if (client?.products && client.products.length > 0) {
       const now = new Date();
       const nextMonth = new Date();
       nextMonth.setDate(now.getDate() + 31);
-  
+
       let active = 0;
       let expiring = 0;
       let expired = 0;
       let totalPrice = 0;
-  
+
       client.products.forEach((product) => {
         const { createdAt, billing_cycle, price } = product;
         totalPrice += price;
-  
+
         if (!createdAt || !billing_cycle) return;
-  
+
         // Calculer la renewalDate
         const monthsToAdd = billingCycleToMonths(billing_cycle);
         const renewalDate = new Date(createdAt);
         renewalDate.setMonth(renewalDate.getMonth() + monthsToAdd);
         renewalDate.setDate(renewalDate.getDate() - 1); // Soustraire un jour
-  
+
         if (renewalDate > nextMonth) {
           active++;
         } else if (renewalDate > now && renewalDate <= nextMonth) {
@@ -96,7 +96,7 @@ function ClientPage({ params }) {
           expired++;
         }
       });
-  
+
       setStats({
         activeProducts: active,
         expiringSoon: expiring,
@@ -134,11 +134,14 @@ function ClientPage({ params }) {
 
   return (
     <>
-      <h1 className="clientTitle">Client #CL0{client.client_reference}</h1>
-      <div className="container">
+      <h1 className="text-3xl font-bold m-1.5 p-0.5">Client #CL0{client.client_reference}</h1>
+      <div className="OneClientContainer">
         <div className="mapContainer">
           <div className="logoContainer">
-            {client?.logo || "No logo available"}
+            <img
+              src={`${process.env.NEXT_PUBLIC_URLAPI}\\${client?.logo}`}
+              alt="Client Logo"
+            />
           </div>
           <div className="TheAddress">
             <h1>{client.name}</h1>
@@ -151,10 +154,22 @@ function ClientPage({ params }) {
           </div>
         </div>
         <div className="statiqueContainer">
-          <StatCard title="Active Products" count={stats.activeProducts} className="activeProducts" />
-          <StatCard title="Expiring Soon" count={stats.expiringSoon} className="expiringSoon" />
+          <StatCard
+            title="Active Products"
+            count={stats.activeProducts}
+            className="activeProducts"
+          />
+          <StatCard
+            title="Expiring Soon"
+            count={stats.expiringSoon}
+            className="expiringSoon"
+          />
           <StatCard title="Expired" count={stats.expired} className="expired" />
-          <StatCard title="Games Played" count={`${stats.totalPrice.toFixed(2)}MAD`} className="games" />
+          <StatCard
+            title="Games Played"
+            count={`${stats.totalPrice.toFixed(2)}MAD`}
+            className="games"
+          />
         </div>
       </div>
       <br />
@@ -168,7 +183,7 @@ function ClientPage({ params }) {
         <ClientTable data={sortedProducts} onDelete={deleteItem} />
         {totalPages > 1 && (
           <div className="mt-2 flex justify-center">
-            <PaginationDemo
+            <PaginationComponent
               currentPage={currentPage}
               setPageChange={setCurrentPage}
               totalPages={totalPages}

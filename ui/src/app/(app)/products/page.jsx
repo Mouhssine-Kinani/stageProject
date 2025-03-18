@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AddProductDialog from "./components/add-product-dialog";
 import EditProductDialog from "./components/edit-product-dialog";
+import SearchBar from "@/components/serchBar/Search";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -66,8 +67,24 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
-        <Button onClick={() => setIsAddDialogOpen(true)}>Add Product</Button>
+      <h1 className="text-3xl font-bold m-1.5 p-0.5">List of products</h1>
+        {/* <Button onClick={() => setIsAddDialogOpen(true)}>Add Product</Button> */}
+        {/* <SearchBar
+          onSearch={setSearchQuery}
+          onSort={setSortOrder}
+          Children={() => (
+            <button
+              onClick={() => setAddDialogOpen(true)}
+              className="px-4 py-2  text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
+            >
+              <Plus
+                size={20}
+                color="black"
+                className="bg-white"
+              />
+            </button>
+          )}
+        /> */}
       </div>
 
       <Table>
