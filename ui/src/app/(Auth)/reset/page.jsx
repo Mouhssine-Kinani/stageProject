@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { toast } from 'react-toastify';
 
+axios.defaults.withCredentials = true;
 const fields = [
     {name:'password', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]' , placeholder: 'Enter password'},
     {name:'passwordConfirmation', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Confirm password'}

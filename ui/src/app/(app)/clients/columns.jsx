@@ -26,13 +26,12 @@ const getColumns = (onDelete) => [
     header: "Client",
     cell: ({ row }) => (
       <img
-        src={row.original.logo}
+        src={`${process.env.NEXT_PUBLIC_URLAPI}/${row.original.logo}`}
         alt="Client Logo"
         style={{ width: 30, height: 30, borderRadius: "50%" }}
       />
     ),
   },
-
   {
     accessorKey: "name",
     header: "Client Name",

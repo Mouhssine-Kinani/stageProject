@@ -10,7 +10,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-      <ThemeProvider>
+     
         <NotificationProvider>
           <LayoutProvider>
             {children}
@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
             />
           </LayoutProvider>
         </NotificationProvider>
-    </ThemeProvider>
+
       </body>
     </html>
   );

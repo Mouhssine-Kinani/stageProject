@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label"
 import {SquarePen, Image} from 'lucide-react'
 import { useState } from "react"
 
-import axios from 'axios'
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 import { object, string } from 'yup';
 
 export function DialogDemo({buttonTitle}) {
