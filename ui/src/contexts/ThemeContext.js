@@ -21,6 +21,14 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.classList.toggle("dark", theme === "dark");
+
+      // Apply dark mode background color to body
+      if (theme === "dark") {
+        document.body.style.backgroundColor = "#333";
+      } else {
+        document.body.style.backgroundColor = "";
+      }
+
       localStorage.setItem("theme", theme);
     }
   }, [theme]);

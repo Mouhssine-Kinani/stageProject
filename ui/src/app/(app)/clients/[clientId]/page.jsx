@@ -9,9 +9,11 @@ import { ClientTable } from "./columns";
 import SearchBar from "@/components/serchBar/Search";
 import PaginationComponent from "@/components/pagination/pagination";
 import { deleteProductFromClient } from "@/lib/api"; // Assurez-vous que cette fonction est exportée correctement
+import { useTheme } from "@/contexts/ThemeContext";
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`
+  const { theme } = useTheme(); // Accès au thème actuel
 
   // Utilisation du hook personnalisé qui gère la recherche et la pagination des produits
   const {
@@ -134,19 +136,23 @@ function ClientPage({ params }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold m-1.5 p-0.5">Client #CL0{client.client_reference}</h1>
+      <h1 className="text-3xl font-bold m-1.5 p-0.5 client-title">
+        Client #CL0{client.client_reference}
+      </h1>
       <div className="OneClientContainer">
         <div className="mapContainer">
           <div className="logoContainer">
             <img
               src={`${process.env.NEXT_PUBLIC_URLAPI}\\${client?.logo}`}
-              alt="Client Logo"
+              alt={`Logo de ${client.name}`}
+              className="client-logo"
             />
           </div>
           <div className="TheAddress">
             <h1>{client.name}</h1>
             <p className="flex">
-              <MapPin /> {client?.address || "No address available"}
+              <MapPin style={{ color: theme === "dark" ? "#fff" : "#333" }} />{" "}
+              {client?.address || "No address available"}
             </p>
           </div>
           <div className="TheAddressInMap">

@@ -4,12 +4,12 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "next/navigation";
 import { useClient } from "@/hooks/useOneClients";
-import { Moon} from "lucide-react";
+import { Moon } from "lucide-react";
 import { Sun } from "lucide-react";
 
 export default function Header() {
   const { toggleSidebar, toggleNotification } = useLayout();
-  const { toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
 
   // Path processing
@@ -21,7 +21,11 @@ export default function Header() {
 
   let breadcrumb = parts.map((part, index) => {
     if (index === 1 && isClientPage) {
-      return clientLoading ? "Chargement..." : client?.client_reference ? `Client #CL0${client.client_reference}` : part;
+      return clientLoading
+        ? "Chargement..."
+        : client?.client_reference
+        ? `Client #CL0${client.client_reference}`
+        : part;
     }
     return decodeURIComponent(part.replace(/-/g, " "));
   });
@@ -38,9 +42,20 @@ export default function Header() {
       <div className="div2">
         <input type="text" placeholder="  Search" className="search-input" />
         <div className="iconsHolder">
-          <button onClick={toggleTheme}>
-          {/* <button> */}
-            <img src="/headerIcon/them.svg" alt="Theme" />
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+            aria-label={
+              theme === "dark"
+                ? "Passer en mode clair"
+                : "Passer en mode sombre"
+            }
+          >
+            {theme === "dark" ? (
+              <Sun size={20} className="theme-icon" />
+            ) : (
+              <Moon size={20} className="theme-icon" />
+            )}
           </button>
           <img src="/headerIcon/history.svg" alt="History" />
           <button onClick={toggleNotification}>

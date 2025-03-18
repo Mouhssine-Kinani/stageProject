@@ -5,6 +5,11 @@
   gap: 1rem;
 }
 
+.dark .area-header {
+  background: #333;
+  border-bottom: 1px solid #444;
+}
+
 .div1 {
   display: flex;
   align-items: center;
@@ -22,11 +27,11 @@
 .search-input {
   min-width: 200px;
   flex-shrink: 1;
-  background-color: #1C1C1C0D;
+  background-color: #1c1c1c0d;
   border: none;
   border-radius: 8px;
   /* Ajout de l'icône */
-  background-image: url('/headerIcon/search.svg');
+  background-image: url("/headerIcon/search.svg");
   background-repeat: no-repeat;
   background-position: 10px center;
   background-size: 16px;
@@ -35,6 +40,10 @@
   padding: 4px 6px 4px 17px;
 }
 
+.dark .search-input {
+  background-color: #ffffff1a;
+  color: #fff;
+}
 
 .iconsHolder {
   display: flex;
@@ -47,4 +56,32 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.dark .theme-toggle-btn:hover {
+  background-color: #444;
+}
+
+.theme-icon {
+  color: #333;
+}
+
+.dark .theme-icon {
+  color: #fff;
 }
