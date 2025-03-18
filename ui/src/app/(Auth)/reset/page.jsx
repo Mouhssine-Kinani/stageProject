@@ -1,15 +1,16 @@
 "use client"
-import {User, LockKeyhole} from 'lucide-react'
+import { LockKeyhole} from 'lucide-react'
 import '../../(Auth)/css/login.css'
 import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import { object, string , ref} from 'yup';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const fields = [
-    {name:'password', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]' , placeholder: 'Entrer le mot de passe'},
-    {name:'passwordConfirmation', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Confirmez le mot de passe'}
+    {name:'password', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]' , placeholder: 'Enter password'},
+    {name:'passwordConfirmation', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Confirm password'}
 ];
 
 const resetPasswordSchema = object({
@@ -21,10 +22,10 @@ const resetPasswordSchema = object({
       .required("Confirm password is required"),
 });
 
-const title = 'Réinitialisez votre mot de passe';
-const subtitle = 'Entrez votre nouveau mot de passe';
-const submitButton = 'Réinitialiser';
-const linkText = 'Retour à la connexion';
+const title = 'Reset your password';
+const subtitle = 'Enter your new password';
+const submitButton = 'Reset';
+const linkText = 'Back to login';
 const link = '/login';
 const formType = 'reset-password';
 
@@ -34,7 +35,7 @@ export default function Reset() {
 
     useEffect(() => {
         if (!token) {
-            alert("Token de réinitialisation manquant. Veuillez réessayer.");
+            toast.error("Missing reset token. Please try again.");
             window.location.href = '/forget';
         }
     }, [token]);
@@ -50,7 +51,7 @@ export default function Reset() {
             });
 
             if (response.data.message) {
-                alert("Votre mot de passe a été réinitialisé avec succès.");
+                toast.success("Your password has been reset successfully.");
                 window.location.href = '/login';
             }
         } catch (err) {
@@ -58,18 +59,21 @@ export default function Reset() {
             if (err.response?.data?.message) {
                 // Handle API error
                 newErrors[formType] = err.response.data.message;
+                toast.error(err.response.data.message);
             } else if (err.inner) {
                 // Handle validation errors
                 err.inner.forEach((error) => {
                     if(!error.path) {
                         newErrors[formType] = error.message;
+                        toast.error(error.message);
                     } else {
                         newErrors[error.path] = error.message;
                     }
                 });
             } else {
                 // Handle other errors
-                newErrors[formType] = "Une erreur s'est produite. Veuillez réessayer.";
+                newErrors[formType] = "An error occurred. Please try again.";
+                toast.error("An error occurred. Please try again.");
             }
             setErrors(newErrors);
         }
