@@ -35,7 +35,9 @@ export default function Login() {
             await loginSchema.validate(form, { abortEarly: false }); 
             setErrors({});
             
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form ,{
+                withCredentials: true,  // ✅ Obligatoire pour envoyer et recevoir les cookies
+              });
             console.log(response);
             
             // No need to store token manually; it is handled by the HTTP-only cookie.

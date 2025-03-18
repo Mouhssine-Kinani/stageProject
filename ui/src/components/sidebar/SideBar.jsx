@@ -1,18 +1,36 @@
+// SideBar.js
 import Link from "next/link";
 import "./sideBar.css";
-
 import { useLayout } from "@/contexts/LayoutContext";
+import useUser from "@/hooks/useUser";
+import useMounted from "@/hooks/useMounted";
 
 function SideBar() {
   const { isSidebarOpen } = useLayout();
+  const mounted = useMounted(); // Ensure client-side only rendering
+  const { user, loading, error } = useUser();
+
+  // Prevent rendering until after the client has mounted
+  if (!mounted) return null;
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  if (error || !user) {
+    return <div>Error loading user data</div>;
+  }
 
   return (
     <aside className={`area-sidebar ${!isSidebarOpen ? "closed" : "p-4"}`}>
       <div className="profile-sidebare">
         <div className="sb-s1">
-          <img src="gg" alt="profile" className="sidebare-img-profile" />
+          <img
+            src={user.logo || "/user.png"}
+            alt="profile"
+            className="sidebare-img-profile"
+          />
           <div className="userName-container">
-            <h2>user name</h2>
+            <h2>{user.fullName}</h2>
           </div>
         </div>
         <div className="sb-s2">
@@ -41,7 +59,7 @@ function SideBar() {
           <Link href="/reminders">
             <li>
               <img src="/sideBarIcon/calendar.svg" alt="icon" />
-              Remiders
+              Reminders
             </li>
           </Link>
           <Link href="/clients">
