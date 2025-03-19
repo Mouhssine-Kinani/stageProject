@@ -3,6 +3,9 @@
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
   gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .dark .area-header {
@@ -10,11 +13,42 @@
   border-bottom: 1px solid #444;
 }
 
+/* Desktop/tablet adjustments */
+@media (min-width: 769px) {
+  .area-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 481px) and (max-width: 768px) {
+  .area-header {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .area-header {
+    padding: 0.5rem;
+  }
+}
+
 .div1 {
   display: flex;
   align-items: center;
   gap: 1rem;
   min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .div1 {
+    margin-bottom: 0.5rem;
+  }
 }
 
 .div2 {
@@ -22,6 +56,56 @@
   align-items: center;
   gap: 1rem;
   min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .div1 {
+    width: auto;
+    flex: 0 1 auto;
+  }
+
+  .div2 {
+    width: auto;
+    flex: 0 1 auto;
+    justify-content: flex-end;
+  }
+}
+
+/* Styles pour les boutons de bascule dans le header */
+.toggle-buttons {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  z-index: 10;
+}
+
+.toggle-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.toggle-buttons button:hover {
+  background-color: #f0f0f0;
+}
+
+.dark .toggle-buttons button:hover {
+  background-color: #444;
+}
+
+.toggle-buttons button svg {
+  color: #333;
+}
+
+.dark .toggle-buttons button svg {
+  color: #fff;
 }
 
 .search-input {
@@ -37,7 +121,21 @@
   background-size: 16px;
 
   /* Ajout de padding pour éviter le chevauchement */
-  padding: 4px 6px 4px 17px;
+  padding: 4px 6px 4px 30px;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    min-width: 150px;
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input {
+    min-width: 100px;
+    padding: 4px 6px 4px 28px;
+  }
 }
 
 .dark .search-input {
@@ -49,6 +147,13 @@
   display: flex;
   gap: 1rem;
   flex-shrink: 0;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .iconsHolder {
+    gap: 0.5rem;
+  }
 }
 
 /* Ensure header elements don't overflow */
@@ -56,6 +161,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .theme-toggle-btn {
@@ -84,4 +190,21 @@
 
 .dark .theme-icon {
   color: #fff;
+}
+
+/* Dropdown styling */
+.profile-dropdown-container {
+  position: relative;
+}
+
+.profile-dropdown-container button {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .profile-dropdown-container button > span,
+  .profile-dropdown-container button > svg {
+    display: none;
+  }
 }

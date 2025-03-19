@@ -111,7 +111,10 @@ export const getAllClients = async (req, res) => {
     // Ajout du calcul du prix total pour chaque client
     const clientsWithTotalPrice = clients.map((client) => ({
       ...client,
-      totalPrice: client.products.reduce((sum, product) => sum + product.price, 0),
+      totalPrice: client.products.reduce(
+        (sum, product) => sum + product.price,
+        0
+      ),
     }));
 
     const totalClients = await Client.countDocuments(filter);
@@ -131,8 +134,6 @@ export const getAllClients = async (req, res) => {
     });
   }
 };
-
-
 
 export const getClientById = async (req, res) => {
   try {
@@ -283,6 +284,64 @@ export const deleteProductFromClient = async (req, res) => {
       success: true,
       message: "Product deleted from client successfully",
       data: client,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+// Ajouter un produit à un client
+export const addProductToClient = async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+    // Vérifier si le client existe
+    const client = await Client.findById(clientId);
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found",
+        data: null,
+      });
+    }
+
+    // Créer un nouveau produit
+    const newProduct = new Product({
+      productName: req.body.productName,
+      category: req.body.category,
+      billing_cycle: req.body.billing_cycle,
+      price: req.body.price,
+      type: req.body.type,
+      productAddedDate: req.body.productAddedDate,
+      productDeployed: req.body.productDeployed,
+      date_fin: req.body.date_fin,
+      website: req.body.website,
+      provider: req.body.provider,
+    });
+
+    // Sauvegarder le produit
+    const savedProduct = await newProduct.save();
+
+    // Ajouter le produit au client
+    client.products.push(savedProduct._id);
+    await client.save();
+
+    // Populer les données du fournisseur pour le retour
+    const populatedProduct = await Product.findById(savedProduct._id).populate(
+      "provider"
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Product added to client successfully",
+      data: {
+        client,
+        product: populatedProduct,
+      },
     });
   } catch (error) {
     res.status(500).json({

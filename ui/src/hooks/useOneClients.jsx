@@ -1,44 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 export function useClient(clientId) {
   const [client, setClient] = useState(null);
-  const [clientLoading, setLoading] = useState(true);
-  const [clientError, setError] = useState(null);
+  const [clientLoading, setClientLoading] = useState(true);
+  const [clientError, setClientError] = useState(null);
 
   // États pour la recherche et la pagination des produits du client
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const productsPerPage = 5; // Nombre de produits par page
   const [paginatedProducts, setPaginatedProducts] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    if (!clientId) return; // Évite d'exécuter la requête si l'ID est invalide
+  // Fonction pour récupérer les données du client directement utilisable pour les mises à jour
+  const fetchClient = useCallback(async () => {
+    setClientLoading(true);
+    setClientError(null);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_URLAPI;
+      if (!API_URL)
+        throw new Error("API URL is not defined in env variables");
 
-    const fetchClient = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_URLAPI;
-        if (!API_URL)
-          throw new Error("API URL is not defined in env variables");
-
-        const response = await axios.get(`${API_URL}/clients/${clientId}`);
-        if (response.data.success && response.data.data) {
-          setClient(response.data.data);
-        } else {
-          throw new Error(`Failed to fetch the client ${clientId}`);
-        }
-      } catch (err) {
-        setError(  `no client with this id ${clientId} ` ||  (err.message && "An error occurred "));
-      } finally {
-        setLoading(false);
+      const response = await axios.get(`${API_URL}/clients/${clientId}`);
+      if (response.data.success && response.data.data) {
+        setClient(response.data.data);
+      } else {
+        throw new Error(`Failed to fetch the client ${clientId}`);
       }
-    };
-
-    fetchClient();
+    } catch (error) {
+      console.error("Error fetching client:", error);
+      setClientError(error.message || "Failed to fetch client data");
+    } finally {
+      setClientLoading(false);
+    }
   }, [clientId]);
+
+  // Chargement initial des données du client
+  useEffect(() => {
+    fetchClient();
+  }, [clientId, fetchClient]);
 
   // Filtrer et paginer les produits du client
   useEffect(() => {
@@ -51,12 +52,12 @@ export function useClient(clientId) {
             .includes(searchQuery.toLowerCase())
         );
       }
-      const pages = Math.ceil(filtered.length / itemsPerPage) || 1;
+      const pages = Math.ceil(filtered.length / productsPerPage) || 1;
       setTotalPages(pages);
       // Si le currentPage dépasse le nombre total de pages, on le réinitialise
       if (currentPage > pages) setCurrentPage(1);
-      const start = (currentPage - 1) * itemsPerPage;
-      const paginated = filtered.slice(start, start + itemsPerPage);
+      const start = (currentPage - 1) * productsPerPage;
+      const paginated = filtered.slice(start, start + productsPerPage);
       setPaginatedProducts(paginated);
     }
   }, [client, searchQuery, currentPage]);
@@ -71,5 +72,6 @@ export function useClient(clientId) {
     setCurrentPage,
     paginatedProducts,
     totalPages,
+    fetchClient, // Exporter la fonction pour permettre le rechargement des données
   };
 }

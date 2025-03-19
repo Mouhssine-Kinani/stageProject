@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
@@ -11,14 +11,17 @@ import "./statiques.css";
 import { useProducts } from "@/components/getStatiques/getAllProducts";
 import { useClientsCount } from "@/components/getStatiques/getAllClients";
 import { useProductsStats } from "@/hooks/useProductsStats";
-import { ProductHomeTable } from "./columns";
+import { ProductHomeTable } from "./components/ProductHomeTable";
 import { useCrud } from "@/hooks/useCrud";
 
 function Page() {
-  const [data, setData] = useState([]);
   const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
   const router = useRouter();
-  const { products, loading, error } = useProducts();
+  const {
+    products,
+    loading: productsLoading,
+    error: productsError,
+  } = useProducts();
   const { clientsCount, clintsLoading, ClientError } = useClientsCount();
   const {
     productsCount,
@@ -26,6 +29,34 @@ function Page() {
     error: errorStats,
   } = useProductsStats();
   const { deleteItem } = useCrud("users");
+
+  // Filtrer les produits qui expirent bientôt
+  const expiringSoonProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) return [];
+
+    // Obtenir la date actuelle
+    const currentDate = new Date();
+
+    // Filtrer les produits qui expirent dans les 30 prochains jours
+    return products
+      .filter((product) => {
+        if (!product.nextRenewalDate) return false;
+
+        const renewalDate = new Date(product.nextRenewalDate);
+        const timeDiff = renewalDate.getTime() - currentDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+        // Produits qui expirent dans les 30 prochains jours
+        return daysDiff > 0 && daysDiff <= 30;
+      })
+      .map((product) => ({
+        ...product,
+        // Assurer un format de date cohérent
+        nextRenewalDate: product.nextRenewalDate
+          ? new Date(product.nextRenewalDate).toISOString()
+          : null,
+      }));
+  }, [products]);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -42,13 +73,16 @@ function Page() {
     return <p>Checking authentication...</p>;
   }
 
-  if (loading || clintsLoading || loadingStats) return <p>Loading...</p>;
-  if (error || ClientError || errorStats)
+  if (productsLoading || clintsLoading || loadingStats)
+    return <p>Loading...</p>;
+  if (productsError || ClientError || errorStats)
     return (
       <p className="text-red-500">
-        Error: {error || ClientError || errorStats}
+        Error: {productsError || ClientError || errorStats}
       </p>
     );
+
+  console.log("Expiring soon products for table:", expiringSoonProducts); // Debug expiring soon products
 
   const totalProducts = productsCount.totalProducts || 0;
   const activeProducts = productsCount.activeProducts || 0;
@@ -100,10 +134,11 @@ function Page() {
         </div>
       </div>
       <div className="HomeItems">
+        <h3 className="text-lg font-semibold mb-4">Products Expiring Soon</h3>
         <div className="tableContainer">
           <ProductHomeTable
-            data={Array.isArray(data) ? data : []}
-            onDelete={deleteItem}
+            data={expiringSoonProducts}
+            isLoading={productsLoading}
           />
         </div>
       </div>

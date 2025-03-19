@@ -15,15 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCrud } from "@/hooks/useCrud";
+import { useProviders } from "@/hooks/useProviders";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
-export default function EditProductDialog({
-  open,
-  onOpenChange,
-  productData,
-}) {
+export default function EditProductDialog({ open, onOpenChange, productData }) {
   const [formData, setFormData] = useState({
     productName: "",
     category: "",
@@ -33,7 +31,14 @@ export default function EditProductDialog({
     website: "",
     provider: "",
   });
-  const [providers, setProviders] = useState([]);
+
+  const { updateItem } = useCrud("products");
+  const {
+    providers,
+    isLoading: isLoadingProviders,
+    error: providerError,
+    fetchProviders,
+  } = useProviders();
 
   useEffect(() => {
     if (productData) {
@@ -50,17 +55,16 @@ export default function EditProductDialog({
     if (open) {
       fetchProviders();
     }
-  }, [productData, open]);
+  }, [productData, open, fetchProviders]);
 
-  const fetchProviders = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/providers`);
-      setProviders(response.data.data);
-    } catch (error) {
-      console.error("Error fetching providers:", error);
-      toast.error("Failed to fetch providers");
-    }
-  };
+  // Optimisation: mémoriser les options du fournisseur
+  const providerOptions = useMemo(() => {
+    return providers.map((provider) => (
+      <SelectItem key={provider._id} value={provider._id}>
+        {provider.name}
+      </SelectItem>
+    ));
+  }, [providers]);
 
   const handleCancel = () => {
     onOpenChange(false);
@@ -76,21 +80,37 @@ export default function EditProductDialog({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation de base du formulaire
+    if (!formData.productName.trim()) {
+      toast.error("Le nom du produit est requis");
+      return;
+    }
+
+    if (!formData.provider) {
+      toast.error("Veuillez sélectionner un fournisseur");
+      return;
+    }
+
     try {
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/edit/${productData._id}`,
-        formData
-      );
-      if (response.status === 200) {
-        toast.success("Product updated successfully");
+      const result = await updateItem(productData._id, formData);
+
+      if (result.success) {
+        toast.success("Produit mis à jour avec succès");
         // Dispatch custom event for product edited
-        const event = new CustomEvent('productEdited');
+        const event = new CustomEvent("productEdited", {
+          detail: result.data,
+        });
         window.dispatchEvent(event);
         handleCancel();
+      } else {
+        toast.error(result.error || "Échec de la mise à jour du produit");
       }
     } catch (error) {
       console.error("Error updating product:", error);
-      toast.error(error.response?.data?.message || "Failed to update product");
+      toast.error(
+        error.response?.data?.message || "Échec de la mise à jour du produit"
+      );
     }
   };
 
@@ -111,7 +131,7 @@ export default function EditProductDialog({
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="category">Category</Label>
             <Input
@@ -127,7 +147,9 @@ export default function EditProductDialog({
             <Label htmlFor="billing_cycle">Billing Cycle</Label>
             <Select
               value={formData.billing_cycle}
-              onValueChange={(value) => handleSelectChange(value, "billing_cycle")}
+              onValueChange={(value) =>
+                handleSelectChange(value, "billing_cycle")
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select billing cycle" />
@@ -170,22 +192,53 @@ export default function EditProductDialog({
           </div>
 
           <div>
-            <Label htmlFor="provider">Provider</Label>
+            <Label htmlFor="provider" className="flex justify-between">
+              <span>Provider</span>
+              {isLoadingProviders ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <button
+                  type="button"
+                  onClick={fetchProviders}
+                  className="text-xs text-blue-500 hover:underline"
+                >
+                  Refresh
+                </button>
+              )}
+            </Label>
+
             <Select
               value={formData.provider}
               onValueChange={(value) => handleSelectChange(value, "provider")}
+              disabled={isLoadingProviders}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select provider" />
+                <SelectValue
+                  placeholder={
+                    isLoadingProviders
+                      ? "Loading providers..."
+                      : "Select provider"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {providers.map((provider) => (
-                  <SelectItem key={provider._id} value={provider._id}>
-                    {provider.name}
+                {providerError ? (
+                  <SelectItem value="error" disabled>
+                    Error loading providers
                   </SelectItem>
-                ))}
+                ) : providers.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    No providers available
+                  </SelectItem>
+                ) : (
+                  providerOptions
+                )}
               </SelectContent>
             </Select>
+
+            {providerError && (
+              <p className="text-red-500 text-xs mt-1">{providerError}</p>
+            )}
           </div>
 
           <div>
@@ -208,4 +261,4 @@ export default function EditProductDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

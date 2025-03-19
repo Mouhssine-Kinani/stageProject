@@ -1,160 +1,194 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import AddProductDialog from "./components/add-product-dialog";
-import EditProductDialog from "./components/edit-product-dialog";
+import { useState, useEffect } from "react";
+import { useCrud } from "@/hooks/useCrud";
 import SearchBar from "@/components/serchBar/Search";
+import { toast } from "react-toastify";
+import { Plus } from "lucide-react";
+import PaginationComponent from "@/components/pagination/pagination";
+import { ProductsTable } from "./components/ProductsTable";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_URLAPI}/products`);
-      setProducts(response.data.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Failed to fetch products");
-    }
-  };
+  const {
+    data: products,
+    isLoading,
+    deleteItem,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    fetchData,
+  } = useCrud("products", searchQuery);
+
+  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    fetchProducts();
-    // Listen for product added/edited events
-    window.addEventListener('productAdded', fetchProducts);
-    window.addEventListener('productEdited', fetchProducts);
-    return () => {
-      window.removeEventListener('productAdded', fetchProducts);
-      window.removeEventListener('productEdited', fetchProducts);
+    // Filtrer côté client si nécessaire
+    let filtered =
+      products?.filter(
+        (product) =>
+          (product.productName &&
+            product.productName
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (product.category &&
+            product.category
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (product.provider?.name &&
+            product.provider.name
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
+      ) || [];
+
+    // Trier les données
+    filtered.sort((a, b) => {
+      const refA = a.product_reference || 0;
+      const refB = b.product_reference || 0;
+
+      return sortOrder === "asc" ? refA - refB : refB - refA;
+    });
+
+    console.log("Filtered products data:", filtered);
+    setFilteredData(filtered);
+  }, [products, searchQuery, sortOrder]);
+
+  useEffect(() => {
+    // Event listeners for product operations
+    const handleProductAdded = () => {
+      fetchData();
+      toast.success("Product added successfully");
     };
-  }, []);
 
-  const handleEdit = (product) => {
-    setSelectedProduct(product);
-    setIsEditDialogOpen(true);
-  };
+    const handleProductEdited = () => {
+      fetchData();
+      toast.info("Product updated successfully");
+    };
 
-  const handleDelete = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        const response = await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/products/delete/${productId}`
-        );
-        if (response.status === 200) {
-          toast.success("Product deleted successfully");
-          fetchProducts();
-        }
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        toast.error(error.response?.data?.message || "Failed to delete product");
+    const handleProductDeleted = () => {
+      fetchData();
+      toast.error("Product deleted");
+    };
+
+    const handleEditEvent = (event) => {
+      setSelectedProduct(event.detail);
+      setEditDialogOpen(true);
+    };
+
+    window.addEventListener("productAdded", handleProductAdded);
+    window.addEventListener("productEdited", handleProductEdited);
+    window.addEventListener("productDeleted", handleProductDeleted);
+    window.addEventListener("editProduct", handleEditEvent);
+
+    return () => {
+      window.removeEventListener("productAdded", handleProductAdded);
+      window.removeEventListener("productEdited", handleProductEdited);
+      window.removeEventListener("productDeleted", handleProductDeleted);
+      window.removeEventListener("editProduct", handleEditEvent);
+    };
+  }, [fetchData]);
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await deleteItem(id);
+
+      // Vérifie si l'API a retourné un succès
+      if (response && response.success) {
+        toast.success("Product deleted successfully");
+
+        // Dispatch custom event for deletion
+        const event = new CustomEvent("productDeleted");
+        window.dispatchEvent(event);
+      } else {
+        // Si la suppression a échoué, afficher un message d'erreur
+        toast.error("You do not have permission to delete this product.");
       }
+    } catch (err) {
+      // Si une erreur survient, l'afficher correctement
+      toast.error(`Failed to delete product: ${err.message}`);
     }
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
+    <div>
       <h1 className="text-3xl font-bold m-1.5 p-0.5">List of products</h1>
-        {/* <Button onClick={() => setIsAddDialogOpen(true)}>Add Product</Button> */}
-        {/* <SearchBar
+      <div className="w-full searchbar">
+        <SearchBar
           onSearch={setSearchQuery}
           onSort={setSortOrder}
           Children={() => (
             <button
               onClick={() => setAddDialogOpen(true)}
-              className="px-4 py-2  text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
+              className="px-4 py-2 text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
             >
-              <Plus
-                size={20}
-                color="black"
-                className="bg-white"
-              />
+              <Plus size={20} color="black" className="bg-white" />
             </button>
           )}
-        /> */}
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Product Name</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Billing Cycle</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Provider</TableHead>
-            <TableHead>Website</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((product) => (
-            <TableRow key={product._id}>
-              <TableCell>{product.productName}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>{product.billing_cycle}</TableCell>
-              <TableCell>${product.price}</TableCell>
-              <TableCell>{product.type}</TableCell>
-              <TableCell>{product.provider?.name}</TableCell>
-              <TableCell>
-                <a
-                  href={product.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
-                >
-                  {product.website}
-                </a>
-              </TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(product)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(product._id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      {isAddDialogOpen && (
-        <AddProductDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
         />
+      </div>
+      <br />
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <ProductsTable
+            data={filteredData}
+            onDelete={handleDelete}
+            isLoading={isLoading}
+          />
+          {/* Afficher la pagination même avec un seul élément */}
+          {totalPages > 0 && (
+            <div className="mt-4 flex justify-center">
+              <PaginationComponent
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {isEditDialogOpen && selectedProduct && (
-        <EditProductDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          productData={selectedProduct}
-        />
+      {/* Import dialog components dynamically to avoid SSR issues */}
+      {typeof window !== "undefined" && (
+        <>
+          {/* Dynamic import for AddProductDialog */}
+          {addDialogOpen && (
+            <div>
+              {(() => {
+                const AddProductDialog =
+                  require("./components/add-product-dialog").default;
+                return (
+                  <AddProductDialog
+                    open={addDialogOpen}
+                    onOpenChange={setAddDialogOpen}
+                  />
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Dynamic import for EditProductDialog */}
+          {editDialogOpen && selectedProduct && (
+            <div>
+              {(() => {
+                const EditProductDialog =
+                  require("./components/edit-product-dialog").default;
+                return (
+                  <EditProductDialog
+                    open={editDialogOpen}
+                    onOpenChange={setEditDialogOpen}
+                    productData={selectedProduct}
+                  />
+                );
+              })()}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

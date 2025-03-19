@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCrud } from "@/hooks/useCrud";
 import SearchBar from "@/components/serchBar/Search";
-import { ClientsTable } from "./columns";
+import { ClientsTable } from "./components/ClientsTable";
 import PaginationComponent from "@/components/pagination/pagination";
 import { toast } from "react-toastify";
 import { Plus } from "lucide-react";
@@ -44,6 +44,7 @@ function Page() {
       return sortOrder === "asc" ? refA - refB : refB - refA;
     });
 
+    console.log("Filtered clients data:", filtered); // Debug clients data
     setFilteredData(filtered);
   }, [clients, searchQuery, sortOrder]);
 
@@ -79,15 +80,14 @@ function Page() {
     };
   }, [fetchData]);
 
-
   const handleDelete = async (id) => {
     try {
-      const response = await deleteItem(id); 
-  
+      const response = await deleteItem(id);
+
       // Vérifie si l'API a retourné un succès
-      if (response && response.success) { 
+      if (response && response.success) {
         toast.success("Client deleted successfully");
-        
+
         // Dispatch custom event for deletion
         const event = new CustomEvent("clientDeleted");
         window.dispatchEvent(event);
@@ -100,7 +100,7 @@ function Page() {
       toast.error(`Failed to delete client: ${err.message}`);
     }
   };
-  
+
   return (
     <div>
       <h1 className="text-3xl font-bold m-1.5 p-0.5">List of clients</h1>
@@ -113,11 +113,7 @@ function Page() {
               onClick={() => setAddDialogOpen(true)}
               className="px-4 py-2  text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
             >
-              <Plus
-                size={20}
-                color="black"
-                className="bg-white"
-              />
+              <Plus size={20} color="black" className="bg-white" />
             </button>
           )}
         />
@@ -132,7 +128,7 @@ function Page() {
             onDelete={handleDelete}
             isLoading={isLoading}
           />
-          {clients.length >= 2 && (
+          {totalPages > 0 && (
             <div className="mt-2 flex justify-center">
               <PaginationComponent
                 currentPage={currentPage}
