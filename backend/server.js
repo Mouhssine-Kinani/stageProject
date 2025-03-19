@@ -1,7 +1,7 @@
 import express from 'express';
 import errorMiddleWare from './middleware/error.middleware.js';
 import providerRoute from './routes/providers/providers.routes.js';
-import productRoute from './routes/Products/products.routes.js';
+import productRoute from './routes/products/products.routes.js';
 import clientRoute from './routes/clients/clients.routes.js';
 import connectDB from './config/db.js';
 import userRouter from "./routes/Users/user.routes.js";
@@ -14,10 +14,16 @@ const app = express();
 
 app.use(cookieParser()); // Middleware to parse cookies
 
-// Configure CORS to allow requests from your frontend and include credentials
+// Configure CORS to allow requests from multiple origins with credentials
 app.use(cors({
-  origin: FRONT_END_URL, // Replace with your frontend URL
-  credentials: true,  // Allow cookies
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    
+    // Allow requests from any origin
+    return callback(null, true);
+  },
+  credentials: true  // Allow cookies
 }));
 
 app.use("/uploads", express.static("uploads"));
@@ -43,11 +49,18 @@ app.get("/", (req, res) => {
 // Middleware for error handling (should be last)
 app.use(errorMiddleWare);
 
-// Start the server
-app.listen(PORT, async () => {
+// Route pour les utilisateurs
+app.use("/users", userRouter);
+// auth
+app.use('/auth', authRouter)
+
+// let backend dynamically assigns a port
+const serverPORT = process.env.PORT || 5000;
+// Démarrer le serveur
+app.listen(serverPORT, async () => {
     try {
-      await connectDB();
-      console.log(`Server running at http://localhost:${PORT}`);
+      await connectDB()
+      console.log(`Server running at ${PORT}`);
     } catch (err) {
       console.error('Failed to connect to MongoDB:', err.message);
       process.exit(1);
