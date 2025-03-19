@@ -54,8 +54,8 @@ function ResetContent() {
             await resetPasswordSchema.validate(form, { abortEarly: false });
             setErrors({});
 
-            // Use the consistent API URL environment variable
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+            // Use the correct environment variable name
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/reset-password`, {
                 resetToken: token,
                 newPassword: form.password
             });

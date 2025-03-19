@@ -254,11 +254,24 @@ export const requestPasswordReset = async (req, res, next) => {
 export const resetPassword = async (req, res, next) => {
   try {
     const { resetToken, newPassword } = req.body;
+    
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({
+        message: "Reset token and new password are required",
+      });
+    }
+
     const user = await User.findOne({ resetToken });
 
-    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < Date.now()) {
+    if (!user) {
       return res.status(400).json({
-        message: "Invalid or expired token",
+        message: "Invalid reset token",
+      });
+    }
+
+    if (!user.resetTokenExpiry || user.resetTokenExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "Reset token has expired",
       });
     }
 
@@ -271,10 +284,14 @@ export const resetPassword = async (req, res, next) => {
     user.resetTokenExpiry = undefined;
 
     await user.save();
+    
     res.status(200).json({
       message: "Password reset successfully",
     });
   } catch (error) {
-    next(error);
+    console.error("Password reset error:", error);
+    res.status(500).json({
+      message: "An error occurred while resetting your password",
+    });
   }
 };
