@@ -7,8 +7,15 @@ const mapContainerStyle = {
 };
 
 export default function Map({ coordinates }) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  // Check if the API key is provided
+  if (!apiKey) {
+    return <p>Google Maps API key is not set.</p>;
+  }
+
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: apiKey,
   });
 
   if (!isLoaded) return <p>Loading map...</p>;
@@ -24,3 +31,4 @@ export default function Map({ coordinates }) {
     </GoogleMap>
   );
 }
+

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+axios.defaults.withCredentials = true;
 export function useProductsStats() {
   const [productsCount, setProductsCount] = useState({
     totalProducts: 0,
