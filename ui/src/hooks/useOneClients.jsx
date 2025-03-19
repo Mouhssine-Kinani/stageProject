@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 axios.defaults.withCredentials = true;
+
 export function useClient(clientId) {
   const [client, setClient] = useState(null);
   const [clientLoading, setClientLoading] = useState(true);
@@ -9,28 +10,65 @@ export function useClient(clientId) {
   // États pour la recherche et la pagination des produits du client
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 5; // Nombre de produits par page
+  const productsPerPage = 5;
   const [paginatedProducts, setPaginatedProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
 
-  // Fonction pour récupérer les données du client directement utilisable pour les mises à jour
   const fetchClient = useCallback(async () => {
     setClientLoading(true);
     setClientError(null);
     try {
       const API_URL = process.env.NEXT_PUBLIC_URLAPI;
-      if (!API_URL)
+      if (!API_URL) {
         throw new Error("API URL is not defined in env variables");
+      }
 
       const response = await axios.get(`${API_URL}/clients/${clientId}`);
-      if (response.data.success && response.data.data) {
-        setClient(response.data.data);
-      } else {
-        throw new Error(`Failed to fetch the client ${clientId}`);
+
+      if (!response.data) {
+        throw new Error("No data received from the server");
       }
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to fetch client data");
+      }
+
+      if (!response.data.data) {
+        throw new Error("Client data is missing from the response");
+      }
+
+      setClient(response.data.data);
     } catch (error) {
       console.error("Error fetching client:", error);
-      setClientError(error.message || "Failed to fetch client data");
+
+      // Gestion spécifique des erreurs
+      if (error.response) {
+        // Le serveur a répondu avec un code d'erreur
+        switch (error.response.status) {
+          case 404:
+            setClientError("Client not found");
+            break;
+          case 401:
+            setClientError("Unauthorized access");
+            break;
+          case 403:
+            setClientError("Access forbidden");
+            break;
+          case 500:
+            setClientError("Server error. Please try again later");
+            break;
+          default:
+            setClientError(
+              error.response.data?.message || "Failed to fetch client data"
+            );
+        }
+      } else if (error.request) {
+        // La requête a été faite mais aucune réponse n'a été reçue
+        setClientError("No response from server. Please check your connection");
+      } else {
+        // Une erreur s'est produite lors de la configuration de la requête
+        setClientError(error.message || "Failed to fetch client data");
+      }
     } finally {
       setClientLoading(false);
     }
@@ -38,7 +76,9 @@ export function useClient(clientId) {
 
   // Chargement initial des données du client
   useEffect(() => {
-    fetchClient();
+    if (clientId) {
+      fetchClient();
+    }
   }, [clientId, fetchClient]);
 
   // Filtrer et paginer les produits du client
@@ -47,14 +87,11 @@ export function useClient(clientId) {
       let filtered = client.products;
       if (searchQuery) {
         filtered = filtered.filter((product) =>
-          product.productName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
+          product.productName.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       const pages = Math.ceil(filtered.length / productsPerPage) || 1;
       setTotalPages(pages);
-      // Si le currentPage dépasse le nombre total de pages, on le réinitialise
       if (currentPage > pages) setCurrentPage(1);
       const start = (currentPage - 1) * productsPerPage;
       const paginated = filtered.slice(start, start + productsPerPage);
@@ -72,6 +109,6 @@ export function useClient(clientId) {
     setCurrentPage,
     paginatedProducts,
     totalPages,
-    fetchClient, // Exporter la fonction pour permettre le rechargement des données
+    fetchClient,
   };
 }

@@ -225,19 +225,19 @@ h1 {
 }
 .activeProducts {
   background-color: #a1e3cb;
-  color: #333;
+  color: #1e6a52;
 }
 .expiringSoon {
   background-color: #ffe999;
-  color: #333;
+  color: #8a6d00;
 }
 .expired {
   background-color: #fb766b;
-  color: #333;
+  color: #852920;
 }
 .games {
   background-color: #e5ecf6;
-  color: #333;
+  color: #2c4c6d;
 }
 
 /* Mode sombre pour les cartes statistiques */

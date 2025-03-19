@@ -1,10 +1,12 @@
 import React from "react";
-import { User, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { User, MoreHorizontal, Pencil, Trash, Eye } from "lucide-react";
 import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -44,8 +46,12 @@ export default function UsersTable({ data, onEdit, onDelete }) {
         const user = row.original;
         return (
           <div className="flex items-center gap-3">
-            <ProfilePreview 
-              src={user.logo ? `${process.env.NEXT_PUBLIC_URLAPI}/${user.logo}` : null}
+            <ProfilePreview
+              src={
+                user.logo
+                  ? `${process.env.NEXT_PUBLIC_URLAPI}/${user.logo}`
+                  : null
+              }
               alt={user.fullName}
               size={40}
             />
@@ -64,6 +70,10 @@ export default function UsersTable({ data, onEdit, onDelete }) {
     {
       accessorKey: "role.roleName",
       header: "Role",
+      cell: ({ row }) => {
+        const role = row.getValue("role.roleName");
+        return <Badge variant="outline">{role}</Badge>;
+      },
     },
     {
       accessorKey: "status",
@@ -105,20 +115,37 @@ export default function UsersTable({ data, onEdit, onDelete }) {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer flex items-center"
                 onClick={() => onEdit(user)}
               >
                 <Pencil className="mr-2 h-4 w-4" />
-                <span>Edit</span>
+                <span>Modifier</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer flex items-center"
+                onClick={() => (window.location.href = `/users/${user._id}`)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                <span>Voir détails</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer flex items-center text-red-600 focus:text-red-600"
-                onClick={() => onDelete(user._id)}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+                    )
+                  ) {
+                    onDelete(user._id);
+                  }
+                }}
               >
                 <Trash className="mr-2 h-4 w-4" />
-                <span>Delete</span>
+                <span>Supprimer</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

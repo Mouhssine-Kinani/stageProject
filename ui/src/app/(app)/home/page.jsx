@@ -1,62 +1,122 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { useProductsStats } from "@/hooks/useProductsStats";
+import { ProductHomeTable } from "./components/ProductHomeTable";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Loader2, TrendingUp, TrendingDown } from "lucide-react";
 
 import "./homepage.css";
 import "./homeitems.css";
 import "./statiques.css";
 
-import { useProducts } from "@/components/getStatiques/getAllProducts";
 import { useClientsCount } from "@/components/getStatiques/getAllClients";
-import { useProductsStats } from "@/hooks/useProductsStats";
-import { ProductHomeTable } from "./components/ProductHomeTable";
-import { useCrud } from "@/hooks/useCrud";
 
 function Page() {
-  const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
-  const router = useRouter();
+  const { theme } = useTheme();
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    activeProducts: 0,
+    expiringSoon: 0,
+    expired: 0,
+    totalPrice: 0,
+    activePercentage: 0,
+    expiringPercentage: 0,
+    expiredPercentage: 0,
+    clientsPercentage: 0,
+  });
+
   const {
     products,
-    loading: productsLoading,
-    error: productsError,
-  } = useProducts();
-  const { clientsCount, clintsLoading, ClientError } = useClientsCount();
-  const {
     productsCount,
-    loading: loadingStats,
-    error: errorStats,
+    isLoading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    totalPages,
   } = useProductsStats();
-  const { deleteItem } = useCrud("users");
 
-  // Filtrer les produits qui expirent bientôt
-  const expiringSoonProducts = useMemo(() => {
-    if (!products || !Array.isArray(products)) return [];
+  const { clientsCount, clintsLoading, ClientError } = useClientsCount();
 
-    // Obtenir la date actuelle
-    const currentDate = new Date();
+  // Calculer les statistiques à partir des produits récupérés de la base de données
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const now = new Date();
+      const in31Days = new Date();
+      in31Days.setDate(now.getDate() + 31);
 
-    // Filtrer les produits qui expirent dans les 30 prochains jours
-    return products
-      .filter((product) => {
-        if (!product.nextRenewalDate) return false;
+      let active = 0;
+      let expiring = 0;
+      let expired = 0;
+      let totalPrice = 0;
 
-        const renewalDate = new Date(product.nextRenewalDate);
-        const timeDiff = renewalDate.getTime() - currentDate.getTime();
-        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      products.forEach((product) => {
+        const { date_fin, price } = product;
+        totalPrice += price || 0;
 
-        // Produits qui expirent dans les 30 prochains jours
-        return daysDiff > 0 && daysDiff <= 30;
-      })
-      .map((product) => ({
-        ...product,
-        // Assurer un format de date cohérent
-        nextRenewalDate: product.nextRenewalDate
-          ? new Date(product.nextRenewalDate).toISOString()
-          : null,
+        if (!date_fin) {
+          active++;
+          return;
+        }
+
+        const renewalDate = new Date(date_fin);
+
+        // Active Products: current_date + 31 days < end_date
+        if (in31Days < renewalDate) {
+          active++;
+        }
+        // Expiring Soon: current_date + 31 days >= end_date > current_date
+        else if (in31Days >= renewalDate && renewalDate > now) {
+          expiring++;
+        }
+        // Expired: current_date > end_date
+        else if (now > renewalDate) {
+          expired++;
+        }
+      });
+
+      const total = products.length;
+
+      // Calcul des pourcentages
+      const activePercentage =
+        total > 0 ? ((active / total) * 100).toFixed(2) : 0;
+      const expiringPercentage =
+        total > 0 ? ((expiring / total) * 100).toFixed(2) : 0;
+      const expiredPercentage =
+        total > 0 ? ((expired / total) * 100).toFixed(2) : 0;
+
+      // Pour le pourcentage de clients, nous utilisons simplement une valeur de tendance
+      const clientsPercentage = "+6.08";
+
+      setStats({
+        totalProducts: total,
+        activeProducts: active,
+        expiringSoon: expiring,
+        expired,
+        totalPrice,
+        activePercentage,
+        expiringPercentage,
+        expiredPercentage,
+        clientsPercentage,
+      });
+    } else if (productsCount) {
+      // Si les produits détaillés ne sont pas disponibles, utiliser les statistiques globales
+      setStats((prevState) => ({
+        ...prevState,
+        totalProducts: productsCount.totalProducts || 0,
+        activeProducts: productsCount.activeProducts || 0,
+        expiringSoon: productsCount.expiringSoonProducts || 0,
+        expired: productsCount.expiredProducts || 0,
       }));
-  }, [products]);
+    }
+  }, [products, productsCount]);
+
+  const router = useRouter();
+  const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -73,74 +133,72 @@ function Page() {
     return <p>Checking authentication...</p>;
   }
 
-  if (productsLoading || clintsLoading || loadingStats)
-    return <p>Loading...</p>;
-  if (productsError || ClientError || errorStats)
+  if (isLoading || clintsLoading) {
     return (
-      <p className="text-red-500">
-        Error: {productsError || ClientError || errorStats}
-      </p>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
+  }
 
-  console.log("Expiring soon products for table:", expiringSoonProducts); // Debug expiring soon products
-
-  const totalProducts = productsCount.totalProducts || 0;
-  const activeProducts = productsCount.activeProducts || 0;
-  const expiringSoon = productsCount.expiringSoonProducts || 0;
-  const expiredProducts = productsCount.expiredProducts || 0;
+  if (error || ClientError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">Error: {error || ClientError}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <div className="day">
-        <h2>Today</h2>
-      </div>
+    <div className="space-y-6 p-4">
       <div className="statiques">
-        <div className="activeProducts statiquesDisplay">
+        <div className={`statiquesDisplay activeProducts`}>
           <h1 className="statiquesHeader">Active Products</h1>
-          <h2 className="nbrStatiques">{activeProducts}</h2>
-          <p className="calc">
-            {totalProducts > 0
-              ? ((activeProducts / totalProducts) * 100).toFixed(2)
-              : 0}
-            %
-          </p>
+          <div className="flex justify-between items-end">
+            <h2 className="nbrStatiques">{stats.activeProducts}</h2>
+            <div className="flex items-center text-sm">
+              <span className="mr-1">{stats.activePercentage}%</span>
+              <TrendingUp size={16} />
+            </div>
+          </div>
         </div>
 
-        <div className="expiringSoon statiquesDisplay">
+        <div className={`statiquesDisplay expiringSoon`}>
           <h1 className="statiquesHeader">Expiring Soon</h1>
-          <h2 className="nbrStatiques">{expiringSoon}</h2>
-          <p className="calc">
-            {totalProducts > 0
-              ? ((expiringSoon / totalProducts) * 100).toFixed(2)
-              : 0}
-            %
-          </p>
+          <div className="flex justify-between items-end">
+            <h2 className="nbrStatiques">{stats.expiringSoon}</h2>
+            <div className="flex items-center text-sm">
+              <span className="mr-1">{stats.expiringPercentage}%</span>
+              <TrendingDown size={16} />
+            </div>
+          </div>
         </div>
 
-        <div className="expired statiquesDisplay">
+        <div className={`statiquesDisplay expired`}>
           <h1 className="statiquesHeader">Expired</h1>
-          <h2 className="nbrStatiques">{expiredProducts}</h2>
-          <p className="calc">
-            {totalProducts > 0
-              ? ((expiredProducts / totalProducts) * 100).toFixed(2)
-              : 0}
-            %
-          </p>
+          <div className="flex justify-between items-end">
+            <h2 className="nbrStatiques">{stats.expired}</h2>
+            <div className="flex items-center text-sm">
+              <span className="mr-1">{stats.expiredPercentage}%</span>
+              <TrendingUp size={16} />
+            </div>
+          </div>
         </div>
 
-        <div className="clients statiquesDisplay">
+        <div className={`statiquesDisplay clients`}>
           <h1 className="statiquesHeader">Clients</h1>
-          <h2 className="nbrStatiques">{clientsCount}</h2>
+          <div className="flex justify-between items-end">
+            <h2 className="nbrStatiques">{clientsCount}</h2>
+            <div className="flex items-center text-sm">
+              <span className="mr-1">{stats.clientsPercentage}%</span>
+              <TrendingUp size={16} />
+            </div>
+          </div>
         </div>
       </div>
-      <div className="HomeItems">
-        <h3 className="text-lg font-semibold mb-4">Products Expiring Soon</h3>
-        <div className="tableContainer">
-          <ProductHomeTable
-            data={expiringSoonProducts}
-            isLoading={productsLoading}
-          />
-        </div>
+
+      <div className="mt-8 bg-card p-6 rounded-lg shadow-sm">
+        <ProductHomeTable data={products} isLoading={isLoading} />
       </div>
     </div>
   );

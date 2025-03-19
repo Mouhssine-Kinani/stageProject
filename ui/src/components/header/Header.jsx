@@ -9,6 +9,8 @@ import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useRouter } from "next/navigation";
+import { useWindowWidth } from "@/hooks/useWindowWidth";
+import useUser from "@/hooks/useUser";
 
 export default function Header({
   isMobile = false,
@@ -21,16 +23,16 @@ export default function Header({
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("");
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 0
-  );
+  const { windowWidth, mounted } = useWindowWidth();
   const router = useRouter();
+  const { userName: userNameFromContext, handleLogout } = useUser();
 
   // Path processing
   const parts = pathname.split("/").filter(Boolean);
   const isClientPage = parts.length >= 2 && parts[0] === "clients";
   const clientId = isClientPage ? parts[1] : null;
 
+  // Maintenant on peut utiliser clientId en toute sécurité
   const { client, clientLoading } = useClient(clientId);
 
   let breadcrumb = parts.map((part, index) => {
@@ -44,62 +46,16 @@ export default function Header({
     return decodeURIComponent(part.replace(/-/g, " "));
   });
 
-  // Détecter la taille de la fenêtre pour les adaptations responsives
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-      };
-
-      setWindowWidth(window.innerWidth);
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    }
-  }, []);
-
-  // Récupérer le nom d'utilisateur depuis le cookie
-  useEffect(() => {
-    const storedUserName = Cookies.get("userName");
-    if (storedUserName) {
-      setUserName(storedUserName);
-    } else {
-      setUserName("User");
-    }
-  }, []);
-
-  const handleLogout = () => {
-    // Supprimer les cookies
-    Cookies.remove("token");
-    Cookies.remove("userId");
-    Cookies.remove("userName");
-
-    // Rediriger vers la page de login
-    router.push("/login");
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  // Fermer le dropdown quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isDropdownOpen &&
-        !event.target.closest(".profile-dropdown-container")
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isDropdownOpen]);
+  // Ne pas rendre le contenu jusqu'à ce que le composant soit monté côté client
+  if (!mounted) {
+    return (
+      <header className="area-header">
+        <div className="flex items-center">
+          <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="area-header w-full flex flex-col md:flex-row justify-between items-center px-4 relative">
@@ -144,8 +100,9 @@ export default function Header({
 
         {/* Icône et chemin de navigation - masqué sur très petits écrans */}
         <div
-          className="flex items-center"
-          style={{ display: windowWidth < 400 ? "none" : "flex" }}
+          className={`flex items-center ${
+            windowWidth < 400 ? "hidden" : "flex"
+          }`}
         >
           <img src="/headerIcon/star.svg" alt="" className="mx-2" />
           <p className="text-sm md:text-base truncate max-w-[150px] md:max-w-[350px] lg:max-w-full">
@@ -163,7 +120,7 @@ export default function Header({
         />
 
         <div className="iconsHolder flex items-center space-x-1 md:space-x-3">
-          <ThemeSwitcher isMobile={isMobile} />
+          <ThemeSwitcher isMobile={windowWidth < 768} />
 
           <img
             src="/headerIcon/history.svg"
@@ -171,7 +128,6 @@ export default function Header({
             className="cursor-pointer"
           />
 
-          {/* Notification button in header icons area - visible on all screens but has different behavior */}
           <button
             onClick={toggleNotification}
             className="p-2 hover:bg-muted rounded-full"
@@ -181,11 +137,13 @@ export default function Header({
 
           <div className="profile-dropdown-container relative">
             <button
-              onClick={toggleDropdown}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="p-2 hover:bg-muted rounded-full flex items-center"
             >
               <img src="/headerIcon/side.svg" alt="Profile" />
-              <span className="ml-1 hidden md:inline-block">{userName}</span>
+              <span className="ml-1 hidden md:inline-block">
+                {userNameFromContext}
+              </span>
               <ChevronDown
                 size={16}
                 className="hidden md:block ml-1 transition-transform"
