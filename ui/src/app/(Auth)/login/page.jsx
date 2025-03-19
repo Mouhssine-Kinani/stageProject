@@ -36,7 +36,7 @@ export default function Login() {
             setErrors({});
             
             const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`, form ,{
-                withCredentials: true,  // ✅ Obligatoire pour envoyer et recevoir les cookies
+                withCredentials: true, 
               });
             console.log(response);
             
