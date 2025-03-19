@@ -17,50 +17,51 @@ const clientRoute = Router();
 // Création d'un client (seulement pour admin et superadmin)
 clientRoute.post(
   "/clients/create",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
   upload.single("logo"),
   createClient
 );
 
 // Récupérer tous les clients (accessible à tous)
-clientRoute.get("/clients", getAllClients);
+clientRoute.get("/clients",isAuthenticated, getAllClients);
 
 // Récupérer le nombre de clients (accessible à tous)
-clientRoute.get("/clients/count", getClientsCount);
+clientRoute.get("/clients/count", isAuthenticated, getClientsCount);
 
 // Récupérer un client par son id (accessible à tous)
-clientRoute.get("/clients/:id", getClientById);
+clientRoute.get("/clients/:id", isAuthenticated, getClientById);
 
 // Suppression d'un client (seulement pour admin et superadmin)
 clientRoute.delete(
   "/clients/delete/:id",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
   deleteClient
 );
 
 // Afficher la page d'édition d'un client (seulement pour admin et superadmin)
 clientRoute.get(
   "/clients/edit/:id",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
   showEditClientPage
 );
 
 // Mise à jour d'un client (seulement pour admin et superadmin)
 clientRoute.put(
   "/clients/edit/:id",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
+  upload.single("logo"),
   updateClient
 );
 
 // Suppression d'un produit d'un client (seulement pour admin et superadmin)
 clientRoute.delete(
   "/clients/:clientId/product/:productId",
-  // isAuthenticated,
-  // hasRole(["admin", "superadmin"]),
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
   deleteProductFromClient
 );
 

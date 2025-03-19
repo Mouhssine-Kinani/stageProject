@@ -24,7 +24,23 @@ const getColumns = (onDelete, onEdit) => [
   {
     accessorKey: "fullName",
     header: "Name",
+    cell: ({ row }) => {
+      const { fullName, logo } = row.original;  // On récupère fullName et logo du provider
+  
+      return (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <img
+            src={`${logo ? `${process.env.NEXT_PUBLIC_URLAPI}/${logo}` : "/user.png"}`}
+            alt="User Logo"
+            style={{ width: 30, height: 30, borderRadius: "50%", marginRight: 10 }}
+          />
+          <span>{fullName}</span>
+        </div>
+      );
+    }
   },
+  
+  
   {
     accessorKey: "role.roleName",
     header: "Role",

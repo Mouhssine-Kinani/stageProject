@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import User from "../../models/Users/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import ms from "ms";
 import {
   JWT_SECRET,
   JWT_EXPIRE_INS,
@@ -38,9 +39,13 @@ export const signUP = async (req, res, next) => {
     await newUser.save();
 
     // Création du token avec l'ID et le rôle
-    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRE_INS,
-    });
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      JWT_SECRET,
+      {
+        expiresIn: JWT_EXPIRE_INS,
+      }
+    );
 
     res.status(201).json({
       message: "User created successfully",
@@ -61,6 +66,54 @@ export const signUP = async (req, res, next) => {
   }
 };
 
+// export const signIn = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) {
+//       return res.status(401).json({
+//         message: "Invalid password",
+//         data: { email, password },
+//       });
+//     }
+
+//     // Create token with user ID and role
+//     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
+//       expiresIn: JWT_EXPIRE_INS,
+//     });
+
+//     res.cookie('token', token, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       maxAge: ms(JWT_EXPIRE_INS), // Convertit '1d' en millisecondes
+//     });
+
+//     res.status(200).json({
+//       message: "User logged in successfully",
+//       data: {
+//         token, // also returned in JSON if needed
+//         user: {
+//           _id: user._id,
+//           reference: user.reference,
+//           fullName: user.fullName,
+//           email: user.email,
+//           role: user.role,
+//           status: user.status,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const signIn = async (req, res, next) => {
   try {
@@ -81,15 +134,30 @@ export const signIn = async (req, res, next) => {
       });
     }
 
-    // Création du token avec ID et rôle
+    // Create token with user ID and role
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
       expiresIn: JWT_EXPIRE_INS,
+    });
+
+    // Set cookie with the correct SameSite and Secure settings
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production", // ✅ Secure in production only
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // ✅ Fix for localhost
+      maxAge: ms(JWT_EXPIRE_INS),
+    });
+
+    res.cookie("userId", user._id.toString(), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: ms(JWT_EXPIRE_INS),
     });
 
     res.status(200).json({
       message: "User logged in successfully",
       data: {
-        token, // Ajout du token ici
+        token, // also returned in JSON if needed
         user: {
           _id: user._id,
           reference: user.reference,
@@ -105,6 +173,11 @@ export const signIn = async (req, res, next) => {
   }
 };
 
+export const logout = (req, res) => {
+  res.clearCookie("token", { path: "/" });
+  res.clearCookie("userId", { path: "/" });
+  res.status(200).json({ message: "Logged out successfully" });
+};
 
 export const requestPasswordReset = async (req, res, next) => {
   try {
@@ -112,15 +185,21 @@ export const requestPasswordReset = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
-        message: "User not found. Veuillez réessayer."
+        message: "User not found. Veuillez réessayer.",
       });
     }
 
     // Check if user has a valid reset token
-    if (user.resetToken && user.resetTokenExpiry && user.resetTokenExpiry > Date.now()) {
-      const timeLeft = Math.ceil((user.resetTokenExpiry - Date.now()) / 1000 / 60); // Convert to minutes
+    if (
+      user.resetToken &&
+      user.resetTokenExpiry &&
+      user.resetTokenExpiry > Date.now()
+    ) {
+      const timeLeft = Math.ceil(
+        (user.resetTokenExpiry - Date.now()) / 1000 / 60
+      ); // Convert to minutes
       return res.status(400).json({
-        message: `Un email de réinitialisation a déjà été envoyé. Veuillez attendre ${timeLeft} minutes avant de réessayer.`
+        message: `Un email de réinitialisation a déjà été envoyé. Veuillez attendre ${timeLeft} minutes avant de réessayer.`,
       });
     }
 
@@ -129,7 +208,7 @@ export const requestPasswordReset = async (req, res, next) => {
     user.resetToken = resetToken;
     user.resetTokenExpiry = Date.now() + 360000; // Token expires in 1 hour
     await user.save();
-    
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -137,10 +216,10 @@ export const requestPasswordReset = async (req, res, next) => {
         pass: EMAIL_PASSWORD,
       },
     });
-    
+
     // Update the reset link format to match our frontend route
     const resetLink = `${FRONT_END_URL}/reset?token=${resetToken}`;
-    
+
     const mailOptions = {
       from: EMAIL_USER,
       to: email,
@@ -152,7 +231,7 @@ export const requestPasswordReset = async (req, res, next) => {
         <a href="${resetLink}">Réinitialiser mon mot de passe</a>
         <p>Ce lien expirera dans 1 heure.</p>
         <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
-      `
+      `,
     };
 
     transporter.sendMail(mailOptions, (err, info) => {

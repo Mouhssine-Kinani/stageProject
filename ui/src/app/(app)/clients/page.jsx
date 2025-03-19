@@ -5,6 +5,7 @@ import SearchBar from "@/components/serchBar/Search";
 import { ClientsTable } from "./columns";
 import PaginationComponent from "@/components/pagination/pagination";
 import { toast } from "react-toastify";
+import { Plus } from "lucide-react";
 
 function Page() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,7 +13,7 @@ function Page() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
-  
+
   const {
     data: clients,
     isLoading,
@@ -20,7 +21,7 @@ function Page() {
     currentPage,
     setCurrentPage,
     totalPages,
-    fetchData
+    fetchData,
   } = useCrud("clients", searchQuery);
 
   const [filteredData, setFilteredData] = useState([]);
@@ -65,43 +66,58 @@ function Page() {
       setEditDialogOpen(true);
     };
 
-    window.addEventListener('clientAdded', handleClientAdded);
-    window.addEventListener('clientEdited', handleClientEdited);
-    window.addEventListener('clientDeleted', handleClientDeleted);
-    window.addEventListener('editClient', handleEditEvent);
+    window.addEventListener("clientAdded", handleClientAdded);
+    window.addEventListener("clientEdited", handleClientEdited);
+    window.addEventListener("clientDeleted", handleClientDeleted);
+    window.addEventListener("editClient", handleEditEvent);
 
     return () => {
-      window.removeEventListener('clientAdded', handleClientAdded);
-      window.removeEventListener('clientEdited', handleClientEdited);
-      window.removeEventListener('clientDeleted', handleClientDeleted);
-      window.removeEventListener('editClient', handleEditEvent);
+      window.removeEventListener("clientAdded", handleClientAdded);
+      window.removeEventListener("clientEdited", handleClientEdited);
+      window.removeEventListener("clientDeleted", handleClientDeleted);
+      window.removeEventListener("editClient", handleEditEvent);
     };
   }, [fetchData]);
 
+
   const handleDelete = async (id) => {
     try {
-      await deleteItem(id);
-      toast.success('Client deleted successfully');
-      // Dispatch custom event for deletion
-      const event = new CustomEvent('clientDeleted');
-      window.dispatchEvent(event);
+      const response = await deleteItem(id); 
+  
+      // Vérifie si l'API a retourné un succès
+      if (response && response.success) { 
+        toast.success("Client deleted successfully");
+        
+        // Dispatch custom event for deletion
+        const event = new CustomEvent("clientDeleted");
+        window.dispatchEvent(event);
+      } else {
+        // Si la suppression a échoué, afficher un message d'erreur
+        toast.error("You do not have permission to delete this client.");
+      }
     } catch (err) {
+      // Si une erreur survient, l'afficher correctement
       toast.error(`Failed to delete client: ${err.message}`);
     }
   };
-
+  
   return (
     <div>
+      <h1 className="text-3xl font-bold m-1.5 p-0.5">List of clients</h1>
       <div className="w-full searchbar">
-        <SearchBar 
-          onSearch={setSearchQuery} 
+        <SearchBar
+          onSearch={setSearchQuery}
           onSort={setSortOrder}
           Children={() => (
             <button
               onClick={() => setAddDialogOpen(true)}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+              className="px-4 py-2  text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
             >
-              Add Client
+              <Plus
+                size={20}
+                color="black"
+                className="bg-white"
+              />
             </button>
           )}
         />
@@ -111,7 +127,11 @@ function Page() {
         <p>Loading...</p>
       ) : (
         <>
-          <ClientsTable data={filteredData} onDelete={handleDelete} isLoading={isLoading} />
+          <ClientsTable
+            data={filteredData}
+            onDelete={handleDelete}
+            isLoading={isLoading}
+          />
           {clients.length >= 2 && (
             <div className="mt-2 flex justify-center">
               <PaginationComponent
@@ -125,13 +145,14 @@ function Page() {
       )}
 
       {/* Import dialog components dynamically to avoid SSR issues */}
-      {typeof window !== 'undefined' && (
+      {typeof window !== "undefined" && (
         <>
           {/* Dynamic import for AddClientDialog */}
           {addDialogOpen && (
             <div>
               {(() => {
-                const AddClientDialog = require('./components/add-client-dialog').default;
+                const AddClientDialog =
+                  require("./components/add-client-dialog").default;
                 return (
                   <AddClientDialog
                     open={addDialogOpen}
@@ -146,7 +167,8 @@ function Page() {
           {editDialogOpen && selectedClient && (
             <div>
               {(() => {
-                const EditClientDialog = require('./components/edit-client-dialog').default;
+                const EditClientDialog =
+                  require("./components/edit-client-dialog").default;
                 return (
                   <EditClientDialog
                     open={editDialogOpen}

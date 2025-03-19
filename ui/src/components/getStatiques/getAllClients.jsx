@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+axios.defaults.withCredentials = true;
 export function useClientsCount() {
   const [clientsCount, setClientsCount] = useState(0);
   const [clintsLoading, setLoading] = useState(true);

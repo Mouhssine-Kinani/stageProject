@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/table/data-tableDemo";
+import { DataTable } from "@/components/table/base-data-table";
 import { useMemo } from "react";
 
 // Fonction utilitaire pour convertir la chaîne billing_cycle en nombre de mois

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 import "./homepage.css";
 import "./homeitems.css";
 import "./statiques.css";
@@ -8,12 +11,13 @@ import "./statiques.css";
 import { useProducts } from "@/components/getStatiques/getAllProducts";
 import { useClientsCount } from "@/components/getStatiques/getAllClients";
 import { useProductsStats } from "@/hooks/useProductsStats";
-
 import { ProductHomeTable } from "./columns";
 import { useCrud } from "@/hooks/useCrud";
 
 function Page() {
   const [data, setData] = useState([]);
+  const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
+  const router = useRouter();
   const { products, loading, error } = useProducts();
   const { clientsCount, clintsLoading, ClientError } = useClientsCount();
   const {
@@ -24,16 +28,19 @@ function Page() {
   const { deleteItem } = useCrud("users");
 
   useEffect(() => {
-    const oneMonthInMillis = 31 * 24 * 60 * 60 * 1000;
-    const now = Date.now();
+    const token = Cookies.get("token");
 
-    const productExpiringSoon = products.filter((product) => {
-      const expirationDate = new Date(product.date_fin).getTime();
-      return expirationDate - now <= oneMonthInMillis && expirationDate >= now;
-    });
+    if (!token) {
+      router.push("/login");
+    } else {
+      setLoadingToken(false); // Le token est vérifié, on arrête le chargement
+    }
+  }, [router]);
 
-    setData(productExpiringSoon);
-  }, [products]);
+  // Afficher un écran de chargement tant que la vérification du token n'est pas terminée
+  if (loadingToken) {
+    return <p>Checking authentication...</p>;
+  }
 
   if (loading || clintsLoading || loadingStats) return <p>Loading...</p>;
   if (error || ClientError || errorStats)
@@ -98,14 +105,6 @@ function Page() {
             data={Array.isArray(data) ? data : []}
             onDelete={deleteItem}
           />
-        </div>
-        <div className="graphes">
-          <div className="graphe1">
-            <h1 className="grapheTitle">Traffic by Device</h1>
-          </div>
-          <div className="graphe2">
-            <h1 className="grapheTitle">Traffic by Location</h1>
-          </div>
         </div>
       </div>
     </div>

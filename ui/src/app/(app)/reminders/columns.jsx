@@ -16,18 +16,26 @@ const getColumns = (onDelete) => [
   {
     accessorKey: "client_reference",
     header: "Client Reference",
-    cell : ({row})=>`#CL0${row.original.client_reference}`
+    cell: ({ row }) => `#CL0${row.original.client_reference}`,
   },
   {
     accessorKey: "clientLogo",
     header: "Client Logo",
-    cell: ({ row }) => (
-      <img
-        src={row.original.clientLogo}
-        alt="Client Logo"
-        style={{ width: "30px", height: "30px", borderRadius: "50%" }}
-      />
-    ),
+    cell: ({ row }) => {
+      const logo = row.original.clientLogo;
+      const imageUrl =
+        logo && logo !== "/user.png"
+          ? `${process.env.NEXT_PUBLIC_URLAPI}/${logo}`
+          : "/user.png";
+
+      return (
+        <img
+          src={imageUrl}
+          alt="Client Logo"
+          style={{ width: "30px", height: "30px", borderRadius: "50%" }}
+        />
+      );
+    },
   },
   {
     accessorKey: "clientName",

@@ -1,6 +1,6 @@
 // lib/geocode.js
 import axios from 'axios';
-
+axios.defaults.withCredentials = true;
 export async function getCoordinates(address) {
   if (!address) return null;
 

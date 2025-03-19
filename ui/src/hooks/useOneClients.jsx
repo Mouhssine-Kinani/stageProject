@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+axios.defaults.withCredentials = true;
 export function useClient(clientId) {
   const [client, setClient] = useState(null);
   const [clientLoading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export function useClient(clientId) {
           throw new Error(`Failed to fetch the client ${clientId}`);
         }
       } catch (err) {
-        setError(err.message || "An error occurred");
+        setError(  `no client with this id ${clientId} ` ||  (err.message && "An error occurred "));
       } finally {
         setLoading(false);
       }
