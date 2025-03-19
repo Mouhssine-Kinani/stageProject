@@ -58,7 +58,9 @@ function Page() {
               : "/user.png",
           price: product.price,
           renewal_status: client.renewal_status,
-          nextRenewalDate: nextRenewalDate ? nextRenewalDate.toISOString() : null,
+          nextRenewalDate: nextRenewalDate
+            ? nextRenewalDate.toISOString()
+            : null,
           _id: product._id, // use product id for delete operations if needed
         };
       })
@@ -75,7 +77,7 @@ function Page() {
     });
   }, [flattenedData, sortOrder]);
 
-  console.log("reminder data",sortedData)
+  console.log("reminder data", sortedData);
   return (
     <div>
       <h1 className="text-3xl font-bold m-1.5 p-0.5">List of reminders</h1>
@@ -87,7 +89,7 @@ function Page() {
       ) : (
         <>
           <RemindersTable data={sortedData} onDelete={deleteItem} />
-          {reminders.length >= 2 && (
+          {totalPages > 0 && (
             <div className="mt-2 flex justify-center">
               <PaginationComponent
                 currentPage={currentPage}

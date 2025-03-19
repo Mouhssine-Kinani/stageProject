@@ -1,85 +1,69 @@
 "use client";
-import Link from "next/link";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Box } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/table/base-data-table";
-import { useMemo } from "react";
+import CellContent from "@/components/table/CellContent";
 
-// Define columns outside the component to prevent recreation on each render
-const getColumns = (onDelete) => [
+export const columns = [
   {
     accessorKey: "client_reference",
-    header: "Reference",
-    cell: ({ row }) => `#CL0${row.original.client_reference}`,
-  },
-  {
-    accessorKey: "logo",
-    header: "Client",
-    cell: ({ row }) => (
-      <img
-        src={`${process.env.NEXT_PUBLIC_URLAPI}/${row.original.logo}`}
-        alt="Client Logo"
-        style={{ width: 30, height: 30, borderRadius: "50%" }}
-      />
-    ),
-  },
-  {
-    accessorKey: "name",
-    header: "Client Name",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "products",
-    header: "Products",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Box className="h-4 w-4 " />
-        <p>{row.original.products?.length || 0}</p>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "totalPrice",
-    header: "Total Value",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <p>
-          {row.original.totalPrice
-            ? `${row.original.totalPrice.toFixed(2)}`
-            : "0.00"}{" "}
-          MAD
-        </p>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "renewal_status",
-    header: "Renewal Status",
+    header: "ID",
     cell: ({ row }) => {
-      const status = row.original.renewal_status;
-      let statusClass = "px-2 py-1 rounded text-xs font-medium";
-
-      if (status === "ok") {
-        statusClass += " bg-green-100 text-green-800";
-      } else if (status === "Overdue") {
-        statusClass += " bg-red-100 text-red-800";
-      } else if (status === "Expiring") {
-        statusClass += " bg-yellow-100 text-yellow-800";
-      }
-
-      return <span className={statusClass}>{status}</span>;
+      const value = row.getValue("client_reference");
+      return (
+        <CellContent
+          value={value ? `CL0${value}` : "—"}
+          type="text"
+          maxChars={8}
+        />
+      );
+    },
+  },
+  {
+    accessorKey: "client_name",
+    header: "Nom",
+    cell: ({ row }) => {
+      const value = row.getValue("client_name");
+      return <CellContent value={value} type="text" />;
+    },
+  },
+  {
+    accessorKey: "client_email",
+    header: "Email",
+    cell: ({ row }) => {
+      const value = row.getValue("client_email");
+      return <CellContent value={value} type="text" />;
+    },
+  },
+  {
+    accessorKey: "client_phone",
+    header: "Téléphone",
+    cell: ({ row }) => {
+      const value = row.getValue("client_phone");
+      return <CellContent value={value} type="text" />;
+    },
+  },
+  {
+    accessorKey: "client_address",
+    header: "Adresse",
+    cell: ({ row }) => {
+      const value = row.getValue("client_address");
+      return <CellContent value={value} type="text" />;
+    },
+  },
+  {
+    accessorKey: "products_count",
+    header: "Produits",
+    cell: ({ row }) => {
+      const value = row.getValue("products_count");
+      return <CellContent value={value} type="number" />;
+    },
+  },
+  {
+    accessorKey: "total_value",
+    header: "Valeur Totale",
+    cell: ({ row }) => {
+      const value = row.getValue("total_value");
+      return <CellContent value={value} type="currency" />;
     },
   },
   {
@@ -87,51 +71,58 @@ const getColumns = (onDelete) => [
     cell: ({ row }) => {
       const client = row.original;
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={() => {
-                if (window.confirm("Are you sure you want to delete this client?")) {
-                  onDelete(client._id);
-                }
-              }}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              <span className="text-red-500">Delete</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                // Dispatch custom event for editing
-                const event = new CustomEvent("editClient", {
-                  detail: client,
-                });
-                window.dispatchEvent(event);
-              }}
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
+      const viewClient = () => {
+        window.location.href = `/clients/${client.id}`;
+      };
 
-            <DropdownMenuItem>
-              <Link href={`/clients/${client._id}`}>View Details</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      const editClient = (e) => {
+        e.stopPropagation();
+        // Dispatch l'événement pour ouvrir la modale d'édition
+        const event = new CustomEvent("editClient", {
+          detail: client,
+        });
+        window.dispatchEvent(event);
+      };
+
+      const deleteClient = (e) => {
+        e.stopPropagation();
+        // Dispatch l'événement pour ouvrir la modale de suppression
+        const event = new CustomEvent("deleteClient", {
+          detail: client,
+        });
+        window.dispatchEvent(event);
+      };
+
+      return (
+        <div className="flex justify-end gap-2 actions-cell">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={viewClient}
+            title="Voir les détails"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={editClient}
+            title="Modifier"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={deleteClient}
+            title="Supprimer"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       );
     },
   },
 ];
 
-export function ClientsTable({ data, onDelete, isLoading }) {
-  const columns = useMemo(() => getColumns(onDelete), [onDelete]);
-  return <DataTable columns={columns} data={data} isLoading={isLoading} />;
-}
+export default columns;

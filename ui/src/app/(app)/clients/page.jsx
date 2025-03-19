@@ -2,10 +2,14 @@
 import { useState, useEffect } from "react";
 import { useCrud } from "@/hooks/useCrud";
 import SearchBar from "@/components/serchBar/Search";
-import { ClientsTable } from "./columns";
+import { ClientsTable } from "./components/ClientsTable";
 import PaginationComponent from "@/components/pagination/pagination";
 import { toast } from "react-toastify";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import AddClientDialog from "./components/add-client-dialog";
+import EditClientDialog from "./components/edit-client-dialog";
 
 function Page() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,14 +41,15 @@ function Page() {
     );
 
     // Trier les données
-    filtered.sort((a, b) => {
+    filtered?.sort((a, b) => {
       const refA = a.client_reference || 0; // Assurer une valeur par défaut
       const refB = b.client_reference || 0;
 
       return sortOrder === "asc" ? refA - refB : refB - refA;
     });
 
-    setFilteredData(filtered);
+    console.log("Filtered clients data:", filtered); // Debug clients data
+    setFilteredData(filtered || []);
   }, [clients, searchQuery, sortOrder]);
 
   useEffect(() => {
@@ -79,15 +84,14 @@ function Page() {
     };
   }, [fetchData]);
 
-
   const handleDelete = async (id) => {
     try {
-      const response = await deleteItem(id); 
-  
+      const response = await deleteItem(id);
+
       // Vérifie si l'API a retourné un succès
-      if (response && response.success) { 
+      if (response && response.success) {
         toast.success("Client deleted successfully");
-        
+
         // Dispatch custom event for deletion
         const event = new CustomEvent("clientDeleted");
         window.dispatchEvent(event);
@@ -100,87 +104,58 @@ function Page() {
       toast.error(`Failed to delete client: ${err.message}`);
     }
   };
-  
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold m-1.5 p-0.5">List of clients</h1>
-      <div className="w-full searchbar">
-        <SearchBar
-          onSearch={setSearchQuery}
-          onSort={setSortOrder}
-          Children={() => (
-            <button
-              onClick={() => setAddDialogOpen(true)}
-              className="px-4 py-2  text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
-            >
-              <Plus
-                size={20}
-                color="black"
-                className="bg-white"
-              />
-            </button>
-          )}
+    <div className="container mx-auto p-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Clients</h1>
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Ajouter un client
+          </Button>
+        </div>
+
+        <div className="mb-4">
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher un client..."
+          />
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <ClientsTable
+              data={filteredData}
+              onDelete={handleDelete}
+              isLoading={isLoading}
+            />
+
+            {totalPages > 1 && (
+              <div className="mt-4 flex justify-center">
+                <PaginationComponent
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  totalPages={totalPages}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        <AddClientDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+
+        <EditClientDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          client={selectedClient}
         />
       </div>
-      <br />
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <ClientsTable
-            data={filteredData}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-          />
-          {clients.length >= 2 && (
-            <div className="mt-2 flex justify-center">
-              <PaginationComponent
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-              />
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Import dialog components dynamically to avoid SSR issues */}
-      {typeof window !== "undefined" && (
-        <>
-          {/* Dynamic import for AddClientDialog */}
-          {addDialogOpen && (
-            <div>
-              {(() => {
-                const AddClientDialog =
-                  require("./components/add-client-dialog").default;
-                return (
-                  <AddClientDialog
-                    open={addDialogOpen}
-                    onOpenChange={setAddDialogOpen}
-                  />
-                );
-              })()}
-            </div>
-          )}
-
-          {/* Dynamic import for EditClientDialog */}
-          {editDialogOpen && selectedClient && (
-            <div>
-              {(() => {
-                const EditClientDialog =
-                  require("./components/edit-client-dialog").default;
-                return (
-                  <EditClientDialog
-                    open={editDialogOpen}
-                    onOpenChange={setEditDialogOpen}
-                    clientData={selectedClient}
-                  />
-                );
-              })()}
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 }

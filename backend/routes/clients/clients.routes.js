@@ -8,6 +8,7 @@ import {
   showEditClientPage,
   getClientsCount,
   deleteProductFromClient,
+  addProductToClient,
 } from "../../controllers/clients/clients.controller.js";
 import upload from "../../middleware/upload.middleware.js";
 import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
@@ -24,7 +25,7 @@ clientRoute.post(
 );
 
 // Récupérer tous les clients (accessible à tous)
-clientRoute.get("/clients",isAuthenticated, getAllClients);
+clientRoute.get("/clients", isAuthenticated, getAllClients);
 
 // Récupérer le nombre de clients (accessible à tous)
 clientRoute.get("/clients/count", isAuthenticated, getClientsCount);
@@ -63,6 +64,14 @@ clientRoute.delete(
   isAuthenticated,
   hasRole(["Admin", "Super Admin"]),
   deleteProductFromClient
+);
+
+// Ajout d'un produit à un client (seulement pour admin et superadmin)
+clientRoute.post(
+  "/clients/:clientId/product",
+  isAuthenticated,
+  hasRole(["Admin", "Super Admin"]),
+  addProductToClient
 );
 
 export default clientRoute;

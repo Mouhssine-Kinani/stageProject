@@ -66,6 +66,9 @@ export default function Login() {
     };
 
     return (
+        <div className='loginContainerBg'>
+
+        
         <div className="flex items-center justify-center min-h-screen">
             <div className="login-container max-w-[478px] max-h-[636px] px-10 py-14 space-y-14 rounded-lg border border-gray-500">
                 <SignFromComponent 
@@ -79,6 +82,7 @@ export default function Login() {
                     handleSubmit={handleSubmit}
                 />
             </div>
+        </div>
         </div>
     );
 }
