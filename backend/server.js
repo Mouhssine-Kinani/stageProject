@@ -43,11 +43,18 @@ app.get("/", (req, res) => {
 // Middleware for error handling (should be last)
 app.use(errorMiddleWare);
 
-// Start the server
-app.listen(PORT, async () => {
+// Route pour les utilisateurs
+app.use("/users", userRouter);
+// auth
+app.use('/auth', authRouter)
+
+// let backend dynamically assigns a port
+const serverPORT = process.env.PORT || 5000;
+// Démarrer le serveur
+app.listen(serverPORT, async () => {
     try {
-      await connectDB();
-      console.log(`Server running at http://localhost:${PORT}`);
+      await connectDB()
+      console.log(`Server running at ${PORT}`);
     } catch (err) {
       console.error('Failed to connect to MongoDB:', err.message);
       process.exit(1);
