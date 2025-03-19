@@ -14,10 +14,16 @@ const app = express();
 
 app.use(cookieParser()); // Middleware to parse cookies
 
-// Configure CORS to allow requests from your frontend and include credentials
+// Configure CORS to allow requests from multiple origins with credentials
 app.use(cors({
-  origin: FRONT_END_URL, // Replace with your frontend URL
-  credentials: true,  // Allow cookies
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    
+    // Allow requests from any origin
+    return callback(null, true);
+  },
+  credentials: true  // Allow cookies
 }));
 
 app.use("/uploads", express.static("uploads"));
