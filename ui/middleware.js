@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export function middleware(req) {
   // Access cookies directly from the 'req' object
-  const token = req.cookies.get('token');
+  const token = req.cookies.get("token");
 
   // If no token is found, redirect to login
   if (!token) {
-    console.log('No token found, redirecting to /login');
-    return NextResponse.redirect(new URL('/login', req.url));
+    console.log("No token found, redirecting to /login");
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   // If a token is found, continue with the request
@@ -16,11 +16,11 @@ export function middleware(req) {
 
 export const config = {
   matcher: [
-    '/home/:path*',
-    '/clients/:path*',
-    '/products/:path*',
-    '/reminders/:path*',
-    '/users/:path*',
-    '/settings/:path*',
+    "/home/:path*",
+    "/clients/:path*",
+    "/products/:path*",
+    "/reminders/:path*",
+    "/users/:path*",
+    "/settings/:path*",
   ],
 };
