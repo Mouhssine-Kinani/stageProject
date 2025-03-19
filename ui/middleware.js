@@ -3,14 +3,19 @@ import { NextResponse } from "next/server";
 export function middleware(req) {
   // Access cookies directly from the 'req' object
   const token = req.cookies.get("token");
+  const userId = req.cookies.get("userId");
 
-  // If no token is found, redirect to login
-  if (!token) {
-    console.log("No token found, redirecting to /login");
+  // Debug logs (visibles uniquement dans les logs serveur)
+  console.log("Token in middleware:", token?.value);
+  console.log("UserId in middleware:", userId?.value);
+
+  // If no token or userId is found, redirect to login
+  if (!token || !userId) {
+    console.log("Authentication credentials missing, redirecting to /login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // If a token is found, continue with the request
+  // If credentials exist, continue with the request
   return NextResponse.next();
 }
 

@@ -223,6 +223,10 @@ h1 {
   grid-template-rows: repeat(1, 1fr);
   gap: 8px;
 }
+.statiquesDisplay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 .activeProducts {
   background-color: #a1e3cb;
   color: #1e6a52;

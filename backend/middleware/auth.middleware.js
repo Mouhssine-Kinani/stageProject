@@ -3,11 +3,22 @@ import { JWT_SECRET } from "../config/env.js";
 
 // Middleware pour vérifier si l'utilisateur est connecté
 export const isAuthenticated = (req, res, next) => {
-  // Check token in Authorization header or cookies
-  const token = req.headers.authorization?.split(" ")[1] || req.cookies.token;
+  // Essayer de récupérer le token de différentes sources
+  let token;
+
+  // 1. Vérifier dans l'en-tête Authorization
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+
+  // 2. Si pas de token dans l'en-tête, vérifier dans les cookies
+  if (!token) {
+    token = req.cookies.token;
+  }
 
   if (!token) {
-    return res.status(401).json({ message: "Non autorisé" });
+    return res.status(401).json({ message: "Non autorisé - Token manquant" });
   }
 
   try {
@@ -15,7 +26,8 @@ export const isAuthenticated = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Token invalide" });
+    console.error("Erreur de vérification du token:", error.message);
+    res.status(401).json({ message: "Token invalide ou expiré" });
   }
 };
 

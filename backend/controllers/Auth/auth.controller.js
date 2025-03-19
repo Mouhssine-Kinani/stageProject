@@ -139,20 +139,27 @@ export const signIn = async (req, res, next) => {
       expiresIn: JWT_EXPIRE_INS,
     });
 
-    // Set cookie with the correct SameSite and Secure settings
-    res.cookie("token", token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production", // ✅ Secure in production only
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // ✅ Fix for localhost
-      maxAge: ms(JWT_EXPIRE_INS),
-    });
+    // Log pour débogage
+    console.log("Production mode:", process.env.NODE_ENV === "production");
+    console.log("Cookie domain:", process.env.COOKIE_DOMAIN || "undefined");
 
-    res.cookie("userId", user._id.toString(), {
+    // Set cookie with the correct SameSite and Secure settings
+    const cookieOptions = {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: ms(JWT_EXPIRE_INS),
-    });
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
+    };
+
+    console.log("Cookie options:", JSON.stringify(cookieOptions));
+
+    res.cookie("token", token, cookieOptions);
+    res.cookie("userId", user._id.toString(), cookieOptions);
 
     res.status(200).json({
       message: "User logged in successfully",
@@ -174,8 +181,24 @@ export const signIn = async (req, res, next) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token", { path: "/" });
-  res.clearCookie("userId", { path: "/" });
+  const cookieOptions = {
+    path: "/",
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    domain:
+      process.env.NODE_ENV === "production"
+        ? process.env.COOKIE_DOMAIN
+        : undefined,
+  };
+
+  console.log(
+    "Logout - clearing cookies with options:",
+    JSON.stringify(cookieOptions)
+  );
+
+  res.clearCookie("token", cookieOptions);
+  res.clearCookie("userId", cookieOptions);
   res.status(200).json({ message: "Logged out successfully" });
 };
 
