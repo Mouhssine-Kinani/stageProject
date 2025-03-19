@@ -1,157 +1,171 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-  } from "@/components/ui/dialog"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Image } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { object, string } from 'yup'
-import { useCrud } from "@/hooks/useCrud"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Image } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { object, string } from "yup";
+import { useCrud } from "@/hooks/useCrud";
+import ProfilePreview from "../../dashboard/components/profile-preview";
 
 // Yup validation schema
 const userSchema = object({
   fullName: string()
-    .required('Full name is required')
-    .min(3, 'Full name must be at least 3 characters')
-    .max(50, 'Full name must be less than 50 characters'),
-  
+    .required("Full name is required")
+    .min(3, "Full name must be at least 3 characters")
+    .max(50, "Full name must be less than 50 characters"),
+
   email: string()
-    .required('Email is required')
-    .email('Please enter a valid email address')
-    .min(5, 'Email must be at least 5 characters')
-    .max(100, 'Email must be less than 100 characters'),
-  
+    .required("Email is required")
+    .email("Please enter a valid email address")
+    .min(5, "Email must be at least 5 characters")
+    .max(100, "Email must be less than 100 characters"),
+
   phone: string()
-    .matches(/^\d{10,15}$/, 'Phone number must be between 10-15 digits')
-    .min(10, 'Phone number must be at least 10 digits')
-    .max(15, 'Phone number must be less than 15 digits'),
-  
+    .matches(/^\d{10,15}$/, "Phone number must be between 10-15 digits")
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must be less than 15 digits"),
+
   status: string()
-    .required('Status is required')
-    .oneOf(['active', 'inactive', 'pending'], 'Invalid status'),
-  
+    .required("Status is required")
+    .oneOf(["active", "inactive", "pending"], "Invalid status"),
+
   roleName: string()
-    .required('Role is required')
-    .oneOf(['User', 'Admin', 'Super Admin'], 'Invalid role')
-})
+    .required("Role is required")
+    .oneOf(["User", "Admin", "Super Admin"], "Invalid role"),
+});
 
-// Validate file function
-const validateFile = (file) => {
-  // Check file size (100KB = 102400 bytes)
-  if (file.size > 102400) {
-    return { isValid: false, error: 'File size must be less than 100KB' };
-  }
-  
-  // Check if it's an image
-  if (!file.type.startsWith('image/')) {
-    return { isValid: false, error: 'File must be an image' };
-  }
-  
-  return { isValid: true };
-};
-
-export default function EditUserDialog({open, onOpenChange, onUserEdited, userData}) {
-  const [errors, setErrors] = useState({})
-  const [selectedFile, setSelectedFile] = useState(null)
+export default function EditUserDialog({ open, onOpenChange, userData }) {
+  const [errors, setErrors] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
-      fullName: '',
-      email: '',
-      phone: '',
-      status: '',
-      roleName: '',
-      logo: null
-  })
-  
-  const { updateItem } = useCrud("users")
+    fullName: "",
+    email: "",
+    phone: "",
+    status: "",
+    roleName: "",
+    logo: null,
+  });
+
+  const { updateItem, validateFile } = useCrud("users");
 
   // Load user data when the dialog opens or userData changes
   useEffect(() => {
     if (userData && open) {
       setFormData({
-        fullName: userData.fullName || '',
-        email: userData.email || '',
-        phone: userData.phone || '',
-        status: userData.status || 'active',
-        roleName: userData.role?.roleName || 'User',
-        logo: userData.logo || null
-      })
+        fullName: userData.fullName || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+        status: userData.status || "active",
+        roleName: userData.role?.roleName || "User",
+        logo: userData.logo || null,
+      });
     }
-  }, [userData, open])
+  }, [userData, open]);
 
   const handleCancel = () => {
-    onOpenChange(false)
-    setErrors({})
-  }
+    onOpenChange(false);
+    setErrors({});
+  };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      const validation = validateFile(file)
+      const validation = validateFile(file, { maxSize: 1024000 }); // Max size 1MB
       if (!validation.isValid) {
-        setErrors(prev => ({ ...prev, logo: validation.error }))
-        return
+        setErrors((prev) => ({ ...prev, logo: validation.error }));
+        return;
       }
-      
-      setSelectedFile(file)
-      setFormData(prev => ({ ...prev, logo: file }))
-      setErrors(prev => ({ ...prev, logo: undefined }))
+
+      setSelectedFile(file);
+      setFormData((prev) => ({ ...prev, logo: file }));
+      setErrors((prev) => ({ ...prev, logo: undefined }));
+    }
+  };
+
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+    // Clear error when field is changed
+    if (errors[e.target.id]) {
+      setErrors((prev) => ({ ...prev, [e.target.id]: undefined }));
     }
   }
 
-  function handleChange(e){
-    setFormData({ ...formData, [e.target.id]: e.target.value })
-  }
-  
   const handleSelectChange = (value, field) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     try {
-      e.preventDefault()
-      await userSchema.validate(formData, { abortEarly: false })
-      
+      e.preventDefault();
+      await userSchema.validate(formData, { abortEarly: false });
+
       const submitData = {
-        ...formData, 
-        role: {roleName: formData.roleName}
-      }
-      delete submitData.roleName
-      
-      const result = await updateItem(userData._id, submitData)
-      
-      if (result.success) {
-        handleCancel()
-        // Notify parent component that a user was edited
-        if (onUserEdited) {
-          onUserEdited()
-        }
+        ...formData,
+        role: { roleName: formData.roleName },
+      };
+      delete submitData.roleName;
+
+      // Only include logo if changed
+      const hasNewImage = !!selectedFile;
+      if (!hasNewImage) {
+        delete submitData.logo;
       } else {
-        setErrors(prev => ({ ...prev, submit: result.error }))
+        console.log("Submitting with new image:", selectedFile.name);
       }
-      
+
+      console.log("Submitting update for user:", userData._id, submitData);
+      const result = await updateItem(userData._id, submitData);
+
+      if (result.success) {
+        // Dispatch event for user edited with updated data
+        const event = new CustomEvent("userEdited", {
+          detail: {
+            ...result.data,
+            logo: hasNewImage ? result.data?.data?.logo : userData.logo,
+          },
+        });
+        window.dispatchEvent(event);
+
+        // Close the dialog
+        handleCancel();
+      } else {
+        console.error("Update failed:", result.error);
+        setErrors((prev) => ({ ...prev, submit: result.error }));
+      }
     } catch (error) {
-      if(error.inner) {
-        const newErrors = {}
-        error.inner.forEach(err => {
-          newErrors[err.path] = err.message
-        })
-        setErrors(newErrors)
+      console.error("Validation error:", error);
+      if (error.inner) {
+        const newErrors = {};
+        error.inner.forEach((err) => {
+          newErrors[err.path] = err.message;
+        });
+        setErrors(newErrors);
+      } else {
+        setErrors((prev) => ({ ...prev, submit: error.message }));
       }
     }
-  }
+  };
 
-  return(
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
@@ -164,9 +178,9 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full name</Label>
-                  <Input 
-                    id="fullName" 
-                    placeholder="John Doe" 
+                  <Input
+                    id="fullName"
+                    placeholder="John Doe"
                     value={formData.fullName}
                     onChange={handleChange}
                     className={errors.fullName ? "border-red-500" : ""}
@@ -175,12 +189,12 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
                     <p className="text-xs text-red-500">{errors.fullName}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone number</Label>
-                  <Input 
-                    id="phone" 
-                    placeholder="212 661651425" 
+                  <Input
+                    id="phone"
+                    placeholder="212 661651425"
                     value={formData.phone}
                     onChange={handleChange}
                     className={errors.phone ? "border-red-500" : ""}
@@ -190,15 +204,22 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
                   )}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 w-full">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select 
-                    onValueChange={(value) => handleSelectChange(value, 'status')}
+                  <Select
+                    onValueChange={(value) =>
+                      handleSelectChange(value, "status")
+                    }
                     value={formData.status}
                   >
-                    <SelectTrigger id="status" className={errors.status ? "border-red-500 w-full" : "w-full"}>
+                    <SelectTrigger
+                      id="status"
+                      className={
+                        errors.status ? "border-red-500 w-full" : "w-full"
+                      }
+                    >
                       <SelectValue placeholder="Select a status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -213,15 +234,15 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
                 </div>
               </div>
             </div>
-            
+
             {/* Right column - Email and role */}
             <div className="flex-1 space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="john.doe@example.com" 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="john.doe@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   className={errors.email ? "border-red-500" : ""}
@@ -230,15 +251,22 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
                   <p className="text-xs text-red-500">{errors.email}</p>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-1 w-full">
                 <div className="space-y-2">
                   <Label htmlFor="roleName">Role</Label>
-                  <Select 
-                    onValueChange={(value) => handleSelectChange(value, 'roleName')}
+                  <Select
+                    onValueChange={(value) =>
+                      handleSelectChange(value, "roleName")
+                    }
                     value={formData.roleName}
                   >
-                    <SelectTrigger id="roleName" className={errors.roleName ? "border-red-500 w-full" : "w-full"}>
+                    <SelectTrigger
+                      id="roleName"
+                      className={
+                        errors.roleName ? "border-red-500 w-full" : "w-full"
+                      }
+                    >
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -254,63 +282,56 @@ export default function EditUserDialog({open, onOpenChange, onUserEdited, userDa
               </div>
             </div>
           </div>
-          
-          {/* Logo section */}
-          <div className="space-y-2 mt-6">
+
+          {/* Profile picture section */}
+          <div className="space-y-2 mt-4">
             <Label htmlFor="logo">Profile picture</Label>
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-24 bg-slate-100 flex items-center justify-center rounded-full border">
-                {selectedFile ? (
-                  <img 
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview" 
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : userData?.logo ? (
-                  <img 
-                    src={userData.logo}
-                    alt="User" 
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <Image size={30} />
-                )}
-              </div>
-              
-              <div className="flex-1 space-y-1">
-                <label htmlFor="logoInput">
-                  <Button variant="outline" className="w-40" type="button" onClick={() => document.getElementById('logoInput').click()}>
-                    Choose a file
-                  </Button>
-                  <input
-                    type="file"
-                    id="logoInput"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-                <p className="text-xs text-gray-500">Please choose a square image, less than 100Kb</p>
-                <p className="text-sm text-gray-600">
-                  {selectedFile ? selectedFile.name : userData?.logo ? "Current image" : "No file"}
-                </p>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <ProfilePreview
+                src={
+                  selectedFile
+                    ? URL.createObjectURL(selectedFile)
+                    : formData.logo
+                    ? `${process.env.NEXT_PUBLIC_URLAPI}/${formData.logo}`
+                    : null
+                }
+                alt={formData.fullName || "Profile"}
+                size={96}
+              />
+
+              <div className="flex-1">
+                <Input
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className={errors.logo ? "border-red-500" : ""}
+                />
                 {errors.logo && (
-                  <p className="text-xs text-red-500">{errors.logo}</p>
+                  <p className="text-xs text-red-500 mt-1">{errors.logo}</p>
                 )}
-                {errors.submit && (
-                  <div className="mt-4 mb-4 bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                    <p className="text-sm font-medium">{errors.submit}</p>
-                  </div>
-                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload a profile picture (max 1MB)
+                </p>
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button className="bg-gray-100 text-black hover:bg-gray-200 px-6" onClick={handleCancel}>Cancel</Button>
-            <Button type="submit">Update User</Button>
+
+          {/* Submit error */}
+          {errors.submit && (
+            <div className="mt-4 p-2 bg-red-50 text-red-600 rounded">
+              {errors.submit}
+            </div>
+          )}
+
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

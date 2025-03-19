@@ -15,9 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCrud } from "@/hooks/useCrud";
+import { useProviders } from "@/hooks/useProviders";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
 export default function AddProductDialog({ open, onOpenChange }) {
   const [formData, setFormData] = useState({
@@ -29,23 +31,30 @@ export default function AddProductDialog({ open, onOpenChange }) {
     website: "",
     provider: "",
   });
-  const [providers, setProviders] = useState([]);
 
+  const { createItem } = useCrud("products");
+  const {
+    providers,
+    isLoading: isLoadingProviders,
+    error: providerError,
+    fetchProviders,
+  } = useProviders();
+
+  // Charger les fournisseurs quand le dialogue s'ouvre
   useEffect(() => {
     if (open) {
       fetchProviders();
     }
-  }, [open]);
+  }, [open, fetchProviders]);
 
-  const fetchProviders = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/providers`);
-      setProviders(response.data.data);
-    } catch (error) {
-      console.error("Error fetching providers:", error);
-      toast.error("Failed to fetch providers");
-    }
-  };
+  // Optimisation: mémoriser les options du fournisseur
+  const providerOptions = useMemo(() => {
+    return providers.map((provider) => (
+      <SelectItem key={provider._id} value={provider._id}>
+        {provider.name}
+      </SelectItem>
+    ));
+  }, [providers]);
 
   const handleCancel = () => {
     setFormData({
@@ -70,21 +79,37 @@ export default function AddProductDialog({ open, onOpenChange }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation de base du formulaire
+    if (!formData.productName.trim()) {
+      toast.error("Le nom du produit est requis");
+      return;
+    }
+
+    if (!formData.provider) {
+      toast.error("Veuillez sélectionner un fournisseur");
+      return;
+    }
+
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/create`,
-        formData
-      );
-      if (response.status === 201) {
-        toast.success("Product added successfully");
+      const result = await createItem(formData);
+
+      if (result.success) {
+        toast.success("Produit ajouté avec succès");
         // Dispatch custom event for product added
-        const event = new CustomEvent('productAdded');
+        const event = new CustomEvent("productAdded", {
+          detail: result.data,
+        });
         window.dispatchEvent(event);
         handleCancel();
+      } else {
+        toast.error(result.error || "Échec de l'ajout du produit");
       }
     } catch (error) {
       console.error("Error creating product:", error);
-      toast.error(error.response?.data?.message || "Failed to add product");
+      toast.error(
+        error.response?.data?.message || "Échec de l'ajout du produit"
+      );
     }
   };
 
@@ -105,7 +130,7 @@ export default function AddProductDialog({ open, onOpenChange }) {
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="category">Category</Label>
             <Input
@@ -121,7 +146,9 @@ export default function AddProductDialog({ open, onOpenChange }) {
             <Label htmlFor="billing_cycle">Billing Cycle</Label>
             <Select
               value={formData.billing_cycle}
-              onValueChange={(value) => handleSelectChange(value, "billing_cycle")}
+              onValueChange={(value) =>
+                handleSelectChange(value, "billing_cycle")
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select billing cycle" />
@@ -164,22 +191,53 @@ export default function AddProductDialog({ open, onOpenChange }) {
           </div>
 
           <div>
-            <Label htmlFor="provider">Provider</Label>
+            <Label htmlFor="provider" className="flex justify-between">
+              <span>Provider</span>
+              {isLoadingProviders ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <button
+                  type="button"
+                  onClick={fetchProviders}
+                  className="text-xs text-blue-500 hover:underline"
+                >
+                  Refresh
+                </button>
+              )}
+            </Label>
+
             <Select
               value={formData.provider}
               onValueChange={(value) => handleSelectChange(value, "provider")}
+              disabled={isLoadingProviders}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select provider" />
+                <SelectValue
+                  placeholder={
+                    isLoadingProviders
+                      ? "Loading providers..."
+                      : "Select provider"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {providers.map((provider) => (
-                  <SelectItem key={provider._id} value={provider._id}>
-                    {provider.name}
+                {providerError ? (
+                  <SelectItem value="error" disabled>
+                    Error loading providers
                   </SelectItem>
-                ))}
+                ) : providers.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    No providers available
+                  </SelectItem>
+                ) : (
+                  providerOptions
+                )}
               </SelectContent>
             </Select>
+
+            {providerError && (
+              <p className="text-red-500 text-xs mt-1">{providerError}</p>
+            )}
           </div>
 
           <div>
@@ -202,4 +260,4 @@ export default function AddProductDialog({ open, onOpenChange }) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

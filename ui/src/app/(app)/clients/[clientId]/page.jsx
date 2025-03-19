@@ -4,14 +4,19 @@ import Map from "@/components/map/map";
 import { getCoordinates } from "@/lib/geocode";
 import { useState, useEffect, use } from "react";
 import { useClient } from "@/hooks/useOneClients";
-import { MapPin } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { ClientTable } from "./columns";
 import SearchBar from "@/components/serchBar/Search";
 import PaginationComponent from "@/components/pagination/pagination";
 import { deleteProductFromClient } from "@/lib/api"; // Assurez-vous que cette fonction est exportée correctement
+import { useTheme } from "@/contexts/ThemeContext";
+import { Button } from "@/components/ui/button";
+import AddClientProductDialog from "./add-product-dialog";
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`
+  const { theme } = useTheme(); // Accès au thème actuel
+  const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
 
   // Utilisation du hook personnalisé qui gère la recherche et la pagination des produits
   const {
@@ -24,6 +29,7 @@ function ClientPage({ params }) {
     setCurrentPage,
     paginatedProducts,
     totalPages,
+    fetchClient,
   } = useClient(clientId);
 
   const [coordinates, setCoordinates] = useState(null);
@@ -64,6 +70,19 @@ function ClientPage({ params }) {
         return 0;
     }
   };
+
+  // Écouter les événements d'ajout de produit au client
+  useEffect(() => {
+    const handleProductAdded = () => {
+      fetchClient();
+    };
+
+    window.addEventListener("productAddedToClient", handleProductAdded);
+
+    return () => {
+      window.removeEventListener("productAddedToClient", handleProductAdded);
+    };
+  }, [fetchClient]);
 
   useEffect(() => {
     if (client?.products && client.products.length > 0) {
@@ -134,19 +153,23 @@ function ClientPage({ params }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold m-1.5 p-0.5">Client #CL0{client.client_reference}</h1>
+      <h1 className="text-3xl font-bold m-1.5 p-0.5 client-title">
+        Client #CL0{client.client_reference}
+      </h1>
       <div className="OneClientContainer">
         <div className="mapContainer">
           <div className="logoContainer">
             <img
               src={`${process.env.NEXT_PUBLIC_URLAPI}\\${client?.logo}`}
-              alt="Client Logo"
+              alt={`Logo de ${client.name}`}
+              className="client-logo"
             />
           </div>
           <div className="TheAddress">
             <h1>{client.name}</h1>
             <p className="flex">
-              <MapPin /> {client?.address || "No address available"}
+              <MapPin style={{ color: theme === "dark" ? "#fff" : "#333" }} />{" "}
+              {client?.address || "No address available"}
             </p>
           </div>
           <div className="TheAddressInMap">
@@ -175,7 +198,18 @@ function ClientPage({ params }) {
       <br />
       <div>
         {/* Barre de recherche pour filtrer les produits et gérer le tri */}
-        <SearchBar onSearch={setSearchQuery} onSort={toggleSortOrder} />
+        <SearchBar
+          onSearch={setSearchQuery}
+          onSort={toggleSortOrder}
+          Children={() => (
+            <Button
+              onClick={() => setAddProductDialogOpen(true)}
+              className="px-4 py-2 flex items-center gap-2"
+            >
+              <Plus size={20} color="white" /> Ajouter un produit
+            </Button>
+          )}
+        />
       </div>
       <br />
       <div className="data">
@@ -191,6 +225,16 @@ function ClientPage({ params }) {
           </div>
         )}
       </div>
+
+      {/* Dialog pour ajouter un produit au client */}
+      {addProductDialogOpen && (
+        <AddClientProductDialog
+          open={addProductDialogOpen}
+          onOpenChange={setAddProductDialogOpen}
+          clientId={clientId}
+          clientName={client.name}
+        />
+      )}
     </>
   );
 }

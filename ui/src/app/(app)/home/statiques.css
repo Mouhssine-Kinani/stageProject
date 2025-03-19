@@ -1,42 +1,84 @@
 .statiques {
   display: flex;
-  justify-content: space-around;
-  max-width: 970px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
 .statiquesDisplay {
   margin-top: 0.7rem;
-  width: 200px;
+  width: 100%;
+  min-width: 200px;
+  flex: 1;
   height: 112px;
   border: none;
   border-radius: 16px;
   padding: 1.3rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(1, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s;
 }
+
+.statiquesDisplay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .activeProducts {
   background-color: #a1e3cb;
+  color: #1e6a52;
 }
+
 .expiringSoon {
   background-color: #ffe999;
+  color: #8a6d00;
 }
+
 .expired {
   background-color: #fb766b;
+  color: #852920;
 }
+
 .clients {
   background-color: #e5ecf6;
+  color: #2c4c6d;
 }
 
 .statiquesHeader {
-  grid-column: span 2 / span 2;
-  font-weight: bolder;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
+
 .nbrStatiques {
-  grid-row-start: 2;
-  font-weight: bolder;
+  font-size: 24px;
+  font-weight: 700;
 }
-.calc {
-  grid-row-start: 2;
+
+/* Responsive design pour tablettes */
+@media (max-width: 1024px) {
+  .statiques {
+    flex-wrap: wrap;
+  }
+
+  .statiquesDisplay {
+    width: calc(50% - 8px);
+    flex: none;
+  }
+}
+
+/* Responsive design pour mobiles */
+@media (max-width: 600px) {
+  .statiques {
+    flex-direction: column;
+  }
+
+  .statiquesDisplay {
+    width: 100%;
+  }
 }

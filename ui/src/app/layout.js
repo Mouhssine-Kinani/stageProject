@@ -10,24 +10,24 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-     
-        <NotificationProvider>
-          <LayoutProvider>
-            {children}
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-          </LayoutProvider>
-        </NotificationProvider>
-
+        <ThemeProvider>
+          <NotificationProvider>
+            <LayoutProvider>
+              {children}
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+              />
+            </LayoutProvider>
+          </NotificationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

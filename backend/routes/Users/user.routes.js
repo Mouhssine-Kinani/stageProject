@@ -1,5 +1,5 @@
 import { Router } from "express";
-import upload from '../../middleware/upload.middleware.js';
+import upload from "../../middleware/upload.middleware.js";
 import {
   getUsers,
   getUser,
@@ -12,9 +12,7 @@ import { hasRole, isAuthenticated } from "../../middleware/auth.middleware.js";
 const userRouter = Router();
 
 // Route pour récupérer tous les utilisateurs (accessible à tous)
-userRouter.get("/",
-  isAuthenticated,
-   getUsers);
+userRouter.get("/", isAuthenticated, getUsers);
 
 // Route pour récupérer un utilisateur (accessible à tous)
 userRouter.get("/:id", isAuthenticated, getUser);
@@ -24,15 +22,16 @@ userRouter.post(
   "/create",
   isAuthenticated,
   hasRole(["Admin", "Super Admin"]),
-  upload.single('logo'),
+  upload.single("logo"),
   createUser
 );
 
 // Mise à jour d'un utilisateur (seulement pour admin et superadmin)
 userRouter.put(
-  "/users/edit/:id",
+  "/edit/:id",
   isAuthenticated,
   hasRole(["Admin", "Super Admin"]),
+  upload.single("logo"),
   updateUser
 );
 
