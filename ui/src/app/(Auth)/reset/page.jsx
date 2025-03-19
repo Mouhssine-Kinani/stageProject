@@ -5,9 +5,10 @@ import SignFromComponent from '@/components/formComponent/SignFromComponent'
 import { object, string , ref} from 'yup';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { toast } from 'react-toastify';
 
+axios.defaults.withCredentials = true;
 const fields = [
     {name:'password', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]' , placeholder: 'Enter password'},
     {name:'passwordConfirmation', icon: LockKeyhole, type: 'password', iconClass: 'user-icon', inputClass: 'w-full px-10 py-2 rounded-md bg-[#EFF1F999]', placeholder: 'Confirm password'}
@@ -30,6 +31,14 @@ const link = '/login';
 const formType = 'reset-password';
 
 export default function Reset() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResetContent />
+        </Suspense>
+    );
+}
+
+function ResetContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
@@ -45,7 +54,8 @@ export default function Reset() {
             await resetPasswordSchema.validate(form, { abortEarly: false });
             setErrors({});
 
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_URLAPI}/auth/reset-password`, {
+            // Use the consistent API URL environment variable
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
                 resetToken: token,
                 newPassword: form.password
             });

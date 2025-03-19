@@ -15,19 +15,19 @@ const providerRoute = Router();
 providerRoute.post(
   '/providers/create',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   upload.single('logo'),
   Insertprovider
 );
 
 // Récupérer tous les providers (accessible à tous)
-providerRoute.get('/providers', showProviders);
+providerRoute.get('/providers',isAuthenticated, showProviders);
 
 // Suppression d'un provider (seulement pour admin et superadmin)
 providerRoute.delete(
   '/providers/delete/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   deleteProvider
 );
 
@@ -35,7 +35,7 @@ providerRoute.delete(
 providerRoute.get(
   '/providers/edit/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   showEditProviderPage
 );
 
@@ -43,7 +43,7 @@ providerRoute.get(
 providerRoute.put(
   '/providers/edit/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   editProvider
 );
 

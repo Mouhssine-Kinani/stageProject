@@ -55,7 +55,7 @@ export default function AddUserDialog({open, onOpenChange, onUserAdded}) {
       roleName: 'User',
       logo: null
     })
-    const {data, createItem, setCurrentPage, currentPage, totalPages, fetchData} = useCrud("users")
+    const { validateFile, data, createItem, setCurrentPage, currentPage, totalPages, fetchData} = useCrud("users")
 
     const handleCancel = () => {
         onOpenChange(false)
@@ -81,7 +81,7 @@ export default function AddUserDialog({open, onOpenChange, onUserAdded}) {
         }
         
         setSelectedFile(file)
-        setFormDataData(prev => ({ ...prev, logo: file }))
+        setFormData(prev => ({ ...prev, logo: file }))
         setErrors(prev => ({ ...prev, logo: undefined }))
     }
     }

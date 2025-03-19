@@ -66,10 +66,11 @@ export default function UsersPage() {
     }
   };
   
-  return (
+  return (<>
+  
+      <h1 className="text-3xl font-bold m-1.5 p-0.5">List of users</h1>
     <div className="container mx-auto py-10">
-      <h1>Users Page</h1>
-      <br />
+
       {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
       <div>
       {isLoading ? (
@@ -79,5 +80,6 @@ export default function UsersPage() {
       )}
       </div>
     </div>
+  </>
   )
 } 

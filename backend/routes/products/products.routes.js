@@ -16,21 +16,21 @@ const productRoute = Router();
 productRoute.post(
   '/products/create',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   insertProduct
 );
 
 // Récupérer tous les produits (accessible à tous)
-productRoute.get('/products', showProducts);
+productRoute.get('/products',isAuthenticated, showProducts);
 
 // Statistiques sur les produits (accessible à tous)
-productRoute.get('/products/stats', countProducts);
+productRoute.get('/products/stats', isAuthenticated, countProducts);
 
 // Suppression d'un produit (seulement pour admin et superadmin)
 productRoute.delete(
   '/products/delete/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   deleteProduct
 );
 
@@ -38,7 +38,7 @@ productRoute.delete(
 productRoute.get(
   '/products/edit/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   showEditProductPage
 );
 
@@ -46,7 +46,7 @@ productRoute.get(
 productRoute.put(
   '/products/edit/:id',
   isAuthenticated,
-  hasRole(["admin", "superadmin"]),
+  hasRole(["Admin", "Super Admin"]),
   editProduct
 );
 

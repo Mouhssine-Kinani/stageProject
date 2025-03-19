@@ -15,6 +15,7 @@ import {SquarePen, Image} from 'lucide-react'
 import { useState } from "react"
 
 import axios from 'axios'
+axios.defaults.withCredentials = true;
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { object, string } from 'yup';
 
