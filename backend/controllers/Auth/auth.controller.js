@@ -115,91 +115,113 @@ export const signUP = async (req, res, next) => {
 //   }
 // };
 
-export const signIn = async (req, res, next) => {
+export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log(`[Auth] Tentative de connexion pour: ${email}`);
+
+    // Vérifier si l'utilisateur existe
     const user = await User.findOne({ email });
-
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      console.log(`[Auth] Utilisateur introuvable: ${email}`);
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        message: "Invalid password",
-        data: { email, password },
-      });
+    // Vérifier le mot de passe
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      console.log(`[Auth] Mot de passe incorrect pour: ${email}`);
+      return res
+        .status(401)
+        .json({ success: false, message: "Mot de passe incorrect" });
     }
 
-    // Create token with user ID and role
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRE_INS,
-    });
+    // Générer un token JWT avec l'ID utilisateur et le rôle
+    const token = jwt.sign(
+      {
+        id: user._id.toString(),
+        role: user.role.roleName, // Inclure le nom du rôle dans le token
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    // Log pour débogage
-    console.log("Production mode:", process.env.NODE_ENV === "production");
-    console.log("Cookie domain:", process.env.COOKIE_DOMAIN || "undefined");
+    console.log(`[Auth] Génération du token pour l'utilisateur: ${user._id}`);
+    console.log(
+      `[Auth] Utilisateur connecté: ${JSON.stringify({
+        _id: user._id,
+        email: user.email,
+        role: user.role.roleName,
+      })}`
+    );
 
-    // Set cookie with the correct SameSite and Secure settings
+    // Options pour les cookies
     const cookieOptions = {
+      httpOnly: false, // Client peut accéder au cookie
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+      path: "/",
+    };
+
+    console.log(
+      `[Auth] Production mode: ${process.env.NODE_ENV === "production"}`
+    );
+    console.log(`[Auth] Cookie domain: ${process.env.COOKIE_DOMAIN}`);
+    console.log(`[Auth] Cookie options: ${JSON.stringify(cookieOptions)}`);
+
+    // Définir les cookies
+    res.cookie("token", token, cookieOptions);
+    res.cookie("userId", user._id.toString(), cookieOptions);
+
+    // Réponse avec succès, token et données utilisateur (sans mot de passe)
+    const userToReturn = { ...user.toObject() };
+    delete userToReturn.password;
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: userToReturn,
+    });
+  } catch (error) {
+    console.error(`[Auth] Erreur de connexion:`, error);
+    res.status(500).json({ success: false, message: "Erreur du serveur" });
+  }
+};
+
+export const logout = (req, res) => {
+  try {
+    // Options complètes pour les cookies, identiques à celles utilisées lors de la création
+    const cookieOptions = {
+      path: "/",
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      maxAge: ms(JWT_EXPIRE_INS),
-      path: "/",
       domain:
         process.env.NODE_ENV === "production"
           ? process.env.COOKIE_DOMAIN
           : undefined,
     };
 
-    console.log("Cookie options:", JSON.stringify(cookieOptions));
+    console.log(
+      "[Logout] Clearing cookies with options:",
+      JSON.stringify(cookieOptions)
+    );
 
-    res.cookie("token", token, cookieOptions);
-    res.cookie("userId", user._id.toString(), cookieOptions);
+    // Supprimer les cookies d'authentification
+    res.clearCookie("token", cookieOptions);
+    res.clearCookie("userId", cookieOptions);
 
-    res.status(200).json({
-      message: "User logged in successfully",
-      data: {
-        token, // also returned in JSON if needed
-        user: {
-          _id: user._id,
-          reference: user.reference,
-          fullName: user.fullName,
-          email: user.email,
-          role: user.role,
-          status: user.status,
-        },
-      },
-    });
+    res.status(200).json({ success: true, message: "Déconnexion réussie" });
   } catch (error) {
-    next(error);
+    console.error("[Logout] Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erreur lors de la déconnexion" });
   }
-};
-
-export const logout = (req, res) => {
-  const cookieOptions = {
-    path: "/",
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    domain:
-      process.env.NODE_ENV === "production"
-        ? process.env.COOKIE_DOMAIN
-        : undefined,
-  };
-
-  console.log(
-    "Logout - clearing cookies with options:",
-    JSON.stringify(cookieOptions)
-  );
-
-  res.clearCookie("token", cookieOptions);
-  res.clearCookie("userId", cookieOptions);
-  res.status(200).json({ message: "Logged out successfully" });
 };
 
 export const requestPasswordReset = async (req, res, next) => {

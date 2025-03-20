@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import AutoIncrementFactory from 'mongoose-sequence';
+import AutoIncrementFactory from "mongoose-sequence";
+import bcrypt from "bcryptjs";
 
 const AutoIncrement = AutoIncrementFactory(mongoose);
 const Schema = mongoose.Schema;
@@ -54,6 +55,11 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.plugin(AutoIncrement, { inc_field: 'user_reference' });
+// Ajouter la méthode matchPassword pour vérifier le mot de passe
+UserSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+UserSchema.plugin(AutoIncrement, { inc_field: "user_reference" });
 const User = mongoose.model("User", UserSchema);
 export default User;
