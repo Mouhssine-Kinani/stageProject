@@ -157,10 +157,9 @@ export default function Header({
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="p-2 hover:bg-muted rounded-full flex items-center"
               >
-                <img src="/headerIcon/side.svg" alt="Profile" />
-                <span className="ml-1 hidden md:inline-block">
-                  Déconnexion
-                </span>
+                {/* <img src="/headerIcon/side.svg" alt="Profile" /> */}
+                <LogOut size={16} />
+                <span className="ml-1 md:inline-block"></span>
                 <ChevronDown
                   size={16}
                   className="hidden md:block ml-1 transition-transform"

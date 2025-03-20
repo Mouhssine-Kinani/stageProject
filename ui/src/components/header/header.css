@@ -201,10 +201,3 @@
   display: flex;
   align-items: center;
 }
-
-@media (max-width: 768px) {
-  .profile-dropdown-container button > span,
-  .profile-dropdown-container button > svg {
-    display: none;
-  }
-}
