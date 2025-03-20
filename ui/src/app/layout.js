@@ -5,6 +5,7 @@ import { LayoutProvider } from "@/contexts/LayoutContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function RootLayout({ children }) {
   return (
@@ -16,15 +17,16 @@ export default function RootLayout({ children }) {
               {children}
               <ToastContainer
                 position="top-right"
-                autoClose={3000}
+                autoClose={5000}
                 hideProgressBar={false}
-                newestOnTop
+                newestOnTop={false}
                 closeOnClick
                 rtl={false}
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
               />
+              <Toaster />
             </LayoutProvider>
           </NotificationProvider>
         </ThemeProvider>

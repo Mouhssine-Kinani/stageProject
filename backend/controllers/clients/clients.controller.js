@@ -190,22 +190,53 @@ export const showEditClientPage = async (req, res) => {
 // Update an existing client
 export const updateClient = async (req, res) => {
   try {
+    console.log("Update client request received for ID:", req.params.id);
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+
+    // Gérer le cas où un fichier est téléchargé
+    const updateData = { ...req.body };
+
+    // Si un nouveau logo est téléchargé, ajouter le chemin à updateData
+    if (req.file) {
+      // Normaliser le chemin avec des slashes avant de le stocker
+      updateData.logo = req.file.path.replace(/\\/g, "/");
+      console.log("New logo path:", updateData.logo);
+    }
+
+    console.log("Update client data:", updateData);
+    console.log("Client ID:", req.params.id);
+
+    if (!req.params.id) {
+      return res.status(400).json({
+        success: false,
+        message: "Client ID is required",
+        data: null,
+      });
+    }
+
     const updatedClient = await Client.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      updateData,
+      { new: true, runValidators: true }
     );
+
     if (!updatedClient) {
+      console.log("Client not found with ID:", req.params.id);
       return res
         .status(404)
         .json({ success: false, message: "Client not found", data: null });
     }
+
+    console.log("Client updated successfully:", updatedClient);
+
     res.status(200).json({
       success: true,
       message: "Client updated successfully",
       data: updatedClient,
     });
   } catch (error) {
+    console.error("Error updating client:", error);
     res
       .status(400)
       .json({ success: false, message: error.message, data: null });

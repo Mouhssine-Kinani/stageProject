@@ -4,19 +4,21 @@ import Map from "@/components/map/map";
 import { getCoordinates } from "@/lib/geocode";
 import { useState, useEffect, use } from "react";
 import { useClient } from "@/hooks/useOneClients";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Edit2 } from "lucide-react";
 import { ClientTable } from "./columns";
 import SearchBar from "@/components/serchBar/Search";
 import PaginationComponent from "@/components/pagination/pagination";
-import { deleteProductFromClient } from "@/lib/api"; // Assurez-vous que cette fonction est exportée correctement
+import { deleteProductFromClient, updateClient } from "@/lib/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import AddClientProductDialog from "./add-product-dialog";
+import EditClientDialog from "./edit-client-dialog";
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`
   const { theme } = useTheme(); // Accès au thème actuel
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
+  const [editClientDialogOpen, setEditClientDialogOpen] = useState(false);
 
   // Utilisation du hook personnalisé qui gère la recherche et la pagination des produits
   const {
@@ -159,11 +161,20 @@ function ClientPage({ params }) {
       <div className="OneClientContainer">
         <div className="mapContainer">
           <div className="logoContainer">
-            <img
-              src={`${process.env.NEXT_PUBLIC_URLAPI}\\${client?.logo}`}
-              alt={`Logo de ${client.name}`}
-              className="client-logo"
-            />
+            {client?.logo ? (
+              <img
+                src={`${process.env.NEXT_PUBLIC_URLAPI}/${client.logo.replace(
+                  /\\/g,
+                  "/"
+                )}`}
+                alt={`Logo de ${client.name}`}
+                className="client-logo"
+              />
+            ) : (
+              <div className="client-logo-placeholder">
+                {client?.name?.charAt(0) || "?"}
+              </div>
+            )}
           </div>
           <div className="TheAddress">
             <h1>{client.name}</h1>
@@ -171,6 +182,13 @@ function ClientPage({ params }) {
               <MapPin style={{ color: theme === "dark" ? "#fff" : "#333" }} />{" "}
               {client?.address || "No address available"}
             </p>
+            <Button
+              onClick={() => setEditClientDialogOpen(true)}
+              className="mt-2 flex items-center gap-2"
+              variant="outline"
+            >
+              <Edit2 size={16} /> Modifier le client
+            </Button>
           </div>
           <div className="TheAddressInMap">
             <Map coordinates={coordinates} />
@@ -233,6 +251,16 @@ function ClientPage({ params }) {
           onOpenChange={setAddProductDialogOpen}
           clientId={clientId}
           clientName={client.name}
+        />
+      )}
+
+      {/* Dialog pour éditer le client */}
+      {editClientDialogOpen && client && (
+        <EditClientDialog
+          open={editClientDialogOpen}
+          onOpenChange={setEditClientDialogOpen}
+          client={client}
+          onSuccess={fetchClient}
         />
       )}
     </>

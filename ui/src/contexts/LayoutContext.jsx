@@ -1,27 +1,30 @@
 "use client";
 import { createContext, useState, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
 
 const LayoutContext = createContext();
 
 export const LayoutProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isNotificationOpen, setIsNotificationOpen] = useState(true);
+  const router = useRouter();
 
-  // const [theme, setTheme] = useState(() => {
-  //   if (typeof window !== "undefined") {
-  //     return localStorage.getItem("theme") || "light";
-  //   }
-  //   return "light";
-  // });
+  useEffect(() => {
+    const getCookie = (name) => {
+      const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+      return match ? match[2] : null;
+    };
 
-  // useEffect(() => {
-  //   document.documentElement.classList.toggle("dark", theme === "dark");
-  //   localStorage.setItem("theme", theme);
-  // }, [theme]);
+    const token = getCookie("token");
+    const userId = getCookie("userId");
+
+    if (!token || !userId) {
+      router.push("/login");
+    }
+  }, [router]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleNotification = () => setIsNotificationOpen(!isNotificationOpen);
-  // const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
   return (
     <LayoutContext.Provider
@@ -30,11 +33,9 @@ export const LayoutProvider = ({ children }) => {
         isNotificationOpen,
         toggleSidebar,
         toggleNotification,
-        // theme,
-        // toggleTheme,
       }}
     >
-      {children}
+      <div className="root">{children}</div>
     </LayoutContext.Provider>
   );
 };
