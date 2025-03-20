@@ -47,6 +47,7 @@ const formType = "login";
 
 export default function Login() {
   const router = useRouter();
+<<<<<<< HEAD
   const [processing, setProcessing] = useState(false);
   const [errors, setErrors] = useState(null);
 
@@ -101,6 +102,80 @@ export default function Login() {
       setErrors("Une erreur s'est produite. Veuillez réessayer plus tard.");
     } finally {
       setProcessing(false);
+=======
+
+  const handleSubmit = async (form, setErrors) => {
+    try {
+      await loginSchema.validate(form, { abortEarly: false });
+      setErrors({});
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`,
+        form,
+        {
+          withCredentials: true, // ✅ Obligatoire pour envoyer et recevoir les cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Login response:", response.data);
+
+      // Vérifier si les cookies ont été définis correctement
+      const tokenCookie = document.cookie.includes("token=");
+      const userIdCookie = document.cookie.includes("userId=");
+
+      console.log("Token cookie set:", tokenCookie);
+      console.log("UserId cookie set:", userIdCookie);
+
+      // Si les cookies ne sont pas définis via HTTP, on les définit manuellement
+      // (Solution de secours pour la production)
+      if (!tokenCookie && response.data.data.token) {
+        Cookies.set("token", response.data.data.token, {
+          path: "/",
+          secure: window.location.protocol === "https:",
+          sameSite: "Lax",
+          // Utiliser le domaine correct en production
+          ...(process.env.NODE_ENV === "production" && {
+            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+          }),
+        });
+      }
+
+      if (!userIdCookie && response.data.data.user._id) {
+        Cookies.set("userId", response.data.data.user._id, {
+          path: "/",
+          secure: window.location.protocol === "https:",
+          sameSite: "Lax",
+          // Utiliser le domaine correct en production
+          ...(process.env.NODE_ENV === "production" && {
+            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+          }),
+        });
+      }
+
+      // Store user in localStorage if needed
+      if (response.data.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+      }
+
+      router.push("/home");
+    } catch (err) {
+      const newErrors = {};
+      if (err.name === "AxiosError") {
+        newErrors[formType] =
+          err.response?.data?.message || "Login failed. Please try again.";
+      } else {
+        err.inner?.forEach((error) => {
+          if (!error.path) {
+            newErrors[formType] = error.message;
+          } else {
+            newErrors[error.path] = error.message;
+          }
+        });
+      }
+      setErrors(newErrors);
+>>>>>>> 09ea354 (hope to work in dev end dep)
     }
   };
 
