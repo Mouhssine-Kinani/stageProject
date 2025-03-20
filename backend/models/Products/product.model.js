@@ -31,7 +31,7 @@ const ProductSchema = new Schema(
       trim: true,
     },
     price: { type: Number, required: true, min: 0 },
-    type: { type: String, enum: ["Type A", "Type B", "Type c"], required: true },
+    type: { type: String, enum: ["Type A", "Type B", "Type C"], required: true },
     productAddedDate: { type: Date, default: Date.now },
     productDeployed: { type: Date },
     date_fin: { type: Date },

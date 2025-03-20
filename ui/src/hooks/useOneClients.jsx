@@ -23,6 +23,7 @@ export function useClient(clientId) {
         throw new Error("API URL is not defined in env variables");
       }
 
+      console.log("Fetching client with ID:", clientId);
       const response = await axios.get(`${API_URL}/clients/${clientId}`);
 
       if (!response.data) {
@@ -37,6 +38,11 @@ export function useClient(clientId) {
         throw new Error("Client data is missing from the response");
       }
 
+      if (!response.data.data._id) {
+        throw new Error("Client ID is missing from the response data");
+      }
+
+      console.log("Client data received:", response.data.data);
       setClient(response.data.data);
     } catch (error) {
       console.error("Error fetching client:", error);

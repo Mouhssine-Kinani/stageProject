@@ -40,25 +40,15 @@ const upload = multer({
   // take storage params up
   storage: storage,
   fileFilter: function (req, file, callback) {
-    console.log(
-      "Processing file upload:",
-      file.originalname,
-      "mimetype:",
-      file.mimetype
-    );
+    console.log("Upload middleware - File received:", file.originalname);
+    console.log("Upload middleware - File type:", file.mimetype);
 
-    if (
-      file.mimetype === "image/png" ||
-      file.mimetype === "image/jpg" ||
-      file.mimetype === "image/jpeg"
-    ) {
+    // Check if the file type is an image
+    if (file.mimetype.startsWith("image/")) {
       callback(null, true);
     } else {
-      console.error(
-        "Only JPG & PNG & JPEG files are supported! Got:",
-        file.mimetype
-      );
-      callback(null, false);
+      console.log("Upload middleware - File rejected: not an image");
+      callback(new Error("Not an image! Please upload only images."), false);
     }
   },
   limits: {
