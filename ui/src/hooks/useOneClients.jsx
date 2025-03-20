@@ -116,5 +116,6 @@ export function useClient(clientId) {
     paginatedProducts,
     totalPages,
     fetchClient,
+    setClient,
   };
 }

@@ -47,13 +47,12 @@ const formType = "login";
 
 export default function Login() {
   const router = useRouter();
-<<<<<<< HEAD
   const [processing, setProcessing] = useState(false);
-  const [errors, setErrors] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (values) => {
     setProcessing(true);
-    setErrors(null);
+    setErrors({});
 
     try {
       console.log("[Login] Tentative de connexion", values);
@@ -75,13 +74,14 @@ export default function Login() {
 
       if (!response.data || response.status !== 200) {
         console.error("[Login] Échec de connexion:", response.data);
-        setErrors("Erreur de connexion. Veuillez réessayer.");
+        setErrors({ login: "Erreur de connexion. Veuillez réessayer." });
         setProcessing(false);
         return;
       }
 
       const data = response.data;
       console.log("[Login] Connexion réussie:", data);
+      console.log("[Login] Données utilisateur:", data.user);
 
       // Définir manuellement les cookies pour s'assurer qu'ils sont présents
       document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
@@ -89,6 +89,10 @@ export default function Login() {
 
       // Stocker les données utilisateur dans localStorage
       localStorage.setItem("userData", JSON.stringify(data.user));
+      console.log(
+        "[Login] Données utilisateur stockées dans localStorage:",
+        data.user
+      );
 
       console.log("[Login] Cookies définis:", document.cookie);
       console.log(`[Login] Redirection vers: ${returnUrl}`);
@@ -99,83 +103,22 @@ export default function Login() {
       }, 100);
     } catch (error) {
       console.error("[Login] Erreur inattendue:", error);
-      setErrors("Une erreur s'est produite. Veuillez réessayer plus tard.");
+      if (error.response?.data?.message) {
+        // Si l'erreur vient du serveur avec un message spécifique
+        if (error.response.data.message.includes("email")) {
+          setErrors({ email: "Email ou mot de passe incorrect" });
+        } else if (error.response.data.message.includes("password")) {
+          setErrors({ password: "Email ou mot de passe incorrect" });
+        } else {
+          setErrors({ login: error.response.data.message });
+        }
+      } else {
+        setErrors({
+          login: "Une erreur s'est produite. Veuillez réessayer plus tard.",
+        });
+      }
     } finally {
       setProcessing(false);
-=======
-
-  const handleSubmit = async (form, setErrors) => {
-    try {
-      await loginSchema.validate(form, { abortEarly: false });
-      setErrors({});
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`,
-        form,
-        {
-          withCredentials: true, // ✅ Obligatoire pour envoyer et recevoir les cookies
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Login response:", response.data);
-
-      // Vérifier si les cookies ont été définis correctement
-      const tokenCookie = document.cookie.includes("token=");
-      const userIdCookie = document.cookie.includes("userId=");
-
-      console.log("Token cookie set:", tokenCookie);
-      console.log("UserId cookie set:", userIdCookie);
-
-      // Si les cookies ne sont pas définis via HTTP, on les définit manuellement
-      // (Solution de secours pour la production)
-      if (!tokenCookie && response.data.data.token) {
-        Cookies.set("token", response.data.data.token, {
-          path: "/",
-          secure: window.location.protocol === "https:",
-          sameSite: "Lax",
-          // Utiliser le domaine correct en production
-          ...(process.env.NODE_ENV === "production" && {
-            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
-          }),
-        });
-      }
-
-      if (!userIdCookie && response.data.data.user._id) {
-        Cookies.set("userId", response.data.data.user._id, {
-          path: "/",
-          secure: window.location.protocol === "https:",
-          sameSite: "Lax",
-          // Utiliser le domaine correct en production
-          ...(process.env.NODE_ENV === "production" && {
-            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
-          }),
-        });
-      }
-
-      // Store user in localStorage if needed
-      if (response.data.data.user) {
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
-      }
-
-      router.push("/home");
-    } catch (err) {
-      const newErrors = {};
-      if (err.name === "AxiosError") {
-        newErrors[formType] =
-          err.response?.data?.message || "Login failed. Please try again.";
-      } else {
-        err.inner?.forEach((error) => {
-          if (!error.path) {
-            newErrors[formType] = error.message;
-          } else {
-            newErrors[error.path] = error.message;
-          }
-        });
-      }
-      setErrors(newErrors);
->>>>>>> 09ea354 (hope to work in dev end dep)
     }
   };
 
@@ -192,6 +135,7 @@ export default function Login() {
             link={link}
             formType={formType}
             handleSubmit={handleSubmit}
+            parentErrors={errors}
           />
         </div>
       </div>
