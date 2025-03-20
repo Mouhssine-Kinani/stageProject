@@ -34,9 +34,15 @@ export const isAuthenticated = (req, res, next) => {
 export const hasRole = (roles) => (req, res, next) => {
   const userRole = req.user?.role?.roleName; // Accès correct au rôle
   console.log("User role in middleware:", userRole);
+  console.log("Required roles:", roles);
+  console.log("User object:", req.user);
 
   if (!userRole || !roles.includes(userRole)) {
-    return res.status(403).json({ message: "Accès refusé" });
+    console.log("Access denied: Role not authorized");
+    return res
+      .status(403)
+      .json({ message: "Accès refusé - Rôle non autorisé" });
   }
+  console.log("Access granted: Role authorized");
   next();
 };
