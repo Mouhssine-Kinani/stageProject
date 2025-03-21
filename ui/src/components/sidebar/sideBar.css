@@ -1,0 +1,38 @@
+.profile-sidebare{
+    margin-bottom: 1rem;
+    padding: .3rem;
+}
+
+.sidebare-img-profile{
+    border-radius:50% ;
+    border: 1px solid black;
+    width: 30px;
+    height: 30px;
+}
+.userName-container{
+    padding: 5px;
+    padding-inline-start: .7rem;
+}
+.sb-s1{
+    display: flex;
+}
+.sb-s2{
+    padding: 1rem;
+    margin-inline-start: .7rem;
+}
+.sb-s2 ul{
+    list-style-type:disc;
+}
+.menu h2{
+    color: gray;
+}
+.menu ul li{
+    display: flex;
+    gap :4px;
+    border-radius: 7px;
+    transition: all 30ms;
+    padding: .7rem;
+}
+.menu ul li:hover{
+    background-color: rgba(166, 164, 164, 0.719);
+}

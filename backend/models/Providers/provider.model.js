@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+
+const { Schema, model } = mongoose;
+
 const ProviderSchema = new Schema(
   {
     name: {
@@ -22,4 +24,6 @@ const ProviderSchema = new Schema(
   { timestamps: true }
 );
 
-export default ProviderSchema;
+const Provider = model('Provider', ProviderSchema);
+
+export default Provider;

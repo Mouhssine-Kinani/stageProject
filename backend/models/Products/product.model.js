@@ -1,19 +1,15 @@
 import mongoose from "mongoose";
+import AutoIncrementFactory from 'mongoose-sequence';
+
+const AutoIncrement = AutoIncrementFactory(mongoose);
+
 const Schema = mongoose.Schema;
 const ProductSchema = new Schema(
   {
-    clientId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Client",
-      required: true,
+    product_reference: {
+      type: Number,
+      unique: true
     },
-    reference: {
-      type: String,
-      required: true,
-      minLength: 3,
-      maxLength: 10,
-      trim: true,
-    }, // ex: #PR01
     productName: {
       type: String,
       required: true,
@@ -31,12 +27,11 @@ const ProductSchema = new Schema(
     billing_cycle: {
       type: String,
       required: true,
-      minLength: 3,
-      maxLength: 20,
+      enum: ['monthly', 'yearly', 'biennial'],
       trim: true,
     },
     price: { type: Number, required: true, min: 0 },
-    type: { type: String, enum: ["Type A", "Type B"], required: true },
+    type: { type: String, enum: ["Type A", "Type B", "Type C"], required: true },
     productAddedDate: { type: Date, default: Date.now },
     productDeployed: { type: Date },
     date_fin: { type: Date },
@@ -48,4 +43,8 @@ const ProductSchema = new Schema(
   { timestamps: true }
 );
 
-export default ProductSchema;
+ProductSchema.plugin(AutoIncrement, { inc_field: 'product_reference' });
+
+const Product = mongoose.model('Product', ProductSchema);
+
+export default Product;

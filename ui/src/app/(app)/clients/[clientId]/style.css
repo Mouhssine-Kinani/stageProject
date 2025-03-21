@@ -1,0 +1,326 @@
+.OneClientContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  gap: 8px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Mode responsive pour les écrans de taille tablette */
+@media (max-width: 1024px) {
+  .OneClientContainer {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .mapContainer {
+    max-width: 100%;
+  }
+
+  .statiqueContainer {
+    max-width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mode responsive pour les petits écrans */
+@media (max-width: 768px) {
+  .OneClientContainer {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .mapContainer {
+    max-width: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .logoContainer {
+    grid-row: 1;
+    grid-column: 1;
+    max-height: 120px;
+    padding: 0.5rem;
+  }
+
+  .TheAddress {
+    grid-row: 2;
+    grid-column: 1;
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+
+  .TheAddressInMap {
+    grid-row: 3;
+    grid-column: 1;
+    height: 150px;
+  }
+
+  .statiqueContainer {
+    max-width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .statiquesDisplay {
+    width: 100%;
+    min-width: unset;
+    height: 100px;
+    padding: 0.8rem;
+  }
+}
+
+/* Mode responsive pour les très petits écrans */
+@media (max-width: 480px) {
+  .statiqueContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .statiquesDisplay {
+    height: 90px;
+    width: 100%;
+  }
+
+  .statiquesHeader {
+    font-size: 0.9rem;
+  }
+
+  .nbrStatiques {
+    font-size: 1.1rem;
+  }
+
+  .calc {
+    font-size: 0.9rem;
+  }
+}
+
+h1 {
+  font-weight: bold;
+}
+
+/* Mode sombre pour les titres principaux */
+.dark h1 {
+  color: #fff;
+}
+
+.client-title {
+  margin-bottom: 1rem;
+}
+
+.dark .client-title {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.clientTitle {
+  font-size: x-large;
+  font-weight: bolder;
+  margin-inline-start: 2rem;
+}
+/* ______________________________________ */
+
+.mapContainer {
+  max-width: 564px;
+  max-height: 252px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  background-color: #f7f9fb;
+  padding: 0.7rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Mode sombre pour mapContainer */
+.dark .mapContainer {
+  background-color: #444;
+  border: 1px solid #555;
+}
+
+.logoContainer {
+  grid-row: span 2 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0.5rem;
+}
+
+.logoContainer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.client-logo {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.dark .client-logo {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.client-logo:hover {
+  transform: scale(1.02);
+}
+
+.TheAddressInMap {
+  grid-column-start: 2;
+  height: 150px;
+  border: 2px solid rgb(190, 190, 190);
+  border-radius: 10px;
+}
+
+/* Mode sombre pour TheAddressInMap */
+.dark .TheAddressInMap {
+  border: 2px solid #555;
+}
+
+.TheAddress {
+  display: flex;
+  flex-direction: column;
+  color: #333;
+}
+
+/* Mode sombre pour TheAddress */
+.dark .TheAddress {
+  color: #fff;
+}
+
+.dark .TheAddress h1 {
+  color: #fff;
+}
+
+.dark .TheAddress p {
+  color: #ccc;
+}
+
+/* ______________________________________ */
+.statiqueContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  max-width: 600px;
+}
+.statiquesDisplay {
+  margin-top: 0.7rem;
+  width: 264px;
+  min-width: 200px;
+  height: 112px;
+  border: none;
+  border-radius: 16px;
+  padding: 1.3rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  gap: 8px;
+}
+.statiquesDisplay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.activeProducts {
+  background-color: #a1e3cb;
+  color: #1e6a52;
+}
+.expiringSoon {
+  background-color: #ffe999;
+  color: #8a6d00;
+}
+.expired {
+  background-color: #fb766b;
+  color: #852920;
+}
+.games {
+  background-color: #e5ecf6;
+  color: #2c4c6d;
+}
+
+/* Mode sombre pour les cartes statistiques */
+.dark .activeProducts {
+  background-color: #2a9177;
+  color: #fff;
+}
+.dark .expiringSoon {
+  background-color: #d9b940;
+  color: #fff;
+}
+.dark .expired {
+  background-color: #c54840;
+  color: #fff;
+}
+.dark .games {
+  background-color: #3a4a5e;
+  color: #fff;
+}
+
+.statiquesHeader {
+  grid-column: span 2 / span 2;
+  font-weight: bolder;
+}
+.nbrStatiques {
+  grid-row-start: 2;
+  font-weight: bolder;
+}
+.calc {
+  grid-row-start: 2;
+}
+
+/* Styles pour la table des données en mode sombre */
+.dark .data {
+  color: #fff;
+  background-color: #333;
+}
+
+.dark table {
+  border-color: #555;
+}
+
+.dark table th,
+.dark table td {
+  border-color: #555;
+  color: #fff;
+}
+
+/* Style pour les boutons de pagination en mode sombre */
+.dark .pagination {
+  color: #fff;
+}
+
+.dark .pagination button {
+  background-color: #444;
+  color: #fff;
+  border-color: #555;
+}
+
+/* Adapter la table aux petits écrans */
+@media (max-width: 768px) {
+  .data {
+    overflow-x: auto;
+  }
+
+  .data table {
+    min-width: 600px;
+  }
+}
+
+.client-logo-placeholder {
+  width: 120px;
+  height: 120px;
+  background-color: #eaeaea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: #666;
+}
