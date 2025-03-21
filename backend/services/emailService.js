@@ -18,11 +18,11 @@ const createExpirationEmailTemplate = (product, daysRemaining, expirationDate) =
       
       <h2>Product Details:</h2>
       <ul>
-        <li><strong>Product Name:</strong> ${product.productName}</li>
-        <li><strong>Client:</strong> ${product.clientName}</li>
-        <li><strong>Deployment Date:</strong> ${new Date(product.productDeployed).toLocaleDateString()}</li>
-        <li><strong>Expiration Date:</strong> ${new Date(expirationDate).toLocaleDateString()}</li>
-        <li><strong>Days Remaining:</strong> ${daysRemaining}</li>
+      <li><strong>Client:</strong> ${product.clientName}</li>
+      <li><strong>Product Name:</strong> ${product.productName}</li>
+      <li><strong>Deployment Date:</strong> ${new Date(product.productAddedDate).toLocaleDateString()}</li>
+      <li><strong>Expiration Date:</strong> ${new Date(expirationDate).toLocaleDateString()}</li>
+      <li><strong>Days Remaining:</strong> ${daysRemaining}</li>
       </ul>
 
       <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">

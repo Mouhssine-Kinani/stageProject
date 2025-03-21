@@ -1,5 +1,5 @@
 const calculateExpirationDate = (product) => {
-  const deploymentDate = new Date(product.productDeployed);
+  const deploymentDate = new Date(product.productAddedDate);
   const cycles = {
     monthly: 1,
     yearly: 12,

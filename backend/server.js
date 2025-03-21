@@ -84,7 +84,7 @@ const scheduleExpirationChecks = () => {
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
-    12, 0, 0 // 12:00 PM
+    15, 0, 0 // 12:00 PM
   );
   
   // If it's already past noon, schedule for tomorrow at noon
@@ -101,8 +101,6 @@ const scheduleExpirationChecks = () => {
     setInterval(checkExpirations, 24 * 60 * 60 * 1000);
   }, timeToNoon);
 };
-
-// checkExpirations();
 // let backend dynamically assigns a port
 const serverPORT = process.env.PORT || 5000;
 // Démarrer le serveur

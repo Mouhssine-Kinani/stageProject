@@ -1,4 +1,5 @@
 import Product from '../models/Products/product.model.js';
+import Client from '../models/Clients/client.model.js';
 import User from '../models/Users/user.model.js';
 import { calculateExpirationDate, getRemainingDays } from '../utils/expirationUtils.js';
 import { sendExpirationNotification } from './emailService.js';
@@ -37,19 +38,15 @@ const recordNotification = async (productId, daysRemaining) => {
 
 const checkExpirations = async () => {
   try {
-    // const products = await Product.find({
-    //   productDeployed: { $exists: true, $ne: null }
-    // });
-    // const products = await Product.find();
-     const products = await getProductsReferencedByClients()     
-    console.log(products);
+     const products = await getProductsReferencedByClients()
     const admins = await getAdminUsers();
-    console.log(admins);
     
     for (const product of products) {
       const expirationDate = calculateExpirationDate(product);
       const daysRemaining = getRemainingDays(expirationDate);
-      
+
+      const clientName = await Client.findById(product.clientId).select('name');
+      product.clientName = clientName.name;
       // Check if we need to send a notification for this interval
       for (const interval of NOTIFICATION_INTERVALS) {
         if (daysRemaining === interval) {
@@ -59,17 +56,51 @@ const checkExpirations = async () => {
             await sendExpirationNotification(admins, product, daysRemaining, expirationDate);
             await recordNotification(product._id, interval);
           }
+          }
         }
       }
-      await sendExpirationNotification(admins, products[0], 7, calculateExpirationDate(products[0]));
-      await recordNotification(product._id, 7);
-      console.log('GGGGGGGG');
-      console.log(product._id);
-      console.log('GGGGGGGG');
-    }
   } catch (error) {
     console.error('Error in expiration checker:', error);
   }
 };
+
+
+// const checkExpirations = async () => {
+//   try {
+//      const products = await getProductsReferencedByClients()
+//     const admins = await getAdminUsers();
+    
+//     // 
+//     for (const product of products) {
+//       const expirationDate = calculateExpirationDate(product);
+//       const daysRemaining = getRemainingDays(expirationDate);
+
+//       const clientName = await Client.findById(product.clientId).select('name');
+//       product.clientName = clientName.name;
+//       // Check if we need to send a notification for this interval
+//       // for (const interval of NOTIFICATION_INTERVALS) {
+//       //   if (daysRemaining === interval) {
+//           // Check if we've already sent a notification for this interval
+//           // const alreadySent = await hasNotificationBeenSent(product._id, interval);
+//           // const alreadySent = await hasNotificationBeenSent(product._id, daysRemaining);
+//           // if (!alreadySent) {
+//             await sendExpirationNotification(admins, product, daysRemaining, expirationDate);
+//             await recordNotification(product._id, daysRemaining);
+//             // await recordNotification(product._id, interval);
+//           // }
+//           //   }
+//           // }
+//         // await sendExpirationNotification(admins, products[0], 7, calculateExpirationDate(products[0]));
+//         // await recordNotification(product._id, 7);
+//         // console.log('GGGGGGGG');
+//         // console.log(product._id);
+//         // console.log('GGGGGGGG');
+//         break;
+//       }
+//   } catch (error) {
+//     console.error('Error in expiration checker:', error);
+//   }
+// };
+
 
 export { checkExpirations }; 
