@@ -110,7 +110,24 @@ const useUser = () => {
    */
   const handleLogout = async () => {
     try {
-      // Appeler l'API de déconnexion
+      // Récupérer l'ID utilisateur depuis les cookies ou le contexte
+      const userId = Cookies.get("userId");
+
+      // Appeler l'API pour mettre à jour lastLogin_date
+      if (userId) {
+        const token = Cookies.get("token");
+        await axios.post(
+          `${URLAPI}/users/logout`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        console.log("[useUser] LastLogin_date mise à jour via API");
+      }
+
+      // Appeler l'API de déconnexion pour le token
       await axios.post(`${URLAPI}/auth/logout`, {}, { withCredentials: true });
       console.log("[useUser] Déconnexion réussie via API");
     } catch (error) {
