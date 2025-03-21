@@ -19,6 +19,19 @@ import {
 
 import { useState, useEffect, useMemo } from "react";
 
+// Helper function to determine status text color
+const getStatusTextColorClass = (status) => {
+  if (!status) return "text-black";
+  
+  const statusLower = String(status).toLowerCase();
+  
+  if (statusLower === "active") return "text-green-500";
+  if (statusLower === "inactive") return "text-red-500";
+  if (statusLower === "pending") return "text-yellow-500";
+  
+  return "text-black"; // Default color
+};
+
 /**
  * Reusable data table component with responsive design
  * @param {Object} props - Component props
@@ -126,6 +139,15 @@ export function DataTable({
 
   const cellStyles = getCellStyles();
 
+  // Check if the status column exists in the table columns
+  const hasStatusColumn = useMemo(() => {
+    return columns.some(col => 
+      col.accessorKey === "status" || 
+      col.id === "status" || 
+      col.accessorKey?.includes("status")
+    );
+  }, [columns]);
+
   return (
     <div className="table-responsive-container">
       <div className="border rounded-md overflow-hidden">
@@ -162,14 +184,30 @@ export function DataTable({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} style={cellStyles}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    // Check if this is a status column
+                    const isStatusColumn = 
+                      cell.column.id === "status" || 
+                      cell.column.id.includes("status");
+                    
+                    // Apply appropriate class for status column
+                    const statusColorClass = isStatusColumn 
+                      ? getStatusTextColorClass(cell.getValue())
+                      : "";
+                    
+                    return (
+                      <TableCell 
+                        key={cell.id} 
+                        style={cellStyles}
+                        className={statusColorClass}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : showNoResults ? (
