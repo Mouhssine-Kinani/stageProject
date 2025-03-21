@@ -133,9 +133,16 @@ const useUser = () => {
     } catch (error) {
       console.error("[useUser] Erreur lors de la déconnexion via API:", error);
     } finally {
-      // Nettoyer les cookies et le localStorage même si l'API échoue
-      Cookies.remove("token", { path: "/" });
-      Cookies.remove("userId", { path: "/" });
+      // Nettoyer les cookies avec les options appropriées pour le cross-origin
+      const isProduction = process.env.NODE_ENV === "production";
+      const cookieOptions = {
+        path: "/",
+        sameSite: isProduction ? "None" : "Lax",
+        secure: isProduction,
+      };
+
+      Cookies.remove("token", cookieOptions);
+      Cookies.remove("userId", cookieOptions);
       localStorage.removeItem("userData");
 
       setUser(null);

@@ -83,9 +83,13 @@ export default function Login() {
       console.log("[Login] Connexion réussie:", data);
       console.log("[Login] Données utilisateur:", data.user);
 
-      // Définir manuellement les cookies pour s'assurer qu'ils sont présents
-      document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `userId=${data.user._id}; path=/; max-age=604800; SameSite=Lax`;
+      // Définir manuellement les cookies en respectant SameSite pour cross-origin
+      const isProduction = process.env.NODE_ENV === "production";
+      const sameSite = isProduction ? "None" : "Lax";
+      const secure = isProduction ? "; Secure" : "";
+
+      document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=${sameSite}${secure}`;
+      document.cookie = `userId=${data.user._id}; path=/; max-age=604800; SameSite=${sameSite}${secure}`;
 
       // Stocker les données utilisateur dans localStorage
       localStorage.setItem("userData", JSON.stringify(data.user));

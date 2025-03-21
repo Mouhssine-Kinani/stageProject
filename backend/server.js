@@ -5,7 +5,7 @@ import productRoute from "./routes/products/products.routes.js";
 import clientRoute from "./routes/clients/clients.routes.js";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/Users/user.routes.js";
-import { PORT, FRONT_END_URL } from "./config/env.js";
+import { PORT, FRONT_END_URL, COOKIE_DOMAIN } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/Auth/auth.routes.js";
 import cors from "cors";
@@ -18,10 +18,6 @@ app.use(cookieParser()); // Middleware to parse cookies
 // Configure CORS to allow requests from multiple origins with credentials
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
     origin: function (origin, callback) {
       // Whitelist of allowed origins
       const allowedOrigins = [
@@ -49,7 +45,12 @@ app.use(
     },
     credentials: true, // Allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "x-auth-token",
+    ],
     exposedHeaders: ["set-cookie"],
   })
 );
@@ -84,16 +85,18 @@ const scheduleExpirationChecks = () => {
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
-    12, 0, 0 // 12:00 PM
+    12,
+    0,
+    0 // 12:00 PM
   );
-  
+
   // If it's already past noon, schedule for tomorrow at noon
   if (now > noon) {
     noon.setDate(noon.getDate() + 1);
   }
-  
+
   const timeToNoon = noon - now;
-  
+
   // First run at next noon
   setTimeout(() => {
     checkExpirations();
@@ -112,7 +115,7 @@ app.listen(serverPORT, async () => {
     console.log(`Server running at ${PORT}`);
     // Start the expiration checker scheduler
     scheduleExpirationChecks();
-    console.log('Expiration checker scheduled to run daily at noon');
+    console.log("Expiration checker scheduled to run daily at noon");
   } catch (err) {
     console.error("Failed to connect to MongoDB:", err.message);
     process.exit(1);
