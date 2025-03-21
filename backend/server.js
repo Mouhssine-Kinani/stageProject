@@ -84,7 +84,7 @@ const scheduleExpirationChecks = () => {
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
-    15, 0, 0 // 12:00 PM
+    15, 30, 0 // 12:00 PM
   );
   
   // If it's already past noon, schedule for tomorrow at noon
