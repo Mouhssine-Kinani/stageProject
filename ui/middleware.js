@@ -10,7 +10,13 @@ const PROTECTED_PATHS = [
   "/settings",
 ];
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset",
+  "/forget",
+];
 
 /**
  * Middleware d'authentification pour protéger les routes
@@ -18,11 +24,40 @@ const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
  */
 export function middleware(request) {
   // Vérifier si le chemin est protégé
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+
+  // Debug logs
+  console.log(`[Middleware] Processing: ${pathname}${search}`);
+  
+  // Special case for reset password with token
+  if (pathname === "/reset" && search && search.includes("token=")) {
+    console.log(`[Middleware] Reset with token detected, allowing through`);
+    return NextResponse.next();
+  }
+  
+  // More logs
+  console.log(`[Middleware] Not a reset with token path`);
+
+  // Alternative approach
+const url = request.nextUrl;
+if (pathname === "/reset" && url.searchParams.has("token")) {
+  console.log(`[Middleware] Reset with token detected via searchParams`);
+  return NextResponse.next();
+}
 
   // Obtenir les cookies d'authentification
   const token = request.cookies.get("token")?.value;
   const userId = request.cookies.get("userId")?.value;
+
+  // Vérifier si c'est un chemin public
+  const isPublicPath = PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+
+  // Si c'est un chemin public, laisser passer
+  if (isPublicPath) {
+    return NextResponse.next();
+  }
 
   // Déterminer si c'est un chemin protégé
   const isProtectedPath = PROTECTED_PATHS.some(
