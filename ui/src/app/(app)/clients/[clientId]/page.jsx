@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import AddClientProductDialog from "./add-product-dialog";
 import EditClientDialog from "./edit-client-dialog";
+import { toast } from "react-toastify";
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`
@@ -32,6 +33,7 @@ function ClientPage({ params }) {
     paginatedProducts,
     totalPages,
     fetchClient,
+    setClient,
   } = useClient(clientId);
 
   const [coordinates, setCoordinates] = useState(null);
@@ -130,11 +132,61 @@ function ClientPage({ params }) {
   // Fonction pour supprimer un produit d'un client
   const deleteItem = async (productId) => {
     try {
-      await deleteProductFromClient(clientId, productId);
-      window.location.reload();
+      if (!productId) {
+        toast.error("ID du produit manquant");
+        return;
+      }
+
+      console.log(
+        `Tentative de suppression du produit: ${productId} pour le client: ${clientId}`
+      );
+
+      const response = await deleteProductFromClient(clientId, productId);
+      console.log("Réponse de l'API:", response);
+
+      if (response && response.success) {
+        // Mettre à jour l'état local en retirant le produit supprimé
+        setClient((prevClient) => {
+          if (!prevClient) return prevClient;
+          return {
+            ...prevClient,
+            products: prevClient.products.filter(
+              (product) => product._id !== productId
+            ),
+          };
+        });
+        toast.success("Produit supprimé avec succès");
+      } else {
+        toast.error(
+          response?.message || "Erreur lors de la suppression du produit"
+        );
+      }
     } catch (error) {
       console.error("Erreur lors de la suppression du produit:", error);
-      alert("Une erreur est survenue lors de la suppression du produit.");
+
+      // Gérer les erreurs spécifiques
+      if (error.response) {
+        const status = error.response.status;
+        if (status === 401) {
+          toast.error("Non autorisé. Veuillez vous reconnecter.");
+        } else if (status === 403) {
+          toast.error(
+            "Vous n'avez pas les droits suffisants pour cette action."
+          );
+        } else if (status === 404) {
+          toast.error("Client ou produit introuvable.");
+        } else {
+          toast.error(
+            `Erreur: ${
+              error.response.data?.message || "Une erreur est survenue"
+            }`
+          );
+        }
+      } else {
+        toast.error(
+          "Une erreur est survenue lors de la suppression du produit."
+        );
+      }
     }
   };
 

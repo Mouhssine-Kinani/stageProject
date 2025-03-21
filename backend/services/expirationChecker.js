@@ -3,6 +3,7 @@ import User from '../models/Users/user.model.js';
 import { calculateExpirationDate, getRemainingDays } from '../utils/expirationUtils.js';
 import { sendExpirationNotification } from './emailService.js';
 import Notification from '../models/Notifications/notification.model.js';
+import {getProductsReferencedByClients} from '../controllers/clients/clients.controller.js';
 
 const NOTIFICATION_INTERVALS = [20, 7, 3];
 
@@ -39,8 +40,9 @@ const checkExpirations = async () => {
     // const products = await Product.find({
     //   productDeployed: { $exists: true, $ne: null }
     // });
-    const products = await Product.find();
-    
+    // const products = await Product.find();
+     const products = await getProductsReferencedByClients()     
+    console.log(products);
     const admins = await getAdminUsers();
     console.log(admins);
     
@@ -59,7 +61,7 @@ const checkExpirations = async () => {
           }
         }
       }
-      await sendExpirationNotification(admins, product, daysRemaining, expirationDate);
+      await sendExpirationNotification(admins, products[0], 7, calculateExpirationDate(products[0]));
       await recordNotification(product._id, 7);
       console.log('GGGGGGGG');
       console.log(product._id);

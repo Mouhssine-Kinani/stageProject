@@ -168,7 +168,7 @@ const getColumns = (onDelete) => [
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
             <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>View Details</DropdownMenuItem>
+            {/* <DropdownMenuItem>View Details</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       );
