@@ -57,7 +57,9 @@ export default function Notification({ type = 'info', message, onClose, autoClos
         aria-label="Close notification"
       >
         <X size={18} />
+
       </button>
+      <h1>test</h1>
     </div>
   );
 } 
