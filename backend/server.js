@@ -9,6 +9,7 @@ import { PORT, FRONT_END_URL } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/Auth/auth.routes.js";
 import cors from "cors";
+import { checkExpirations } from "./services/expirationChecker.js";
 
 const app = express();
 
@@ -76,11 +77,32 @@ app.get("/", (req, res) => {
 // Middleware for error handling (should be last)
 app.use(errorMiddleWare);
 
-// Route pour les utilisateurs
-app.use("/users", userRouter);
-// auth
-app.use("/auth", authRouter);
+// Schedule expiration checks to run daily at midday (12:00 PM)
+const scheduleExpirationChecks = () => {
+  const now = new Date();
+  const noon = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    12, 0, 0 // 12:00 PM
+  );
+  
+  // If it's already past noon, schedule for tomorrow at noon
+  if (now > noon) {
+    noon.setDate(noon.getDate() + 1);
+  }
+  
+  const timeToNoon = noon - now;
+  
+  // First run at next noon
+  setTimeout(() => {
+    checkExpirations();
+    // Then run every 24 hours
+    setInterval(checkExpirations, 24 * 60 * 60 * 1000);
+  }, timeToNoon);
+};
 
+// checkExpirations();
 // let backend dynamically assigns a port
 const serverPORT = process.env.PORT || 5000;
 // Démarrer le serveur
@@ -88,6 +110,9 @@ app.listen(serverPORT, async () => {
   try {
     await connectDB();
     console.log(`Server running at ${PORT}`);
+    // Start the expiration checker scheduler
+    scheduleExpirationChecks();
+    console.log('Expiration checker scheduled to run daily at noon');
   } catch (err) {
     console.error("Failed to connect to MongoDB:", err.message);
     process.exit(1);

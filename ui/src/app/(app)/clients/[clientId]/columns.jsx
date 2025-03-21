@@ -30,9 +30,9 @@ const billingCycleToMonths = (billingCycle) => {
 
 const getColumns = (onDelete) => [
   {
-    accessorKey: "product_reference",
+    accessorKey: "product_history_reference",
     header: "Reference",
-    cell: ({ row }) => `#PR0${row.original.product_reference}`,
+    cell: ({ row }) => `#PR0${row.original.product_history_reference}`,
   },
   {
     accessorKey: "productName",
@@ -162,7 +162,9 @@ const getColumns = (onDelete) => [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onDelete(row.original._id)}>
+            <DropdownMenuItem onClick={() => {
+              alert(row.original._id)
+              onDelete(row.original._id)}}>
               <span className="text-red-500">Delete</span>
             </DropdownMenuItem>
             <DropdownMenuItem>Edit</DropdownMenuItem>

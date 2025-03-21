@@ -7,7 +7,7 @@ import { useState } from "react";
 import { object, string } from "yup";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 axios.defaults.withCredentials = true;
 // Ensure credentials are sent with every request
 axios.defaults.withCredentials = true;

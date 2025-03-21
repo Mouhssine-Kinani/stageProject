@@ -40,7 +40,7 @@ const ClientSchema = new Schema(
       maxLength: 15,
     },
     products: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      { type: mongoose.Schema.Types.ObjectId, ref: "ProductHistory", required: true },
     ],
   },
   { timestamps: true }
