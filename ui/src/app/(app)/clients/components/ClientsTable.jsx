@@ -173,8 +173,8 @@ export function ClientsTable({ data = [], onDelete, isLoading = false }) {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Confirmer la suppression"
-        description="Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible."
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this client? This action cannot be undone."
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

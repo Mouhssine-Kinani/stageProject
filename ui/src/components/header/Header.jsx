@@ -40,7 +40,7 @@ export default function Header({
   let breadcrumb = parts.map((part, index) => {
     if (index === 1 && isClientPage) {
       return clientLoading
-        ? "Chargement..."
+        ? "Loading..."
         : client?.client_reference
         ? `Client #CL0${client.client_reference}`
         : part;
@@ -83,16 +83,8 @@ export default function Header({
             <button
               className="sidebar-toggle p-2 text-foreground hover:bg-muted rounded-full"
               onClick={toggleSidebar}
-              title={
-                sidebarOpen
-                  ? "Masquer la barre latérale"
-                  : "Afficher la barre latérale"
-              }
-              aria-label={
-                sidebarOpen
-                  ? "Masquer la barre latérale"
-                  : "Afficher la barre latérale"
-              }
+              title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
             >
               <Menu size={isMobile ? 24 : 20} />
             </button>
@@ -101,14 +93,10 @@ export default function Header({
               className="notification-toggle p-2 text-foreground hover:bg-muted rounded-full"
               onClick={toggleNotification}
               title={
-                notificationOpen
-                  ? "Masquer les notifications"
-                  : "Afficher les notifications"
+                notificationOpen ? "Hide notifications" : "Show notifications"
               }
               aria-label={
-                notificationOpen
-                  ? "Masquer les notifications"
-                  : "Afficher les notifications"
+                notificationOpen ? "Hide notifications" : "Show notifications"
               }
             >
               <Bell size={isMobile ? 24 : 20} />
@@ -176,7 +164,7 @@ export default function Header({
                     onClick={handleLogoutClick}
                   >
                     <LogOut size={16} />
-                    <span>Déconnexion</span>
+                    <span>Logout</span>
                   </button>
                 </div>
               )}
@@ -187,8 +175,8 @@ export default function Header({
       <ConfirmDialog
         open={logoutDialogOpen}
         onOpenChange={setLogoutDialogOpen}
-        title="Confirmer la déconnexion"
-        description="Êtes-vous sûr de vouloir vous déconnecter ?"
+        title="Confirm Logout"
+        description="Are you sure you want to logout?"
         onConfirm={handleConfirmLogout}
         onCancel={handleCancelLogout}
       />

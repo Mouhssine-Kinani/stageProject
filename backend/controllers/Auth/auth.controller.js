@@ -127,7 +127,7 @@ export const signIn = async (req, res) => {
       console.log(`[Auth] Utilisateur introuvable: ${email}`);
       return res
         .status(404)
-        .json({ success: false, message: "Utilisateur non trouvé" });
+        .json({ success: false, message: "User not found" });
     }
 
     // Vérifier le mot de passe
@@ -136,7 +136,7 @@ export const signIn = async (req, res) => {
       console.log(`[Auth] Mot de passe incorrect pour: ${email}`);
       return res
         .status(401)
-        .json({ success: false, message: "Mot de passe incorrect" });
+        .json({ success: false, message: "Incorrect password" });
     }
 
     // Générer un token JWT avec l'ID utilisateur et le rôle
@@ -192,7 +192,7 @@ export const signIn = async (req, res) => {
     });
   } catch (error) {
     console.error(`[Auth] Erreur de connexion:`, error);
-    res.status(500).json({ success: false, message: "Erreur du serveur" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -219,12 +219,10 @@ export const logout = (req, res) => {
     res.clearCookie("token", cookieOptions);
     res.clearCookie("userId", cookieOptions);
 
-    res.status(200).json({ success: true, message: "Déconnexion réussie" });
+    res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
     console.error("[Logout] Error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Erreur lors de la déconnexion" });
+    res.status(500).json({ success: false, message: "Error during logout" });
   }
 };
 
@@ -234,7 +232,7 @@ export const requestPasswordReset = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
-        message: "User not found. Veuillez réessayer.",
+        message: "User not found. Please try again.",
       });
     }
 
@@ -248,7 +246,7 @@ export const requestPasswordReset = async (req, res, next) => {
         (user.resetTokenExpiry - Date.now()) / 1000 / 60
       ); // Convert to minutes
       return res.status(400).json({
-        message: `Un email de réinitialisation a déjà été envoyé. Veuillez attendre ${timeLeft} minutes avant de réessayer.`,
+        message: `A reset email has already been sent. Please wait ${timeLeft} minutes before trying again.`,
       });
     }
 
@@ -272,14 +270,14 @@ export const requestPasswordReset = async (req, res, next) => {
     const mailOptions = {
       from: EMAIL_USER,
       to: email,
-      subject: "Réinitialisation de mot de passe",
+      subject: "Password Reset",
       html: `
-        <h1>Réinitialisation de mot de passe</h1>
-        <p>Vous avez demandé une réinitialisation de mot de passe.</p>
-        <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-        <a href="${resetLink}">Réinitialiser mon mot de passe</a>
-        <p>Ce lien expirera dans 1 heure.</p>
-        <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+        <h1>Password Reset</h1>
+        <p>You have requested a password reset.</p>
+        <p>Click on the link below to reset your password:</p>
+        <a href="${resetLink}">Reset my password</a>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you did not request this reset, please ignore this email.</p>
       `,
     };
 

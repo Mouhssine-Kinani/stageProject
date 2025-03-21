@@ -104,21 +104,19 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Ouvrir le menu</span>
+                  <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleEdit}>
-                  Modifier
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDelete}
                   className="text-red-500"
                 >
-                  Supprimer
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -132,9 +130,9 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
   const handleConfirmDelete = () => {
     if (userToDelete) {
       onDelete(userToDelete._id);
+      console.log("Utilisateur supprimé avec succès");
       toast({
-        description: "Utilisateur supprimé avec succès",
-        variant: "success",
+        description: "User deleted successfully",
       });
       setDeleteDialogOpen(false);
       setUserToDelete(null);
@@ -158,8 +156,8 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Confirmer la suppression"
-        description="Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this user?"
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

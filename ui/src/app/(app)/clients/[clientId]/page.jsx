@@ -149,8 +149,9 @@ function ClientPage({ params }) {
         toast.error("Erreur lors de la suppression du produit");
       }
     } catch (error) {
-      console.error("Erreur:", error);
-      toast.error(`Erreur: ${error.message}`);
+      console.error("Error:", error);
+      toast.error("Error deleting product");
+      return;
     }
   };
 

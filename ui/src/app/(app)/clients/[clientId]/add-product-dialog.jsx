@@ -159,7 +159,7 @@ export default function AddClientProductDialog({
     }
 
     if (!formData.provider) {
-      toast.error("Veuillez sélectionner un fournisseur");
+      toast.error("Please select a provider");
       setIsSubmitting(false);
       return;
     }

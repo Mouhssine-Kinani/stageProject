@@ -19,7 +19,7 @@ const fields = [
     type: "email",
     iconClass: "user-icon",
     inputClass: "w-full px-10 py-2 rounded-md bg-[#EFF1F999]",
-    placeholder: "Entrer votre email",
+    placeholder: "Enter your email",
   },
   {
     name: "password",
@@ -27,7 +27,7 @@ const fields = [
     type: "password",
     iconClass: "user-icon",
     inputClass: "w-full px-10 py-2 rounded-md bg-[#EFF1F999]",
-    placeholder: "Entrer le mot de passe",
+    placeholder: "Enter your password",
   },
 ];
 
@@ -38,10 +38,10 @@ const loginSchema = object({
     .required("Password is required"),
 });
 
-const title = "Bienvenue à vous !";
-const subtitle = "Connectez-vous à votre compte";
-const submitButton = "Connexion";
-const linkText = "Mot de pass oublié ?";
+const title = "Welcome!";
+const subtitle = "Login to your account";
+const submitButton = "Login";
+const linkText = "Forgot password?";
 const link = "/forget";
 const formType = "login";
 
@@ -74,7 +74,7 @@ export default function Login() {
 
       if (!response.data || response.status !== 200) {
         console.error("[Login] Échec de connexion:", response.data);
-        setErrors({ login: "Erreur de connexion. Veuillez réessayer." });
+        setErrors({ login: "Login error. Please try again." });
         setProcessing(false);
         return;
       }
@@ -110,15 +110,15 @@ export default function Login() {
       if (error.response?.data?.message) {
         // Si l'erreur vient du serveur avec un message spécifique
         if (error.response.data.message.includes("email")) {
-          setErrors({ email: "Email ou mot de passe incorrect" });
+          setErrors({ email: "Incorrect email or password" });
         } else if (error.response.data.message.includes("password")) {
-          setErrors({ password: "Email ou mot de passe incorrect" });
+          setErrors({ password: "Incorrect email or password" });
         } else {
           setErrors({ login: error.response.data.message });
         }
       } else {
         setErrors({
-          login: "Une erreur s'est produite. Veuillez réessayer plus tard.",
+          login: "An error occurred. Please try again later.",
         });
       }
     } finally {
