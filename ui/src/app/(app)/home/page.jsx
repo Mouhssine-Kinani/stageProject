@@ -148,6 +148,7 @@ function Page() {
       </div>
     );
   }
+  console.log(products);
 
   return (
     <div className="space-y-6 p-4">

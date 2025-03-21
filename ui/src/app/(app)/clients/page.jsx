@@ -108,19 +108,23 @@ function Page() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
           <h1 className="text-2xl font-bold">Clients</h1>
-          <Button onClick={() => setAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Ajouter un client
-          </Button>
         </div>
 
-        <div className="mb-4">
+        <div className="w-full searchbar mb-4">
           <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onSearch={setSearchQuery}
+            onSort={setSortOrder}
             placeholder="Rechercher un client..."
+            Children={() => (
+              <button
+                onClick={() => setAddDialogOpen(true)}
+                className="px-4 py-2 text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
+              >
+                <Plus size={20} color="black" className="bg-white" />
+              </button>
+            )}
           />
         </div>
 
@@ -153,7 +157,8 @@ function Page() {
         <EditClientDialog
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
-          client={selectedClient}
+          clientData={selectedClient}
+          onClientEdited={fetchData}
         />
       </div>
     </div>

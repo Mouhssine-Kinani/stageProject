@@ -17,6 +17,27 @@ import User from "../../models/Users/user.model.js";
 //   }
 // };
 
+// Fonction qui met à jour la date de dernière connexion lors de la déconnexion
+export const logoutUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Mettre à jour lastLogin_date avec la date actuelle
+    await User.findByIdAndUpdate(userId, { lastLogin_date: new Date() });
+
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully, lastLogin_date updated",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      success: false,
+      message: `Logout failed: ${error.message}`,
+    });
+  }
+};
+
 export const getUsers = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;

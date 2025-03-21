@@ -110,15 +110,39 @@ const useUser = () => {
    */
   const handleLogout = async () => {
     try {
-      // Appeler l'API de déconnexion
+      // Récupérer l'ID utilisateur depuis les cookies ou le contexte
+      const userId = Cookies.get("userId");
+
+      // Appeler l'API pour mettre à jour lastLogin_date
+      if (userId) {
+        const token = Cookies.get("token");
+        await axios.post(
+          `${URLAPI}/users/logout`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        console.log("[useUser] LastLogin_date mise à jour via API");
+      }
+
+      // Appeler l'API de déconnexion pour le token
       await axios.post(`${URLAPI}/auth/logout`, {}, { withCredentials: true });
       console.log("[useUser] Déconnexion réussie via API");
     } catch (error) {
       console.error("[useUser] Erreur lors de la déconnexion via API:", error);
     } finally {
-      // Nettoyer les cookies et le localStorage même si l'API échoue
-      Cookies.remove("token", { path: "/" });
-      Cookies.remove("userId", { path: "/" });
+      // Nettoyer les cookies avec les options appropriées pour le cross-origin
+      const isProduction = process.env.NODE_ENV === "production";
+      const cookieOptions = {
+        path: "/",
+        sameSite: isProduction ? "None" : "Lax",
+        secure: isProduction,
+      };
+
+      Cookies.remove("token", cookieOptions);
+      Cookies.remove("userId", cookieOptions);
       localStorage.removeItem("userData");
 
       setUser(null);

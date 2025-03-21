@@ -45,7 +45,7 @@ function SideBar() {
           />
 
           <div className="userName-container">
-            <h2>{user?.fullName || "Utilisateur"}</h2>
+            <h2>{user?.fullName || "User"}</h2>
           </div>
         </div>
         <div className="sb-s2">
@@ -62,7 +62,7 @@ function SideBar() {
           <Link href="/home">
             <li>
               <img src="/sideBarIcon/ChartPieSlice.svg" alt="icon" />
-              Accueil
+              Home
             </li>
           </Link>
           <Link href="/products">
@@ -86,13 +86,13 @@ function SideBar() {
           <Link href="/users">
             <li>
               <img src="/sideBarIcon/users.svg" alt="icon" />
-              Utilisateurs
+              Users
             </li>
           </Link>
           <Link href="/settings">
             <li>
               <img src="/sideBarIcon/settings.svg" alt="icon" />
-              Reglage
+              Settings
             </li>
           </Link>
         </ul>

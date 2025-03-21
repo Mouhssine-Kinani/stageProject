@@ -61,13 +61,13 @@ export default function AddClientProductDialog({
     const fetchProviderInfo = async () => {
       if (formData.provider && providers.length > 0) {
         // Try to find the provider in the providers array
-        const provider = providers.find(p => p._id === formData.provider);
+        const provider = providers.find((p) => p._id === formData.provider);
         if (provider) {
           setProviderInfo(provider);
         }
       }
     };
-    
+
     fetchProviderInfo();
   }, [formData.provider, providers]);
 
@@ -111,11 +111,15 @@ export default function AddClientProductDialog({
       // Provider is an array in the product model
       let providerId = "";
       let provider = null;
-      
+
       // Check if provider exists and is an array with at least one element
-      if (selectedProduct.provider && Array.isArray(selectedProduct.provider) && selectedProduct.provider.length > 0) {
+      if (
+        selectedProduct.provider &&
+        Array.isArray(selectedProduct.provider) &&
+        selectedProduct.provider.length > 0
+      ) {
         // Get the first provider (assuming we only need one)
-        if (typeof selectedProduct.provider[0] === 'object') {
+        if (typeof selectedProduct.provider[0] === "object") {
           // If it's a populated object with properties
           provider = selectedProduct.provider[0];
           providerId = provider._id;
@@ -124,12 +128,12 @@ export default function AddClientProductDialog({
           providerId = selectedProduct.provider[0];
         }
       }
-      
+
       // Set provider info if we have a provider object
       if (provider) {
         setProviderInfo(provider);
       }
-      
+
       setFormData({
         product_reference: selectedProduct.product_reference,
         productName: selectedProduct.productName,
@@ -155,7 +159,7 @@ export default function AddClientProductDialog({
     }
 
     if (!formData.provider) {
-      toast.error("Veuillez sélectionner un fournisseur");
+      toast.error("Please select a provider");
       setIsSubmitting(false);
       return;
     }
@@ -185,7 +189,7 @@ export default function AddClientProductDialog({
   };
 
   return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
@@ -203,7 +207,13 @@ export default function AddClientProductDialog({
               disabled={isLoadingProducts}
             >
               <SelectTrigger>
-                <SelectValue placeholder={isLoadingProducts ? "Loading products..." : "Select a product"} />
+                <SelectValue
+                  placeholder={
+                    isLoadingProducts
+                      ? "Loading products..."
+                      : "Select a product"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {isLoadingProducts ? (
@@ -251,10 +261,7 @@ export default function AddClientProductDialog({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="billing_cycle">Billing Cycle</Label>
-              <Select
-                value={formData.billing_cycle}
-                disabled
-              >
+              <Select value={formData.billing_cycle} disabled>
                 <SelectTrigger className="bg-gray-50">
                   <SelectValue placeholder="Select a cycle" />
                 </SelectTrigger>
@@ -268,10 +275,7 @@ export default function AddClientProductDialog({
 
             <div>
               <Label htmlFor="type">Type</Label>
-              <Select
-                value={formData.type}
-                disabled
-              >
+              <Select value={formData.type} disabled>
                 <SelectTrigger className="bg-gray-50">
                   <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
@@ -294,15 +298,23 @@ export default function AddClientProductDialog({
                 <div className="relative rounded-md border border-input bg-gray-50 px-3 py-2 text-sm">
                   {providerInfo ? (
                     <div className="flex items-center">
-                      <span className="font-medium text-muted-foreground">{providerInfo.name}</span>
+                      <span className="font-medium text-muted-foreground">
+                        {providerInfo.name}
+                      </span>
                     </div>
                   ) : (
                     <div className="flex items-center">
-                      <span className="text-muted-foreground">Loading provider...</span>
+                      <span className="text-muted-foreground">
+                        Loading provider...
+                      </span>
                     </div>
                   )}
                 </div>
-                <input type="hidden" name="provider" value={formData.provider} />
+                <input
+                  type="hidden"
+                  name="provider"
+                  value={formData.provider}
+                />
                 <p className="text-xs text-muted-foreground mt-1">
                   Provider associated with the selected product
                 </p>

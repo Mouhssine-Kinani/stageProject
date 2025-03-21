@@ -25,10 +25,13 @@ router.get("/me", verifyToken, async (req, res) => {
     );
     res.status(500).json({
       success: false,
-      message: "Erreur lors de la récupération des données de l'utilisateur",
+      message: "Error retrieving user data",
     });
   }
 });
+
+// Route pour la déconnexion (mettre à jour lastLogin_date)
+router.post("/logout", verifyToken, userController.logoutUser);
 
 // Routes protégées par authentification
 router.use(verifyToken);

@@ -142,51 +142,16 @@ function ClientPage({ params }) {
       );
 
       const response = await deleteProductFromClient(clientId, productId);
-      console.log("Réponse de l'API:", response);
-
       if (response && response.success) {
-        // Mettre à jour l'état local en retirant le produit supprimé
-        setClient((prevClient) => {
-          if (!prevClient) return prevClient;
-          return {
-            ...prevClient,
-            products: prevClient.products.filter(
-              (product) => product._id !== productId
-            ),
-          };
-        });
         toast.success("Produit supprimé avec succès");
+        fetchClient();
       } else {
-        toast.error(
-          response?.message || "Erreur lors de la suppression du produit"
-        );
+        toast.error("Erreur lors de la suppression du produit");
       }
     } catch (error) {
-      console.error("Erreur lors de la suppression du produit:", error);
-
-      // Gérer les erreurs spécifiques
-      if (error.response) {
-        const status = error.response.status;
-        if (status === 401) {
-          toast.error("Non autorisé. Veuillez vous reconnecter.");
-        } else if (status === 403) {
-          toast.error(
-            "Vous n'avez pas les droits suffisants pour cette action."
-          );
-        } else if (status === 404) {
-          toast.error("Client ou produit introuvable.");
-        } else {
-          toast.error(
-            `Erreur: ${
-              error.response.data?.message || "Une erreur est survenue"
-            }`
-          );
-        }
-      } else {
-        toast.error(
-          "Une erreur est survenue lors de la suppression du produit."
-        );
-      }
+      console.error("Error:", error);
+      toast.error("Error deleting product");
+      return;
     }
   };
 
@@ -274,9 +239,9 @@ function ClientPage({ params }) {
           Children={() => (
             <Button
               onClick={() => setAddProductDialogOpen(true)}
-              className="px-4 py-2 flex items-center gap-2"
+              className="px-4 py-2 bg-white text-white rounded-md hover:bg-yellow-50 flex items-center gap-2"
             >
-              <Plus size={20} color="white" /> Ajouter un produit
+              <Plus size={20} color="black" className="bg-white" />
             </Button>
           )}
         />

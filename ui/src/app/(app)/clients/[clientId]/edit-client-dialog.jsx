@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateClient } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "react-toastify";
 
 export default function EditClientDialog({
   open,
@@ -19,7 +19,6 @@ export default function EditClientDialog({
   client,
   onSuccess,
 }) {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   // État initial vide pour éviter les erreurs
@@ -84,11 +83,7 @@ export default function EditClientDialog({
       // Vérification que client et client._id existent
       if (!client || !client._id) {
         console.error("Client or client ID is undefined", { client });
-        toast({
-          title: "Erreur",
-          description: "Informations du client manquantes. Veuillez réessayer.",
-          variant: "destructive",
-        });
+        toast.error("Missing client information. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -114,12 +109,9 @@ export default function EditClientDialog({
         await updateClient(client._id, formData);
       }
 
-      toast({
-        title: "Client mis à jour",
-        description:
-          "Les informations du client ont été mises à jour avec succès.",
-        variant: "success",
-      });
+      toast.success(
+        "Les informations du client ont été mises à jour avec succès."
+      );
 
       // Fermer le dialogue et rafraîchir les données
       onOpenChange(false);
@@ -128,13 +120,10 @@ export default function EditClientDialog({
       console.error("Erreur lors de la mise à jour:", error);
       console.error("Détails:", error.response?.data || error.message);
 
-      toast({
-        title: "Erreur",
-        description:
-          error.response?.data?.message ||
-          "Une erreur est survenue lors de la mise à jour du client.",
-        variant: "destructive",
-      });
+      toast.error(
+        error.response?.data?.message ||
+          "Une erreur est survenue lors de la mise à jour du client."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -247,10 +236,10 @@ export default function EditClientDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Annuler
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Mise à jour..." : "Mettre à jour"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
         </form>

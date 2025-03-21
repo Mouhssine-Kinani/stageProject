@@ -30,12 +30,12 @@ export function ProductHomeTable({ data = [], isLoading = false }) {
     () => [
       {
         accessorKey: "product_reference",
-        header: "Product ID",
+        header: "Ref",
         cell: ({ row }) => {
           const value = row.getValue("product_reference");
           return (
             <CellContent
-              value={value ? `PR0${value}` : "—"}
+              value={value ? `#PR0${value}` : "—"}
               type="text"
               maxChars={8}
             />
@@ -59,40 +59,61 @@ export function ProductHomeTable({ data = [], isLoading = false }) {
         },
       },
       {
-        accessorKey: "date_fin",
-        header: "Expiration Date",
+        accessorKey: "provider",
+        header: "Provider",
         cell: ({ row }) => {
-          const value = row.getValue("date_fin");
-          if (!value) return <span>—</span>;
-          
-          const date = new Date(value);
+          const provider = row.original.provider?.[0];
+          if (!provider) return <span>—</span>;
+
           return (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" /> 
-              <span>{date.toLocaleDateString()}</span>
+            <div className="flex items-center">
+              <img
+                src={`${
+                  provider.logo
+                    ? `${process.env.NEXT_PUBLIC_URLAPI}/${provider.logo}`
+                    : "/user.png"
+                }`}
+                alt="Provider Logo"
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  marginRight: 10,
+                }}
+              />
             </div>
           );
         },
       },
       {
-        id: "daysRemaining",
-        header: "Days Remaining",
+        accessorKey: "billing_cycle",
+        header: "Billing Cycle",
         cell: ({ row }) => {
-          const dateFin = row.original.date_fin;
-          if (!dateFin) return <span>—</span>;
-          
-          const expirationDate = new Date(dateFin);
-          const today = new Date();
-          const diffInDays = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
-          
+          const value = row.getValue("billing_cycle");
           return (
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-yellow-500" />
-              <span className="font-medium text-yellow-600">{diffInDays} days</span>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CellContent value={value || "—"} type="text" />
             </div>
           );
         },
       },
+      // {
+      //   accessorKey: "date_fin",
+      //   header: "Expiration Date",
+      //   cell: ({ row }) => {
+      //     const value = row.getValue("date_fin");
+      //     if (!value) return <span>—</span>;
+
+      //     const date = new Date(value);
+      //     return (
+      //       <div className="flex items-center gap-2">
+      //         <Calendar className="h-4 w-4 text-muted-foreground" />
+      //         <span>{date.toLocaleDateString()}</span>
+      //       </div>
+      //     );
+      //   },
+      // },
       {
         accessorKey: "price",
         header: "Price",
@@ -102,39 +123,63 @@ export function ProductHomeTable({ data = [], isLoading = false }) {
         },
       },
       {
-        id: "actions",
+        id: "daysRemaining",
+        header: "Days Remaining",
         cell: ({ row }) => {
-          const product = row.original;
+          const dateFin = row.original.date_fin;
+          if (!dateFin) return <span>—</span>;
 
-          const viewProduct = () => {
-            window.location.href = `/clients/${product.clientId}/product/${product._id}`;
-          };
+          const expirationDate = new Date(dateFin);
+          const today = new Date();
+          const diffInDays = Math.ceil(
+            (expirationDate - today) / (1000 * 60 * 60 * 24)
+          );
 
           return (
-            <div className="flex justify-end gap-2 actions-cell">
-              <button
-                onClick={viewProduct}
-                className="p-1.5 rounded hover:bg-gray-100"
-                title="View details"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-yellow-500" />
+              <span className="font-medium text-yellow-600">
+                {diffInDays} days
+              </span>
             </div>
           );
         },
       },
+
+      // {
+      //   id: "actions",
+      //   cell: ({ row }) => {
+      //     const product = row.original;
+
+      //     const viewProduct = () => {
+      //       window.location.href = `/clients/${product.clientId}/product/${product._id}`;
+      //     };
+
+      //     return (
+      //       <div className="flex justify-end gap-2 actions-cell">
+      //         <button
+      //           onClick={viewProduct}
+      //           className="p-1.5 rounded hover:bg-gray-100"
+      //           title="View details"
+      //         >
+      //           <svg
+      //             width="16"
+      //             height="16"
+      //             viewBox="0 0 24 24"
+      //             fill="none"
+      //             stroke="currentColor"
+      //             strokeWidth="2"
+      //             strokeLinecap="round"
+      //             strokeLinejoin="round"
+      //           >
+      //             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      //             <circle cx="12" cy="12" r="3"></circle>
+      //           </svg>
+      //         </button>
+      //       </div>
+      //     );
+      //   },
+      // },
     ],
     []
   );
@@ -146,8 +191,12 @@ export function ProductHomeTable({ data = [], isLoading = false }) {
         <h2 className="text-xl font-semibold">Products Expiring Soon (0)</h2>
         <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mb-3" />
-          <p className="text-lg font-medium text-gray-700">No products expiring soon!</p>
-          <p className="text-sm text-gray-500 mt-1">All your products are in good standing or have already expired.</p>
+          <p className="text-lg font-medium text-gray-700">
+            No products expiring soon!
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            All your products are in good standing or have already expired.
+          </p>
         </div>
       </div>
     );
@@ -155,7 +204,9 @@ export function ProductHomeTable({ data = [], isLoading = false }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Products Expiring Soon ({expiringProducts.length})</h2>
+      <h2 className="text-xl font-semibold">
+        Products Expiring Soon ({expiringProducts.length})
+      </h2>
       <DataTable
         columns={columns}
         data={expiringProducts}

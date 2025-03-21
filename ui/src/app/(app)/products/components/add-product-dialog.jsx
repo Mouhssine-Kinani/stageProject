@@ -86,8 +86,8 @@ export default function AddProductDialog({ open, onOpenChange }) {
       return;
     }
 
-    if (!formData.provider) {
-      toast.error("Veuillez sélectionner un fournisseur");
+    if (!formData.provider || formData.provider === "0") {
+      toast.error("Please select a provider");
       return;
     }
 

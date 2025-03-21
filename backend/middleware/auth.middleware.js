@@ -42,7 +42,7 @@ export const verifyToken = async (req, res, next) => {
         );
         return res.status(404).json({
           success: false,
-          message: "Utilisateur introuvable",
+          message: "User not found",
         });
       }
 
@@ -66,7 +66,7 @@ export const verifyToken = async (req, res, next) => {
     );
     res.status(500).json({
       success: false,
-      message: "Erreur serveur dans l'authentification",
+      message: "Server error in authentication",
     });
   }
 };
@@ -105,10 +105,10 @@ export const verifyRole = (roles) => {
       console.log("[Auth] Vérification du rôle réussie");
       next();
     } catch (error) {
-      console.error("[Auth] Erreur dans la vérification du rôle:", error);
+      console.error("Error checking permissions:", error);
       res.status(500).json({
         success: false,
-        message: "Erreur lors de la vérification des permissions",
+        message: "Error while checking permissions",
       });
     }
   };

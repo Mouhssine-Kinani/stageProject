@@ -60,11 +60,9 @@ export default function SignFromComponent({
                 name={field.name}
                 type={
                   field.type === "email" ||
-                  (field.type === "password" &&
-                    field.placeholder === "Entrer le mot de passe" &&
-                    passwordVisible)
+                  (field.type === "password" && passwordVisible)
                     ? "text"
-                    : "password"
+                    : field.type
                 }
                 className={`${field.inputClass} ${
                   displayErrors[field.name] ? "border-red-500" : ""
@@ -72,19 +70,18 @@ export default function SignFromComponent({
                 placeholder={field.placeholder}
                 onChange={(e) => handleChange(e, field.name)}
               />
-              {field.type === "password" &&
-                field.placeholder === "Entrer le mot de passe" && (
-                  <span
-                    className="eye-icon cursor-pointer"
-                    onClick={handleVisible}
-                  >
-                    {passwordVisible ? (
-                      <Eye strokeWidth={1.75} size={18} />
-                    ) : (
-                      <EyeOff strokeWidth={1.75} size={18} />
-                    )}
-                  </span>
-                )}
+              {field.type === "password" && (
+                <span
+                  className="eye-icon cursor-pointer"
+                  onClick={handleVisible}
+                >
+                  {passwordVisible ? (
+                    <Eye strokeWidth={1.75} size={18} />
+                  ) : (
+                    <EyeOff strokeWidth={1.75} size={18} />
+                  )}
+                </span>
+              )}
             </div>
             {displayErrors[field.name] && (
               <div className="text-red-500 text-start mt-2">
