@@ -19,7 +19,12 @@ export const LayoutProvider = ({ children }) => {
     const userId = getCookie("userId");
 
     if (!token || !userId) {
-      router.push("/login");
+      const currentPath = window.location.pathname;
+      const excludedPaths = ["/reset", "/forget"];
+
+      if (!excludedPaths.includes(currentPath)) {
+        router.push("/login");
+      }
     }
   }, [router]);
 
