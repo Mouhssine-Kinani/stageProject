@@ -131,6 +131,7 @@ export default function AddClientProductDialog({
       }
       
       setFormData({
+        product_reference: selectedProduct.product_reference,
         productName: selectedProduct.productName,
         category: selectedProduct.category,
         billing_cycle: selectedProduct.billing_cycle,

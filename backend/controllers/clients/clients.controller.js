@@ -1,5 +1,5 @@
 import Client from "../../models/Clients/client.model.js";
-import Product from "../../models/Products/product.model.js";
+import ProductHistory from "../../models/Products/productHistory.model.js";
 
 // Create a new client
 export const createClient = async (req, res) => {
@@ -271,14 +271,14 @@ export const deleteProductFromClient = async (req, res) => {
     }
 
     // Supprimer le document du produit de la collection
-    const product = await Product.findByIdAndDelete(productId);
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-        data: null,
-      });
-    }
+    // const product = await Product.findByIdAndDelete(productId);
+    // if (!product) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Product not found",
+    //     data: null,
+    //   });
+    // }
 
     res.status(200).json({
       success: true,
@@ -310,28 +310,30 @@ export const addProductToClient = async (req, res) => {
     }
 
     // Créer un nouveau produit
-    const newProduct = new Product({
+    const newProductHistory = new ProductHistory({
+      product_history_reference: req.body.product_reference,
+      clientId: clientId,
       productName: req.body.productName,
       category: req.body.category,
       billing_cycle: req.body.billing_cycle,
       price: req.body.price,
       type: req.body.type,
       productAddedDate: req.body.productAddedDate,
-      productDeployed: req.body.productDeployed,
+      // productDeployed: req.body.productDeployed,
       date_fin: req.body.date_fin,
       website: req.body.website,
       provider: req.body.provider,
     });
 
     // Sauvegarder le produit
-    const savedProduct = await newProduct.save();
+    const savedProductHistory = await newProductHistory.save();
 
     // Ajouter le produit au client
-    client.products.push(savedProduct._id);
+    client.products.push(savedProductHistory._id);
     await client.save();
 
     // Populer les données du fournisseur pour le retour
-    const populatedProduct = await Product.findById(savedProduct._id).populate(
+    const populatedProduct = await ProductHistory.findById(savedProductHistory._id).populate(
       "provider"
     );
 
