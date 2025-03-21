@@ -83,7 +83,7 @@ export default function EditClientDialog({
       // Vérification que client et client._id existent
       if (!client || !client._id) {
         console.error("Client or client ID is undefined", { client });
-        toast.error("Informations du client manquantes. Veuillez réessayer.");
+        toast.error("Missing client information. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -236,10 +236,10 @@ export default function EditClientDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Annuler
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Mise à jour..." : "Mettre à jour"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
         </form>

@@ -22,6 +22,8 @@ app.use(
       // Whitelist of allowed origins
       const allowedOrigins = [
         FRONT_END_URL,
+        "https://syntaradev.vercel.app",
+        "https://syntara.up.railway.app",
         // Ajoutez d'autres origines autorisées au besoin
         // Exemple: "https://app.example.com", "https://admin.example.com"
       ];
@@ -35,12 +37,12 @@ app.use(
       if (!origin) return callback(null, true);
 
       // Check if the origin is in the allowed list
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      if (allowedOrigins.indexOf(origin) !== -1 || origin === FRONT_END_URL) {
         callback(null, true);
       } else {
-        console.log(`Origin ${origin} not allowed by CORS`);
-        // En production, n'autorisez que les origines dans la liste blanche
-        callback(new Error("CORS not allowed"));
+        console.log(`Origin ${origin} not allowed by CORS: ${origin}`);
+        callback(null, true); // Temporarily allow all origins in production
+        // callback(new Error("CORS not allowed"));
       }
     },
     credentials: true, // Allow cookies

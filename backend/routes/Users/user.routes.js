@@ -25,7 +25,7 @@ router.get("/me", verifyToken, async (req, res) => {
     );
     res.status(500).json({
       success: false,
-      message: "Erreur lors de la récupération des données de l'utilisateur",
+      message: "Error retrieving user data",
     });
   }
 });
