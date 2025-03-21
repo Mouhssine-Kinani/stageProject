@@ -51,11 +51,11 @@ const checkExpirations = async () => {
       for (const interval of NOTIFICATION_INTERVALS) {
         if (daysRemaining === interval) {
           // Check if we've already sent a notification for this interval
-          const alreadySent = await hasNotificationBeenSent(product._id, interval);
-          if (!alreadySent) {
+          // const alreadySent = await hasNotificationBeenSent(product._id, interval);
+          // if (!alreadySent) {
             await sendExpirationNotification(admins, product, daysRemaining, expirationDate);
             await recordNotification(product._id, interval);
-          }
+          // }
           }
         }
       }

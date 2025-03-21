@@ -4,6 +4,7 @@ import "./notification.css"
 
 export default function NotificationPanel() {
   const { isNotificationOpen } = useLayout();
+  
 
   return (
     <div className={`notification-panel ${!isNotificationOpen ? 'closed' : ''}`}>
