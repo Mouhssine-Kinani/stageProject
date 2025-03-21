@@ -22,6 +22,35 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    origin: function (origin, callback) {
+      // Whitelist of allowed origins
+      const allowedOrigins = [
+        FRONT_END_URL,
+        // Ajoutez d'autres origines autorisées au besoin
+        // Exemple: "https://app.example.com", "https://admin.example.com"
+      ];
+
+      // Pour le développement local
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in the allowed list
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log(`Origin ${origin} not allowed by CORS`);
+        // En production, n'autorisez que les origines dans la liste blanche
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    credentials: true, // Allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["set-cookie"],
   })
 );
 

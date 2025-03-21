@@ -4,6 +4,11 @@ const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
 
 export async function deleteProductFromClient(clientId, productId) {
   try {
+    console.log(
+      `Tentative de suppression du produit - clientId: ${clientId}, productId: ${productId}`
+    );
+    console.log(`URL API: ${URLAPI}/clients/${clientId}/product/${productId}`);
+
     const response = await axios.delete(
       `${URLAPI}/clients/${clientId}/product/${productId}`
     );
@@ -12,6 +17,8 @@ export async function deleteProductFromClient(clientId, productId) {
     return response.data;
   } catch (error) {
     console.error("Erreur lors de la suppression du produit:", error);
+    console.error("Status code:", error.response?.status);
+    console.error("Message d'erreur:", error.response?.data);
     // Gérez l'erreur (affichage d'un message à l'utilisateur, etc.)
     throw error;
   }

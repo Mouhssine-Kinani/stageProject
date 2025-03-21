@@ -48,11 +48,11 @@ const formType = "login";
 export default function Login() {
   const router = useRouter();
   const [processing, setProcessing] = useState(false);
-  const [errors, setErrors] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (values) => {
     setProcessing(true);
-    setErrors(null);
+    setErrors({});
 
     try {
       console.log("[Login] Tentative de connexion", values);
@@ -74,13 +74,14 @@ export default function Login() {
 
       if (!response.data || response.status !== 200) {
         console.error("[Login] Échec de connexion:", response.data);
-        setErrors("Erreur de connexion. Veuillez réessayer.");
+        setErrors({ login: "Erreur de connexion. Veuillez réessayer." });
         setProcessing(false);
         return;
       }
 
       const data = response.data;
       console.log("[Login] Connexion réussie:", data);
+      console.log("[Login] Données utilisateur:", data.user);
 
       // Définir manuellement les cookies pour s'assurer qu'ils sont présents
       document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
@@ -88,6 +89,10 @@ export default function Login() {
 
       // Stocker les données utilisateur dans localStorage
       localStorage.setItem("userData", JSON.stringify(data.user));
+      console.log(
+        "[Login] Données utilisateur stockées dans localStorage:",
+        data.user
+      );
 
       console.log("[Login] Cookies définis:", document.cookie);
       console.log(`[Login] Redirection vers: ${returnUrl}`);
@@ -98,7 +103,20 @@ export default function Login() {
       }, 100);
     } catch (error) {
       console.error("[Login] Erreur inattendue:", error);
-      setErrors("Une erreur s'est produite. Veuillez réessayer plus tard.");
+      if (error.response?.data?.message) {
+        // Si l'erreur vient du serveur avec un message spécifique
+        if (error.response.data.message.includes("email")) {
+          setErrors({ email: "Email ou mot de passe incorrect" });
+        } else if (error.response.data.message.includes("password")) {
+          setErrors({ password: "Email ou mot de passe incorrect" });
+        } else {
+          setErrors({ login: error.response.data.message });
+        }
+      } else {
+        setErrors({
+          login: "Une erreur s'est produite. Veuillez réessayer plus tard.",
+        });
+      }
     } finally {
       setProcessing(false);
     }
@@ -117,6 +135,7 @@ export default function Login() {
             link={link}
             formType={formType}
             handleSubmit={handleSubmit}
+            parentErrors={errors}
           />
         </div>
       </div>

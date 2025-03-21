@@ -1,4 +1,5 @@
 // useUser.js
+"use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -21,71 +22,64 @@ const useUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        setLoading(true);
+        const token = Cookies.get("token");
+        const userId = Cookies.get("userId");
 
-        // Vérifier si les cookies existent avant de faire la requête
-        const tokenCookie = document.cookie.includes("token=");
-        const userIdCookie = document.cookie.includes("userId=");
+        console.log("[useUser] Token:", token);
+        console.log("[useUser] UserId:", userId);
 
-        if (!tokenCookie || !userIdCookie) {
-          console.error("[useUser] Cookies d'authentification manquants");
-          setError("Cookies d'authentification manquants");
+        if (!token || !userId) {
           setIsAuthenticated(false);
           setLoading(false);
           return;
         }
 
-        console.log(
-          "[useUser] Tentative de récupération des données utilisateur"
-        );
+        // Essayer d'abord de récupérer les données utilisateur depuis le localStorage
+        const userDataFromStorage = localStorage.getItem("userData");
+        console.log("[useUser] Données du localStorage:", userDataFromStorage);
 
-        // Essayer d'abord de récupérer les données du localStorage pour un affichage rapide
-        try {
-          const cachedUser = localStorage.getItem("userData");
-          if (cachedUser) {
-            const parsedUser = JSON.parse(cachedUser);
-            setUser(parsedUser);
-            setIsAuthenticated(true);
+        if (userDataFromStorage) {
+          try {
+            const parsedUserData = JSON.parse(userDataFromStorage);
             console.log(
-              "[useUser] Données utilisateur récupérées du localStorage:",
-              parsedUser
+              "[useUser] Données parsées du localStorage:",
+              parsedUserData
             );
+            setUser(parsedUserData);
+            setIsAuthenticated(true);
+          } catch (parseError) {
+            console.error(
+              "[useUser] Erreur de parsing des données du localStorage:",
+              parseError
+            );
+            localStorage.removeItem("userData");
           }
-        } catch (e) {
-          console.warn(
-            "[useUser] Erreur lors de la récupération des données du localStorage:",
-            e
-          );
         }
 
-        // Ensuite, faire une requête API pour obtenir les données à jour
-        const response = await axios.get(`${URLAPI}/users/me`, {
+        // Requête API pour obtenir les données utilisateur à jour
+        console.log("[useUser] Requête API pour les données utilisateur");
+        const response = await axios.get(`${URLAPI}/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           withCredentials: true,
         });
 
-        if (response.data && response.status === 200) {
-          const userData = response.data;
-          setUser(userData);
+        console.log("[useUser] Réponse API:", response.data);
+
+        // Mettre à jour les données utilisateur dans le state et dans le localStorage
+        if (response.data.success && response.data.data) {
+          setUser(response.data.data);
+          localStorage.setItem("userData", JSON.stringify(response.data.data));
           setIsAuthenticated(true);
-
-          // Mettre à jour le cache si les données ont changé
-          try {
-            localStorage.setItem("userData", JSON.stringify(userData));
-          } catch (e) {
-            console.warn(
-              "[useUser] Erreur lors de la mise en cache des données:",
-              e
-            );
-          }
-
-          console.log(
-            "[useUser] Données utilisateur mises à jour depuis l'API"
-          );
         } else {
-          throw new Error("Réponse API invalide");
+          throw new Error("Format de réponse invalide");
         }
       } catch (error) {
-        console.error("[useUser] Erreur:", error);
+        console.error(
+          "[useUser] Erreur lors de la récupération des données:",
+          error
+        );
 
         // Si l'erreur est liée à l'authentification (401 ou 403), nettoyer les cookies
         if (
@@ -114,7 +108,7 @@ const useUser = () => {
   /**
    * Fonction pour déconnecter l'utilisateur
    */
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       // Appeler l'API de déconnexion
       await axios.post(`${URLAPI}/auth/logout`, {}, { withCredentials: true });
@@ -133,7 +127,7 @@ const useUser = () => {
     }
   };
 
-  return { user, loading, error, isAuthenticated, logout };
+  return { user, loading, error, isAuthenticated, handleLogout };
 };
 
 export default useUser;

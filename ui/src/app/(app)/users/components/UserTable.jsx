@@ -1,6 +1,18 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/components/table/base-data-table";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * Composant de tableau pour l'affichage des utilisateurs
@@ -11,6 +23,10 @@ import { DataTable } from "@/components/table/base-data-table";
  * @param {boolean} props.isLoading - Indique si les données sont en cours de chargement
  */
 export function UserTable({ data = [], onDelete, isLoading = false }) {
+  const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
   // Définir les colonnes du tableau
   const columns = useMemo(
     () => [
@@ -80,54 +96,32 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
           };
 
           const handleDelete = () => {
-            if (window.confirm("Are you sure you want to delete this user?")) {
-              onDelete(user._id);
-            }
+            setUserToDelete(user);
+            setDeleteDialogOpen(true);
           };
 
           return (
-            <div className="flex justify-end gap-2 actions-cell">
-              <button
-                onClick={handleEdit}
-                className="p-1 rounded hover:bg-gray-100"
-                title="Edit user"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Ouvrir le menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleEdit}>
+                  Modifier
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="text-red-500"
                 >
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-1 rounded hover:bg-gray-100 text-red-500"
-                title="Delete user"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-              </button>
-            </div>
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           );
         },
       },
@@ -135,12 +129,40 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
     [onDelete]
   );
 
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      onDelete(userToDelete._id);
+      toast({
+        description: "Utilisateur supprimé avec succès",
+        variant: "success",
+      });
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setUserToDelete(null);
+  };
+
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      isLoading={isLoading}
-      maintainStructure={true} // Maintenir la même structure sur tous les appareils
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        maintainStructure={true} // Maintenir la même structure sur tous les appareils
+      />
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Confirmer la suppression"
+        description="Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
   );
 }

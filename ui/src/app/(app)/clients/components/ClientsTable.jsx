@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/components/table/base-data-table";
 import CellContent from "@/components/table/CellContent";
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
@@ -12,6 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useRouter } from "next/navigation";
 
 /**
  * Composant de tableau pour l'affichage des clients
@@ -22,6 +24,28 @@ import {
  * @param {boolean} props.isLoading - Indique si les données sont en cours de chargement
  */
 export function ClientsTable({ data = [], onDelete, isLoading = false }) {
+  const router = useRouter();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
+
+  const handleDeleteClick = (client) => {
+    setClientToDelete(client);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (clientToDelete) {
+      onDelete(clientToDelete._id);
+      setDeleteDialogOpen(false);
+      setClientToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setClientToDelete(null);
+  };
+
   // Définir les colonnes du tableau directement ici, sans importer depuis un autre fichier
   const columns = useMemo(
     () => [
@@ -96,7 +120,7 @@ export function ClientsTable({ data = [], onDelete, isLoading = false }) {
           const client = row.original;
 
           const viewClient = () => {
-            window.location.href = `/clients/${client._id}`;
+            router.push(`/clients/${client._id}`);
           };
 
           const editClient = (e) => {
@@ -119,17 +143,7 @@ export function ClientsTable({ data = [], onDelete, isLoading = false }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this client?"
-                      )
-                    ) {
-                      onDelete(client._id);
-                    }
-                  }}
-                >
+                <DropdownMenuItem onClick={() => handleDeleteClick(client)}>
                   <span className="text-red-500">Delete</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={editClient}>Edit</DropdownMenuItem>
@@ -142,17 +156,27 @@ export function ClientsTable({ data = [], onDelete, isLoading = false }) {
         },
       },
     ],
-    [onDelete]
+    [onDelete, router]
   );
 
   console.log("Clients data in table:", data); // Debug data
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      isLoading={isLoading}
-      maintainStructure={true} // Maintenir la même structure sur tous les appareils
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        maintainStructure={true} // Maintenir la même structure sur tous les appareils
+      />
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Confirmer la suppression"
+        description="Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
   );
 }
