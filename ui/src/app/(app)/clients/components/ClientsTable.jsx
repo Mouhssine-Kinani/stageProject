@@ -126,6 +126,7 @@ export function ClientsTable({ data = [], onDelete, isLoading = false }) {
           const editClient = (e) => {
             e.stopPropagation();
             // Dispatch l'événement pour ouvrir la modale d'édition
+            console.log("Client data sent to edit dialog:", client);
             const event = new CustomEvent("editClient", {
               detail: client,
             });

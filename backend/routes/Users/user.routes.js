@@ -30,6 +30,9 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
+// Route pour la déconnexion (mettre à jour lastLogin_date)
+router.post("/logout", verifyToken, userController.logoutUser);
+
 // Routes protégées par authentification
 router.use(verifyToken);
 

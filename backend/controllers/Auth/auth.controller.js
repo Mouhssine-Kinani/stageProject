@@ -165,6 +165,10 @@ export const signIn = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
       path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
     };
 
     console.log(
@@ -299,7 +303,7 @@ export const requestPasswordReset = async (req, res, next) => {
 export const resetPassword = async (req, res, next) => {
   try {
     const { resetToken, newPassword } = req.body;
-    
+
     if (!resetToken || !newPassword) {
       return res.status(400).json({
         message: "Reset token and new password are required",
@@ -329,7 +333,7 @@ export const resetPassword = async (req, res, next) => {
     user.resetTokenExpiry = undefined;
 
     await user.save();
-    
+
     res.status(200).json({
       message: "Password reset successfully",
     });

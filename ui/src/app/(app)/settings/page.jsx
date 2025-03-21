@@ -2,21 +2,15 @@
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
+import useUser from "@/hooks/useUser";
 
 export default function SettingPage() {
   const router = useRouter();
+  const { handleLogout: userLogout } = useUser();
 
   const handleLogout = async () => {
     try {
-      // Call backend logout endpoint if required
-      await axios.get(`${process.env.NEXT_PUBLIC_URLAPI}/auth/logout`, { withCredentials: true });
-
-      // Delete cookies
-      Cookies.remove("token");
-      Cookies.remove("userId");
-
-      // Redirect to login page
-      router.push("/login");
+      await userLogout();
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -45,4 +39,3 @@ export default function SettingPage() {
     </div>
   );
 }
-

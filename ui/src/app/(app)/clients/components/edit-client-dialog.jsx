@@ -15,34 +15,42 @@ import { useCrud } from "@/hooks/useCrud";
 import { toast } from "react-toastify";
 import { Grid, ImagePlus } from "lucide-react";
 
-export default function EditClientDialog({open, onOpenChange, onClientEdited, clientData}) {
-  const { updateItem, validateFile, isLoading } = useCrud('clients');
+export default function EditClientDialog({
+  open,
+  onOpenChange,
+  onClientEdited,
+  clientData,
+}) {
+  const { updateItem, validateFile, isLoading } = useCrud("clients");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    country: '',
-    postalCode: '',
-    renewal_status: 'ok',
-    logo: null
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    country: "",
+    postalCode: "",
+    renewal_status: "ok",
+    region: "",
+    logo: null,
   });
   const [logoPreview, setLogoPreview] = useState(null);
 
   useEffect(() => {
     if (clientData) {
       setFormData({
-        name: clientData.name || '',
-        email: clientData.email || '',
-        phone: clientData.phone || '',
-        address: clientData.address || '',
-        city: clientData.city || '',
-        country: clientData.country || '',
-        postalCode: clientData.postalCode || '',
-        logo: null
+        name: clientData.name || "",
+        email: clientData.email || "",
+        phone: clientData.phone || "",
+        address: clientData.address || "",
+        city: clientData.city || "",
+        country: clientData.country || "",
+        postalCode: clientData.postalCode || "",
+        renewal_status: clientData.renewal_status || "ok",
+        region: clientData.region || "",
+        logo: null,
       });
-      
+
       // If client has a logo, set the preview
       if (clientData.logo) {
         setLogoPreview(clientData.logo);
@@ -60,18 +68,18 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
     const file = e.target.files[0];
     if (file) {
       // Use the validateFile function from useCrud
-      const validation = validateFile(file, { 
+      const validation = validateFile(file, {
         maxSize: 5 * 1024 * 1024, // 5MB
-        type: "image" 
+        type: "image",
       });
-      
+
       if (!validation.isValid) {
         toast.error(validation.error);
         return;
       }
-      
-      setFormData({...formData, logo: file});
-      
+
+      setFormData({ ...formData, logo: file });
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -81,33 +89,41 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
     }
   };
 
-  function handleChange(e){
-    setFormData({...formData, [e.target.name]: e.target.value});
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const clientFormData = new FormData();
-      
+
+      console.log("Client data before update:", clientData);
+      console.log("Form data before update:", formData);
+
+      if (!clientData || !clientData._id) {
+        toast.error("Client ID is missing. Cannot update client.");
+        return;
+      }
+
       // Append all form fields to FormData
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         if (formData[key] !== null) {
           clientFormData.append(key, formData[key]);
         }
       });
-      
+
       const result = await updateItem(clientData._id, clientFormData);
-      
+
       if (result.success) {
-        toast.success('Client updated successfully');
+        toast.success("Client updated successfully");
         onOpenChange(false);
-        
+
         // Trigger refresh of client list
-        const event = new CustomEvent('clientEdited');
+        const event = new CustomEvent("clientEdited");
         window.dispatchEvent(event);
-        
+
         if (onClientEdited) {
           onClientEdited();
         }
@@ -161,7 +177,7 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="email" className="block mb-2">
@@ -192,7 +208,7 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1">
               <div>
                 <Label htmlFor="address" className="block mb-2">
@@ -208,7 +224,7 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="region" className="block mb-2">
@@ -237,7 +253,39 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
                 />
               </div>
             </div>
-            
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="postalCode" className="block mb-2">
+                  Postal Code
+                </Label>
+                <Input
+                  id="postalCode"
+                  name="postalCode"
+                  placeholder="10000"
+                  value={formData.postalCode}
+                  onChange={handleChange}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <Label htmlFor="renewal_status" className="block mb-2">
+                  Statut Renouvellement
+                </Label>
+                <select
+                  id="renewal_status"
+                  name="renewal_status"
+                  value={formData.renewal_status}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="ok">OK</option>
+                  <option value="warning">Avertissement</option>
+                  <option value="expired">Expiré</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="logo" className="block mb-2">
                 Logo
@@ -245,9 +293,9 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
               <div className="flex items-start">
                 <div className="bg-gray-100 p-4 mr-4 rounded-md w-32 h-32 flex items-center justify-center">
                   {logoPreview ? (
-                    <img 
-                      src={logoPreview} 
-                      alt="Logo Preview" 
+                    <img
+                      src={logoPreview}
+                      alt="Logo Preview"
                       className="max-h-full max-w-full object-contain"
                     />
                   ) : (
@@ -285,4 +333,4 @@ export default function EditClientDialog({open, onOpenChange, onClientEdited, cl
       </DialogContent>
     </Dialog>
   );
-} 
+}
