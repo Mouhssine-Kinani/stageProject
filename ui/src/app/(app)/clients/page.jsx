@@ -118,8 +118,8 @@ function Page() {
 
         <div className="mb-4">
           <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onSearch={setSearchQuery}
+            onSort={setSortOrder}
             placeholder="Rechercher un client..."
           />
         </div>
