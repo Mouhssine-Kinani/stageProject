@@ -9,6 +9,7 @@ import {
   getClientsCount,
   deleteProductFromClient,
   addProductToClient,
+  getProductsReferencedByClients,
 } from "../../controllers/clients/clients.controller.js";
 import upload from "../../middleware/upload.middleware.js";
 import { verifyRole, verifyToken } from "../../middleware/auth.middleware.js";
@@ -72,6 +73,13 @@ clientRoute.post(
   verifyToken,
   verifyRole(["Admin", "Super Admin"]),
   addProductToClient
+);
+
+// Récupérer tous les produits référencés par des clients
+clientRoute.get(
+  "/clients/products/all",
+  verifyToken,
+  getProductsReferencedByClients
 );
 
 export default clientRoute;

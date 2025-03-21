@@ -13,7 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import AddClientProductDialog from "./add-product-dialog";
 import EditClientDialog from "./edit-client-dialog";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 
 function ClientPage({ params }) {
   const { clientId } = use(params); // Déstructuration avec `use()`

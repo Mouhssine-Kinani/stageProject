@@ -384,3 +384,33 @@ export const addProductToClient = async (req, res) => {
     });
   }
 };
+
+// Récupérer tous les produits référencés par les clients
+export const getProductsReferencedByClients = async () => {
+  try {
+    // Utilisation de populate pour récupérer tous les clients avec leurs produits
+    const clients = await Client.find()
+      .populate({
+        path: "products",
+        populate: {
+          path: "provider",
+        },
+      })
+      .lean();
+
+    // Extraire tous les produits des clients
+    const productsInClients = clients.flatMap(client => client.products);
+    // const productsInClients = clients.flatMap(client => 
+
+    //   client.products.map(product => ({
+    //     ...product
+    //     // clientName: client.name,
+    //     // clientId: client._id,
+    //     // clientReference: client.client_reference
+    //   }))
+    // );
+    return productsInClients
+  } catch (error) {
+    console.log(error)
+  }
+};
