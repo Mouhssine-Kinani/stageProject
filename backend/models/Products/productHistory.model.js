@@ -1,20 +1,21 @@
 import mongoose from "mongoose";
+
 const Schema = mongoose.Schema;
 
 const ProductHistorySchema = new Schema(
   {
+      product_history_reference: {
+        type: Number,
+        unique: true
+      },
     clientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,
     },
-    reference: {
-      type: String,
-      required: true,
-      minLength: 3,
-      maxLength: 10,
-      trim: true,
-    }, // ex: #PR01
+    provider: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Provider", required: true },
+    ],
     productName: {
       type: String,
       required: true,
@@ -46,5 +47,6 @@ const ProductHistorySchema = new Schema(
   { timestamps: true }
 );
 
+const ProductHistory = mongoose.model('ProductHistory', ProductHistorySchema);
 
-export default ProductHistorySchema;
+export default ProductHistory;
