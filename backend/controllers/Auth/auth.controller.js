@@ -177,17 +177,17 @@ export const signIn = async (req, res) => {
     console.log(`[Auth] Cookie domain: ${process.env.COOKIE_DOMAIN}`);
     console.log(`[Auth] Cookie options: ${JSON.stringify(cookieOptions)}`);
 
-    // Définir les cookies
-    res.cookie("token", token, cookieOptions);
+    // Définir le cookie userId uniquement
     res.cookie("userId", user._id.toString(), cookieOptions);
 
-    // Réponse avec succès, token et données utilisateur (sans mot de passe)
+    // Réponse avec succès, token comme Bearer token et données utilisateur (sans mot de passe)
     const userToReturn = { ...user.toObject() };
     delete userToReturn.password;
 
     res.status(200).json({
       success: true,
-      token,
+      token: `Bearer ${token}`,
+      userId: user._id.toString(), // Inclure également l'userId dans la réponse
       user: userToReturn,
     });
   } catch (error) {
@@ -215,8 +215,7 @@ export const logout = (req, res) => {
       JSON.stringify(cookieOptions)
     );
 
-    // Supprimer les cookies d'authentification
-    res.clearCookie("token", cookieOptions);
+    // Supprimer uniquement le cookie userId
     res.clearCookie("userId", cookieOptions);
 
     res.status(200).json({ success: true, message: "Logout successful" });

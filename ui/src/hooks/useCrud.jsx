@@ -28,6 +28,12 @@ export function useCrud(Category, searchQuery = "") {
     fetchData();
   }, [currentPage, Category, searchQuery]);
 
+  // Fonction pour obtenir les en-têtes d'autorisation
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: token } : {};
+  };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -37,7 +43,10 @@ export function useCrud(Category, searchQuery = "") {
 
       console.log(`Fetching data from: ${requestUrl}`);
 
-      const resp = await axios.get(requestUrl, { withCredentials: true });
+      const resp = await axios.get(requestUrl, {
+        withCredentials: true,
+        headers: getAuthHeaders(),
+      });
       console.log(`${Category} API response:`, resp.data);
 
       if (!resp.data.data) {
@@ -81,7 +90,10 @@ export function useCrud(Category, searchQuery = "") {
 
       console.log(`Deleting item from: ${url}`);
 
-      const response = await axios.delete(url);
+      const response = await axios.delete(url, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
       console.log(`Delete response:`, response.data);
 
       // Recharger les données après suppression
@@ -99,15 +111,11 @@ export function useCrud(Category, searchQuery = "") {
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
-        `Failed to delete ${Category}`;
-
-      setError({
-        message: errorMessage,
-      });
+        `Failed to delete ${Category.slice(0, -1)}`;
 
       return {
         success: false,
-        error: errorMessage,
+        message: errorMessage,
       };
     } finally {
       setIsLoading(false);
@@ -119,116 +127,76 @@ export function useCrud(Category, searchQuery = "") {
     file,
     options = { maxSize: 1024000, type: "image" }
   ) => {
-    if (!file) return { isValid: false, error: "No file provided" };
+    if (!file) return { valid: false, error: "No file provided" };
 
-    // Check file type
-    if (options.type === "image" && !file.type.startsWith("image/")) {
-      return { isValid: false, error: "Please select an image file" };
-    }
+    const fileSize = file.size;
+    const fileType = file.type;
 
-    // Check file size (default 1MB = 1024000 bytes)
-    if (file.size > options.maxSize) {
-      const sizeInMB = (options.maxSize / (1024 * 1024)).toFixed(1);
+    if (fileSize > options.maxSize) {
       return {
-        isValid: false,
-        error: `File must be less than ${sizeInMB}MB`,
+        valid: false,
+        error: `File size exceeds ${options.maxSize / 1024} KB`,
       };
     }
 
-    return { isValid: true, error: null };
+    if (options.type === "image" && !fileType.includes("image/")) {
+      return { valid: false, error: "File must be an image" };
+    }
+
+    return { valid: true };
   };
 
   // Create an item function
   const createItem = async (itemData) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
+      let url = `${URLAPI}/${Category}`;
+      let formData = null;
+      let headers = getAuthHeaders(); // Utiliser les en-têtes d'autorisation
 
-      const formData = new FormData();
+      // Check if we need to handle file uploads
+      const hasFile = itemData instanceof FormData;
 
-      // If itemData contains a file, we need to use FormData
-      let containsFile = false;
-
-      // Check if any value is a File
-      Object.keys(itemData).forEach((key) => {
-        if (itemData[key] instanceof File) {
-          containsFile = true;
-          formData.append(key, itemData[key]);
-        } else if (itemData[key] !== null && itemData[key] !== undefined) {
-          if (typeof itemData[key] === "object") {
-            console.log(
-              `createItem - Processing object field '${key}':`,
-              itemData[key]
-            );
-            formData.append(key, JSON.stringify(itemData[key]));
-          } else {
-            formData.append(key, itemData[key]);
-          }
-        }
-      });
-
-      const config = {
-        headers: {
-          "Content-Type": containsFile
-            ? "multipart/form-data"
-            : "application/json",
-        },
-        withCredentials: true,
-      };
-
-      const url = `${URLAPI}/${Category}/create`;
-      console.log(`Creating item at: ${url}`, itemData);
-
-      // For debugging - log what's actually being sent
-      if (containsFile) {
-        console.log("Using FormData with these entries:");
-        for (let pair of formData.entries()) {
-          console.log(
-            `- ${pair[0]}: ${pair[1] instanceof File ? pair[1].name : pair[1]}`
-          );
-        }
+      if (hasFile) {
+        formData = itemData;
+        // For FormData, do not set Content-Type header
       } else {
-        console.log("Using JSON payload:", itemData);
+        // For regular JSON data
+        headers = {
+          ...headers,
+          "Content-Type": "application/json",
+        };
       }
 
-      const response = await axios.post(
-        url,
-        containsFile ? formData : itemData,
-        config
-      );
+      console.log(`Creating ${Category} with URL: ${url}`);
+      console.log("Data being sent:", hasFile ? "[FormData]" : itemData);
 
-      console.log(`Create response:`, response.data);
+      const response = await axios.post(url, formData || itemData, {
+        headers,
+        withCredentials: true,
+      });
 
-      // Recharger les données après création
+      console.log(`${Category} created:`, response.data);
+
+      // Reload data after creating new item
       await fetchData();
 
-      setError(null);
       return {
         success: true,
         message: `${Category.slice(0, -1)} created successfully`,
         data: response.data,
       };
-    } catch (error) {
-      console.error(`Error creating ${Category}:`, error);
+    } catch (err) {
+      console.error(`Error creating ${Category}:`, err);
 
-      let errorMessage = "Server error";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        `Failed to create ${Category.slice(0, -1)}`;
 
-      if (error.response?.data) {
-        console.error("Server error response:", error.response.data);
-        errorMessage =
-          error.response.data.message ||
-          "Server returned error: " + error.response.status;
-      } else if (error.request) {
-        console.error("No response received from server");
-        errorMessage = "No response received from server";
-      } else {
-        console.error("Error in request setup:", error.message);
-        errorMessage = error.message || "Error in request setup";
-      }
-
-      setError({ message: errorMessage });
       return {
         success: false,
-        error: errorMessage,
+        message: errorMessage,
       };
     } finally {
       setIsLoading(false);
@@ -237,103 +205,55 @@ export function useCrud(Category, searchQuery = "") {
 
   // Update an item function
   const updateItem = async (id, itemData) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
+      let url = `${URLAPI}/${Category}/${id}`;
+      let formData = null;
+      let headers = getAuthHeaders(); // Utiliser les en-têtes d'autorisation
 
-      const formData = new FormData();
-      let containsFile = false;
+      // Check if we need to handle file uploads
+      const hasFile = itemData instanceof FormData;
 
-      console.log(`updateItem - Initial data:`, itemData);
-
-      // Check if any value is a File
-      Object.keys(itemData).forEach((key) => {
-        if (itemData[key] instanceof File) {
-          containsFile = true;
-          console.log(
-            `updateItem - File detected in field '${key}'`,
-            itemData[key].name
-          );
-          formData.append(key, itemData[key]);
-        } else if (itemData[key] !== null && itemData[key] !== undefined) {
-          if (typeof itemData[key] === "object") {
-            console.log(
-              `updateItem - Stringify object for field '${key}'`,
-              itemData[key]
-            );
-            formData.append(key, JSON.stringify(itemData[key]));
-          } else {
-            console.log(`updateItem - Adding field '${key}'`, itemData[key]);
-            formData.append(key, itemData[key]);
-          }
-        }
-      });
-
-      const config = {
-        headers: {
-          "Content-Type": containsFile
-            ? "multipart/form-data"
-            : "application/json",
-        },
-        withCredentials: true,
-      };
-
-      // Assure that we are using the correct path
-      const url = `${URLAPI}/${Category}/edit/${id}`;
-      console.log(`Updating item at: ${url}`, itemData);
-      console.log(
-        `Request uses ${containsFile ? "FormData (multipart)" : "JSON"}`
-      );
-
-      if (containsFile) {
-        // For debugging - show formData contents
-        for (let pair of formData.entries()) {
-          console.log(
-            `FormData contains: ${pair[0]}: ${
-              pair[1] instanceof File ? pair[1].name : pair[1]
-            }`
-          );
-        }
+      if (hasFile) {
+        formData = itemData;
+        // Pour FormData, ne pas définir l'en-tête Content-Type
+      } else {
+        // Pour les données JSON standard
+        headers = {
+          ...headers,
+          "Content-Type": "application/json",
+        };
       }
 
-      const response = await axios.put(
-        url,
-        containsFile ? formData : itemData,
-        config
-      );
+      console.log(`Updating ${Category} with ID ${id} at URL: ${url}`);
+      console.log("Update data:", hasFile ? "[FormData]" : itemData);
 
-      console.log(`Update response:`, response.data);
+      const response = await axios.put(url, formData || itemData, {
+        headers,
+        withCredentials: true,
+      });
 
-      // Recharger les données après mise à jour
+      console.log(`${Category} updated:`, response.data);
+
+      // Reload data after updating
       await fetchData();
 
-      setError(null);
       return {
         success: true,
         message: `${Category.slice(0, -1)} updated successfully`,
         data: response.data,
       };
-    } catch (error) {
-      console.error(`Error updating ${Category}:`, error);
+    } catch (err) {
+      console.error(`Error updating ${Category}:`, err);
 
-      let errorMessage = "Server error";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        `Failed to update ${Category.slice(0, -1)}`;
 
-      if (error.response?.data) {
-        console.error("Response error data:", error.response.data);
-        errorMessage =
-          error.response.data.message ||
-          "Server returned error: " + error.response.status;
-      } else if (error.request) {
-        console.error("No response received from server");
-        errorMessage = "No response received from server";
-      } else {
-        console.error("Error in request setup:", error.message);
-        errorMessage = error.message || "Error in request setup";
-      }
-
-      setError({ message: errorMessage });
       return {
         success: false,
-        error: errorMessage,
+        message: errorMessage,
       };
     } finally {
       setIsLoading(false);

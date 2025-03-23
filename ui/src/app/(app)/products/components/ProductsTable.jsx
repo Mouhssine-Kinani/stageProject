@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/components/table/base-data-table";
 import CellContent from "@/components/table/CellContent";
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /**
  * Composant de tableau pour l'affichage des produits
@@ -22,6 +23,27 @@ import {
  * @param {boolean} props.isLoading - Indique si les données sont en cours de chargement
  */
 export function ProductsTable({ data = [], onDelete, isLoading = false }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (productToDelete) {
+      onDelete(productToDelete._id);
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setProductToDelete(null);
+  };
+
   // Définir les colonnes du tableau directement ici
   const columns = useMemo(
     () => [
@@ -138,17 +160,7 @@ export function ProductsTable({ data = [], onDelete, isLoading = false }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this product?"
-                      )
-                    ) {
-                      onDelete(product._id);
-                    }
-                  }}
-                >
+                <DropdownMenuItem onClick={() => handleDeleteClick(product)}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   <span className="text-red-500">Delete</span>
                 </DropdownMenuItem>
@@ -172,11 +184,21 @@ export function ProductsTable({ data = [], onDelete, isLoading = false }) {
   console.log("Products data in table:", data); // Debug data
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      isLoading={isLoading}
-      maintainStructure={true} // Maintenir la même structure sur tous les appareils
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        maintainStructure={true} // Maintenir la même structure sur tous les appareils
+      />
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
   );
 }

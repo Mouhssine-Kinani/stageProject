@@ -3,95 +3,95 @@ import axios from "axios";
 
 axios.defaults.withCredentials = true;
 
-export function useProductsStats() {
-  // État pour les statistiques
-  const [productsCount, setProductsCount] = useState({
-    totalProducts: 0,
-    activeProducts: 0,
-    expiringSoonProducts: 0,
-    expiredProducts: 0,
-  });
-
-  // État pour les produits
+export const useProductsStats = () => {
   const [products, setProducts] = useState([]);
+  const [productsCount, setProductsCount] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(10);
 
-  // États pour le chargement et les erreurs
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Fonction pour obtenir les en-têtes d'autorisation
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: token } : {};
+  };
 
-  const API_URL = process.env.NEXT_PUBLIC_URLAPI;
-
-  // Fetch statistics
   useEffect(() => {
-    const fetchProductsStats = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        if (!API_URL)
-          throw new Error("API URL is not defined in env variables");
-
-        const response = await axios.get(`${API_URL}/products/stats`);
-
-        // Vérifie que l'objet contient bien les clés attendues
-        const {
-          totalProducts,
-          activeProducts,
-          expiringSoonProducts,
-          expiredProducts,
-        } = response.data || {};
-
-        setProductsCount({
-          totalProducts: totalProducts ?? 0,
-          activeProducts: activeProducts ?? 0,
-          expiringSoonProducts: expiringSoonProducts ?? 0,
-          expiredProducts: expiredProducts ?? 0,
-        });
-      } catch (err) {
-        setError(
-          err.response?.data?.message || err.message || "An error occurred"
-        );
-      }
-    };
-
-    fetchProductsStats();
-  }, [API_URL]);
-
-  // Fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        if (!API_URL)
-          throw new Error("API URL is not defined in env variables");
-
-        setLoading(true);
         const searchParam = searchQuery ? `&search=${searchQuery}` : "";
-        const response = await axios.get(
-          `${API_URL}/products?page=${currentPage}&limit=50${searchParam}`
-        );
 
-        if (response.data.success) {
-          setProducts(response.data.data || []);
+        const requestUrl = `${process.env.NEXT_PUBLIC_URLAPI}/products?page=${currentPage}&limit=${itemsPerPage}${searchParam}`;
+
+        console.log("[Products] Requête des produits:", requestUrl);
+
+        const response = await axios.get(requestUrl, {
+          withCredentials: true,
+          headers: getAuthHeaders(),
+        });
+
+        console.log("[Products] Réponse:", response.data);
+
+        if (response.data && response.data.data) {
+          setProducts(response.data.data);
           setTotalPages(response.data.totalPages || 1);
         } else {
-          throw new Error("Failed to fetch products");
+          setProducts([]);
+          setTotalPages(1);
+          console.warn("[Products] Réponse sans données:", response.data);
         }
-      } catch (err) {
+
+        // Fetch global stats
+        const statsUrl = `${process.env.NEXT_PUBLIC_URLAPI}/products/stats`;
+        console.log("[Products] Requête des statistiques:", statsUrl);
+
+        const statsResponse = await axios.get(statsUrl, {
+          withCredentials: true,
+          headers: getAuthHeaders(),
+        });
+
+        console.log("[Products] Statistiques:", statsResponse.data);
+
+        if (statsResponse.data && statsResponse.data.success) {
+          setProductsCount(statsResponse.data.data);
+        } else {
+          console.warn(
+            "[Products] Réponse des statistiques sans données:",
+            statsResponse.data
+          );
+        }
+
+        setError(null);
+      } catch (error) {
+        console.error("[Products] Erreur:", error);
         setError(
-          err.response?.data?.message || err.message || "An error occurred"
+          error.response?.data?.message ||
+            error.message ||
+            "Erreur lors de la récupération des produits"
         );
+        setProducts([]);
+        setProductsCount(null);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [API_URL, currentPage, searchQuery]);
+    // Reset to page 1 when search query changes
+    if (searchQuery !== "") {
+      setCurrentPage(1);
+    }
+
+    fetchData();
+  }, [currentPage, searchQuery, itemsPerPage]);
 
   return {
     products,
     productsCount,
-    isLoading: loading,
+    isLoading,
     error,
     searchQuery,
     setSearchQuery,
@@ -99,4 +99,4 @@ export function useProductsStats() {
     setCurrentPage,
     totalPages,
   };
-}
+};

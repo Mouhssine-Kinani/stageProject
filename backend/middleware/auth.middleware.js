@@ -6,10 +6,24 @@ export const verifyToken = async (req, res, next) => {
   try {
     console.log("[Auth] Vérification du token");
 
-    const token =
-      req.cookies.token ||
-      req.headers["x-auth-token"] ||
-      req.headers.authorization?.split(" ")[1];
+    // Récupérer le token depuis les headers Authorization
+    let token = null;
+
+    // Vérifier si le token est dans l'en-tête Authorization
+    if (req.headers.authorization) {
+      // Si le token est au format "Bearer <token>"
+      if (req.headers.authorization.startsWith("Bearer ")) {
+        token = req.headers.authorization.split(" ")[1];
+      }
+      // Si le token est envoyé directement sans préfixe
+      else {
+        token = req.headers.authorization;
+      }
+    }
+    // Vérifier les autres emplacements possibles (compatibilité)
+    if (!token) {
+      token = req.cookies.token || req.headers["x-auth-token"];
+    }
 
     if (!token) {
       console.log("[Auth] Pas de token trouvé");

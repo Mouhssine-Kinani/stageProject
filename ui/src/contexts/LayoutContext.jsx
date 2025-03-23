@@ -15,12 +15,17 @@ export const LayoutProvider = ({ children }) => {
       return match ? match[2] : null;
     };
 
-    const token = getCookie("token");
     const userId = getCookie("userId");
 
-    if (!token || !userId) {
+    if (!userId) {
       const currentPath = window.location.pathname;
-      const excludedPaths = ["/reset", "/forget"];
+      const excludedPaths = [
+        "/login",
+        "/register",
+        "/reset",
+        "/forget",
+        "/forgot-password",
+      ];
 
       if (!excludedPaths.includes(currentPath)) {
         router.push("/login");

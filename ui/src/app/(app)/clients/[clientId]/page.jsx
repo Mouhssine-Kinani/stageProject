@@ -3,8 +3,8 @@ import "./style.css";
 import Map from "@/components/map/map";
 import { getCoordinates } from "@/lib/geocode";
 import { useState, useEffect, use } from "react";
-import { useClient } from "@/hooks/useOneClients";
-import { MapPin, Plus, Edit2 } from "lucide-react";
+import { useOneClients } from "@/hooks/useOneClients";
+import { MapPin, Plus, Edit2, Loader2 } from "lucide-react";
 import { ClientTable } from "./columns";
 import SearchBar from "@/components/serchBar/Search";
 import PaginationComponent from "@/components/pagination/pagination";
@@ -24,17 +24,16 @@ function ClientPage({ params }) {
   // Utilisation du hook personnalisé qui gère la recherche et la pagination des produits
   const {
     client,
-    clientLoading,
-    clientError,
+    loading,
+    error,
     searchQuery,
     setSearchQuery,
     currentPage,
     setCurrentPage,
     paginatedProducts,
     totalPages,
-    fetchClient,
-    setClient,
-  } = useClient(clientId);
+    triggerReload,
+  } = useOneClients(clientId);
 
   const [coordinates, setCoordinates] = useState(null);
   const [stats, setStats] = useState({
@@ -78,7 +77,7 @@ function ClientPage({ params }) {
   // Écouter les événements d'ajout de produit au client
   useEffect(() => {
     const handleProductAdded = () => {
-      fetchClient();
+      triggerReload();
     };
 
     window.addEventListener("productAddedToClient", handleProductAdded);
@@ -86,7 +85,7 @@ function ClientPage({ params }) {
     return () => {
       window.removeEventListener("productAddedToClient", handleProductAdded);
     };
-  }, [fetchClient]);
+  }, [triggerReload]);
 
   useEffect(() => {
     if (client?.products && client.products.length > 0) {
@@ -144,7 +143,7 @@ function ClientPage({ params }) {
       const response = await deleteProductFromClient(clientId, productId);
       if (response && response.success) {
         toast.success("Produit supprimé avec succès");
-        fetchClient();
+        triggerReload();
       } else {
         toast.error("Erreur lors de la suppression du produit");
       }
@@ -161,14 +160,41 @@ function ClientPage({ params }) {
   };
 
   // Appliquer le tri sur product_reference
-  const sortedProducts = [...paginatedProducts].sort((a, b) => {
+  const sortedProducts = [...(paginatedProducts || [])].sort((a, b) => {
     const refA = Number(a.product_reference) || 0;
     const refB = Number(b.product_reference) || 0;
     return sortOrder === "asc" ? refA - refB : refB - refA;
   });
 
-  if (clientLoading) return <p>Loading...</p>;
-  if (clientError) return <p>Error: {clientError}</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500 text-xl">Erreur: {error}</p>
+        <Button onClick={triggerReload} className="mt-4">
+          Réessayer
+        </Button>
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-xl">Client non trouvé</p>
+        <Button onClick={() => window.history.back()} className="mt-4">
+          Retour
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -277,7 +303,7 @@ function ClientPage({ params }) {
           open={editClientDialogOpen}
           onOpenChange={setEditClientDialogOpen}
           client={client}
-          onSuccess={fetchClient}
+          onSuccess={triggerReload}
         />
       )}
     </>

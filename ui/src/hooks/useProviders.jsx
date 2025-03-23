@@ -10,28 +10,38 @@ export function useProviders() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fonction pour obtenir les en-têtes d'autorisation
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: token } : {};
+  };
+
   // Fonction pour récupérer les fournisseurs
   const fetchProviders = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log("[useProviders] Récupération des fournisseurs");
       const response = await axios.get(`${URLAPI}/providers`, {
         withCredentials: true,
+        headers: getAuthHeaders(),
       });
+
+      console.log("[useProviders] Réponse reçue:", response.status);
 
       if (response.data && Array.isArray(response.data.data)) {
         setProviders(response.data.data);
       } else {
         console.warn(
-          "Provider data structure is not as expected:",
+          "[useProviders] Structure de données inattendue:",
           response.data
         );
         setProviders([]);
         setError("Unexpected data format received from server");
       }
     } catch (error) {
-      console.error("Error fetching providers:", error);
+      console.error("[useProviders] Erreur:", error);
       setError(error.response?.data?.message || "Failed to fetch providers");
     } finally {
       setIsLoading(false);

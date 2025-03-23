@@ -1,11 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+"use client";
 import axios from "axios";
-axios.defaults.withCredentials = true;
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
-export function useClient(clientId) {
+const API_ENDPOINT = process.env.NEXT_PUBLIC_URLAPI;
+
+export function useOneClients(clientId) {
   const [client, setClient] = useState(null);
-  const [clientLoading, setClientLoading] = useState(true);
-  const [clientError, setClientError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reload, setReload] = useState(false);
 
   // États pour la recherche et la pagination des produits du client
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,78 +18,118 @@ export function useClient(clientId) {
   const [paginatedProducts, setPaginatedProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
 
-  const fetchClient = useCallback(async () => {
-    setClientLoading(true);
-    setClientError(null);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_URLAPI;
-      if (!API_URL) {
-        throw new Error("API URL is not defined in env variables");
-      }
+  // Fonction pour obtenir les en-têtes d'autorisation
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: token } : {};
+  };
 
-      console.log("Fetching client with ID:", clientId);
-      const response = await axios.get(`${API_URL}/clients/${clientId}`);
+  const triggerReload = () => setReload(!reload);
 
-      if (!response.data) {
-        throw new Error("No data received from the server");
-      }
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Failed to fetch client data");
-      }
-
-      if (!response.data.data) {
-        throw new Error("Client data is missing from the response");
-      }
-
-      if (!response.data.data._id) {
-        throw new Error("Client ID is missing from the response data");
-      }
-
-      console.log("Client data received:", response.data.data);
-      setClient(response.data.data);
-    } catch (error) {
-      console.error("Error fetching client:", error);
-
-      // Gestion spécifique des erreurs
-      if (error.response) {
-        // Le serveur a répondu avec un code d'erreur
-        switch (error.response.status) {
-          case 404:
-            setClientError("Client not found");
-            break;
-          case 401:
-            setClientError("Unauthorized access");
-            break;
-          case 403:
-            setClientError("Access forbidden");
-            break;
-          case 500:
-            setClientError("Server error. Please try again later");
-            break;
-          default:
-            setClientError(
-              error.response.data?.message || "Failed to fetch client data"
-            );
-        }
-      } else if (error.request) {
-        // La requête a été faite mais aucune réponse n'a été reçue
-        setClientError("No response from server. Please check your connection");
-      } else {
-        // Une erreur s'est produite lors de la configuration de la requête
-        setClientError(error.message || "Failed to fetch client data");
-      }
-    } finally {
-      setClientLoading(false);
-    }
-  }, [clientId]);
-
-  // Chargement initial des données du client
   useEffect(() => {
-    if (clientId) {
-      fetchClient();
+    // Ne pas exécuter la requête si clientId est undefined ou null
+    if (!clientId) {
+      console.log("[useOneClients] clientId non défini, requête annulée");
+      setLoading(false);
+      return;
     }
-  }, [clientId, fetchClient]);
+
+    const fetchClient = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const url = `${API_ENDPOINT}/clients/${clientId}`;
+        console.log(`[useOneClients] Fetching client data from: ${url}`);
+
+        const response = await axios.get(url, {
+          withCredentials: true,
+          headers: getAuthHeaders(),
+        });
+
+        if (!response.data || !response.data.success) {
+          throw new Error(
+            response.data?.message || "Failed to fetch client data"
+          );
+        }
+
+        console.log(
+          `[useOneClients] Client data received:`,
+          response.data.data
+        );
+        setClient(response.data.data);
+      } catch (err) {
+        console.error(`[useOneClients] Error:`, err);
+        setError(
+          err.response?.data?.message || err.message || "Failed to fetch client"
+        );
+        setClient(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClient();
+  }, [clientId, reload]);
+
+  // Fonction pour mettre à jour un client
+  const updateClient = async (clientData) => {
+    // Vérification que clientId existe
+    if (!clientId) {
+      console.error("[useOneClients] Update error: Client ID is required");
+      return {
+        success: false,
+        message: "Client ID is required",
+      };
+    }
+
+    setLoading(true);
+    try {
+      console.log(`[useOneClients] Updating client ID: ${clientId}`);
+      console.log(`[useOneClients] Update data:`, clientData);
+
+      const response = await axios.put(
+        `${API_ENDPOINT}/clients/${clientId}`,
+        clientData,
+        {
+          withCredentials: true,
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log(`[useOneClients] Update response:`, response.data);
+
+      if (!response.data || !response.data.success) {
+        throw new Error(
+          response.data?.message || "Failed to update client data"
+        );
+      }
+
+      setClient(response.data.data);
+      return {
+        success: true,
+        message: "Client updated successfully",
+        data: response.data.data,
+      };
+    } catch (err) {
+      console.error(`[useOneClients] Update error:`, err);
+      setError(
+        err.response?.data?.message || err.message || "Failed to update client"
+      );
+      return {
+        success: false,
+        message:
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to update client",
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtrer et paginer les produits du client
   useEffect(() => {
@@ -107,15 +151,15 @@ export function useClient(clientId) {
 
   return {
     client,
-    clientLoading,
-    clientError,
+    loading,
+    error,
+    updateClient,
+    triggerReload,
     searchQuery,
     setSearchQuery,
     currentPage,
     setCurrentPage,
     paginatedProducts,
     totalPages,
-    fetchClient,
-    setClient,
   };
 }

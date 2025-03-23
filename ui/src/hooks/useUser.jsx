@@ -22,13 +22,18 @@ const useUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = Cookies.get("token");
+        // Récupérer le token du localStorage et userId du cookie
+        const token = localStorage.getItem("authToken");
         const userId = Cookies.get("userId");
 
-        console.log("[useUser] Token:", token);
-        console.log("[useUser] UserId:", userId);
+        console.log(
+          "[useUser] Token (localStorage):",
+          token ? "Présent" : "Absent"
+        );
+        console.log("[useUser] UserId (cookie):", userId);
 
         if (!token || !userId) {
+          console.log("[useUser] Token ou userId manquant, non authentifié");
           setIsAuthenticated(false);
           setLoading(false);
           return;
@@ -36,15 +41,15 @@ const useUser = () => {
 
         // Essayer d'abord de récupérer les données utilisateur depuis le localStorage
         const userDataFromStorage = localStorage.getItem("userData");
-        console.log("[useUser] Données du localStorage:", userDataFromStorage);
+        console.log(
+          "[useUser] Données du localStorage:",
+          userDataFromStorage ? "Présentes" : "Absentes"
+        );
 
         if (userDataFromStorage) {
           try {
             const parsedUserData = JSON.parse(userDataFromStorage);
-            console.log(
-              "[useUser] Données parsées du localStorage:",
-              parsedUserData
-            );
+            console.log("[useUser] Données parsées du localStorage:OK");
             setUser(parsedUserData);
             setIsAuthenticated(true);
           } catch (parseError) {
@@ -60,12 +65,12 @@ const useUser = () => {
         console.log("[useUser] Requête API pour les données utilisateur");
         const response = await axios.get(`${URLAPI}/users/${userId}`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: token, // Utiliser directement le token du localStorage
           },
           withCredentials: true,
         });
 
-        console.log("[useUser] Réponse API:", response.data);
+        console.log("[useUser] Réponse API:", response.data ? "OK" : "Erreur");
 
         // Mettre à jour les données utilisateur dans le state et dans le localStorage
         if (response.data.success && response.data.data) {
@@ -81,15 +86,15 @@ const useUser = () => {
           error
         );
 
-        // Si l'erreur est liée à l'authentification (401 ou 403), nettoyer les cookies
+        // Si l'erreur est liée à l'authentification (401 ou 403), nettoyer les cookies et localStorage
         if (
           error.response &&
           (error.response.status === 401 || error.response.status === 403)
         ) {
           console.log("[useUser] Erreur d'authentification, déconnexion");
-          Cookies.remove("token", { path: "/" });
-          Cookies.remove("userId", { path: "/" });
+          localStorage.removeItem("authToken");
           localStorage.removeItem("userData");
+          Cookies.remove("userId", { path: "/" });
           setIsAuthenticated(false);
         }
 
@@ -110,17 +115,17 @@ const useUser = () => {
    */
   const handleLogout = async () => {
     try {
-      // Récupérer l'ID utilisateur depuis les cookies ou le contexte
+      // Récupérer l'ID utilisateur depuis les cookies
       const userId = Cookies.get("userId");
+      const token = localStorage.getItem("authToken");
 
       // Appeler l'API pour mettre à jour lastLogin_date
-      if (userId) {
-        const token = Cookies.get("token");
+      if (userId && token) {
         await axios.post(
           `${URLAPI}/users/logout`,
           {},
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: token },
             withCredentials: true,
           }
         );
@@ -133,7 +138,11 @@ const useUser = () => {
     } catch (error) {
       console.error("[useUser] Erreur lors de la déconnexion via API:", error);
     } finally {
-      // Nettoyer les cookies avec les options appropriées pour le cross-origin
+      // Nettoyer le localStorage et les cookies
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userData");
+
+      // Nettoyer le cookie userId
       const isProduction = process.env.NODE_ENV === "production";
       const cookieOptions = {
         path: "/",
@@ -141,9 +150,7 @@ const useUser = () => {
         secure: isProduction,
       };
 
-      Cookies.remove("token", cookieOptions);
       Cookies.remove("userId", cookieOptions);
-      localStorage.removeItem("userData");
 
       setUser(null);
       setIsAuthenticated(false);

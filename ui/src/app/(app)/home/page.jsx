@@ -119,11 +119,15 @@ function Page() {
   const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    // Vérifier l'existence du token dans localStorage et du userId dans les cookies
+    const authToken = localStorage.getItem("authToken");
+    const userId = Cookies.get("userId");
 
-    if (!token) {
+    if (!authToken || !userId) {
+      console.log("[Home] Authentification manquante, redirection vers login");
       router.push("/login");
     } else {
+      console.log("[Home] Authentification vérifiée");
       setLoadingToken(false); // Le token est vérifié, on arrête le chargement
     }
   }, [router]);

@@ -3,7 +3,7 @@ import "./header.css";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "next/navigation";
-import { useClient } from "@/hooks/useOneClients";
+import { useOneClients } from "@/hooks/useOneClients";
 import { Moon, Sun, Menu, Bell, ChevronDown, User, LogOut } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
@@ -35,7 +35,7 @@ export default function Header({
   const clientId = isClientPage ? parts[1] : null;
 
   // Maintenant on peut utiliser clientId en toute sécurité
-  const { client, clientLoading } = useClient(clientId);
+  const { client, clientLoading } = useOneClients(clientId);
 
   let breadcrumb = parts.map((part, index) => {
     if (index === 1 && isClientPage) {

@@ -83,13 +83,26 @@ export default function Login() {
       console.log("[Login] Connexion réussie:", data);
       console.log("[Login] Données utilisateur:", data.user);
 
-      // Définir manuellement les cookies en respectant SameSite pour cross-origin
-      const isProduction = process.env.NODE_ENV === "production";
-      const sameSite = isProduction ? "None" : "Lax";
-      const secure = isProduction ? "; Secure" : "";
+      // Stocker le token dans localStorage (pas dans un cookie)
+      localStorage.setItem("authToken", data.token);
 
-      document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=${sameSite}${secure}`;
-      document.cookie = `userId=${data.user._id}; path=/; max-age=604800; SameSite=${sameSite}${secure}`;
+      // Vérifier que le cookie userId est bien présent
+      // Le cookie userId devrait être défini automatiquement par le serveur
+      const userId = Cookies.get("userId");
+      if (!userId) {
+        console.log("[Login] Cookie userId non trouvé, création manuelle...");
+        // Si le cookie n'est pas défini automatiquement, le définir manuellement
+        const isProduction = process.env.NODE_ENV === "production";
+        const sameSite = isProduction ? "None" : "Lax";
+        const secure = isProduction;
+
+        Cookies.set("userId", data.userId, {
+          path: "/",
+          expires: 7, // 7 jours
+          sameSite: sameSite,
+          secure: secure,
+        });
+      }
 
       // Stocker les données utilisateur dans localStorage
       localStorage.setItem("userData", JSON.stringify(data.user));
@@ -98,13 +111,16 @@ export default function Login() {
         data.user
       );
 
-      console.log("[Login] Cookies définis:", document.cookie);
+      console.log("[Login] Token stocké dans localStorage");
+      console.log("[Login] Cookie userId:", Cookies.get("userId"));
       console.log(`[Login] Redirection vers: ${returnUrl}`);
 
-      // Ajouter un petit délai pour s'assurer que les cookies sont bien définis
+      // Ajouter un délai plus long pour s'assurer que tous les états sont bien définis
+      // et que les hooks ne sont pas appelés pendant la redirection
+      toast.success("Connexion réussie");
       setTimeout(() => {
         router.push(returnUrl);
-      }, 100);
+      }, 500); // Augmentation du délai à 500ms
     } catch (error) {
       console.error("[Login] Erreur inattendue:", error);
       if (error.response?.data?.message) {

@@ -20,7 +20,7 @@ const PUBLIC_PATHS = [
 
 /**
  * Middleware d'authentification pour protéger les routes
- * Vérifie la présence des cookies token et userId
+ * Vérifie la présence du cookie userId
  */
 export function middleware(request) {
   // Vérifier si le chemin est protégé
@@ -28,25 +28,24 @@ export function middleware(request) {
 
   // Debug logs
   console.log(`[Middleware] Processing: ${pathname}${search}`);
-  
+
   // Special case for reset password with token
   if (pathname === "/reset" && search && search.includes("token=")) {
     console.log(`[Middleware] Reset with token detected, allowing through`);
     return NextResponse.next();
   }
-  
+
   // More logs
   console.log(`[Middleware] Not a reset with token path`);
 
   // Alternative approach
-const url = request.nextUrl;
-if (pathname === "/reset" && url.searchParams.has("token")) {
-  console.log(`[Middleware] Reset with token detected via searchParams`);
-  return NextResponse.next();
-}
+  const url = request.nextUrl;
+  if (pathname === "/reset" && url.searchParams.has("token")) {
+    console.log(`[Middleware] Reset with token detected via searchParams`);
+    return NextResponse.next();
+  }
 
-  // Obtenir les cookies d'authentification
-  const token = request.cookies.get("token")?.value;
+  // Obtenir le cookie userId
   const userId = request.cookies.get("userId")?.value;
 
   // Vérifier si c'est un chemin public
@@ -65,7 +64,7 @@ if (pathname === "/reset" && url.searchParams.has("token")) {
   );
 
   // Si c'est un chemin protégé et que l'utilisateur n'est pas authentifié
-  if (isProtectedPath && (!token || !userId)) {
+  if (isProtectedPath && !userId) {
     console.log(
       `[Middleware] Redirection immédiate vers la page de connexion - ${pathname}`
     );
@@ -94,7 +93,7 @@ export const config = {
      * 2. /_next (Next.js internal routes)
      * 3. /_static (inside /public)
      * 4. /_vercel (Vercel internal routes)
-     * 5. /favicon.ico, /sitemap.xml (static files)
+     * 5. /favicon.ico, sitemap.xml (static files)
      */
     "/((?!api|_next|_static|_vercel|favicon.ico|sitemap.xml).*)",
   ],
