@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Configuration des chemins protégés et publics
+// Configuration of protected and public paths
 const PROTECTED_PATHS = [
   "/home",
   "/clients",
@@ -19,76 +19,54 @@ const PUBLIC_PATHS = [
 ];
 
 /**
- * Middleware d'authentification pour protéger les routes
- * Vérifie la présence du cookie userId
+ * Middleware de redirection basique
+ * Note: Avec httpOnly: true, nous ne pouvons pas vérifier les cookies côté client
+ * Nous devons donc vérifier l'authentification sur les pages protégées elles-mêmes
  */
 export function middleware(request) {
-  // Vérifier si le chemin est protégé
-  const { pathname, search } = request.nextUrl;
+  // Extract URL information
+  const { pathname } = request.nextUrl;
 
-  // Debug logs
-  console.log(`[Middleware] Processing: ${pathname}${search}`);
+  console.log(`[Middleware] Processing request for path: ${pathname}`);
 
-  // Special case for reset password with token
-  if (pathname === "/reset" && search && search.includes("token=")) {
-    console.log(`[Middleware] Reset with token detected, allowing through`);
+  // Special case for password reset with token
+  if (pathname === "/reset" && request.nextUrl.searchParams.has("token")) {
+    console.log("[Middleware] Password reset with token, allowing");
     return NextResponse.next();
   }
 
-  // More logs
-  console.log(`[Middleware] Not a reset with token path`);
-
-  // Alternative approach
-  const url = request.nextUrl;
-  if (pathname === "/reset" && url.searchParams.has("token")) {
-    console.log(`[Middleware] Reset with token detected via searchParams`);
+  // Special case for root - we let this pass since it will be handled by its own redirection
+  if (pathname === "/") {
+    console.log("[Middleware] Root path, allowing");
     return NextResponse.next();
   }
 
-  // Obtenir le cookie userId
-  const userId = request.cookies.get("userId")?.value;
-
-  // Vérifier si c'est un chemin public
+  // Check if it's a public path
   const isPublicPath = PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  // Si c'est un chemin public, laisser passer
+  // If it's a public path, let the request pass
   if (isPublicPath) {
+    console.log(`[Middleware] Public path ${pathname}, allowing`);
     return NextResponse.next();
   }
 
-  // Déterminer si c'est un chemin protégé
-  const isProtectedPath = PROTECTED_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  // Let all requests through to be handled by client-side authentication checks
+  // This is because with httpOnly cookies, middleware can't check authentication
+  console.log(
+    `[Middleware] Allowing request to ${pathname}, authentication will be checked by the page component`
   );
-
-  // Si c'est un chemin protégé et que l'utilisateur n'est pas authentifié
-  if (isProtectedPath && !userId) {
-    console.log(
-      `[Middleware] Redirection immédiate vers la page de connexion - ${pathname}`
-    );
-
-    // Créer l'URL de redirection avec le returnUrl pour revenir à cette page après la connexion
-    const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("returnUrl", pathname);
-
-    // Force la réponse à être un redirect complet, pas un rewrite
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Laisser passer pour toutes les autres demandes
   return NextResponse.next();
 }
 
 /**
- * Configuration des routes à protéger
- * Toutes ces routes nécessitent une authentification
+ * Configuration of routes to apply middleware
  */
 export const config = {
   matcher: [
     /*
-     * Match toutes les routes sauf:
+     * Match all routes except:
      * 1. /api (API routes)
      * 2. /_next (Next.js internal routes)
      * 3. /_static (inside /public)

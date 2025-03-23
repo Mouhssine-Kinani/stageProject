@@ -1,7 +1,6 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 const API_ENDPOINT = process.env.NEXT_PUBLIC_URLAPI;
 

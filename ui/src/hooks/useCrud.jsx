@@ -31,7 +31,13 @@ export function useCrud(Category, searchQuery = "") {
   // Fonction pour obtenir les en-têtes d'autorisation
   const getAuthHeaders = () => {
     const token = localStorage.getItem("authToken");
-    return token ? { Authorization: token } : {};
+    // S'assurer que le token est renvoyé tel quel (sans ajouter Bearer si déjà présent)
+    if (!token) return {};
+
+    if (token.startsWith("Bearer ")) {
+      return { Authorization: token };
+    }
+    return { Authorization: `Bearer ${token}` };
   };
 
   const fetchData = async () => {

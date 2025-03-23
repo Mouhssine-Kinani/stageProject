@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useOneClients } from "@/hooks/useOneClients";
 import { Moon, Sun, Menu, Bell, ChevronDown, User, LogOut } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useRouter } from "next/navigation";
 import { useWindowWidth } from "@/hooks/useWindowWidth";

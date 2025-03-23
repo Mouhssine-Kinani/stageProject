@@ -1,12 +1,8 @@
 // useUser.js
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-
-axios.defaults.withCredentials = true;
-const URLAPI = process.env.NEXT_PUBLIC_URLAPI;
+import { checkAuth, logout as apiLogout } from "@/lib/api";
 
 /**
  * Hook pour gérer l'utilisateur actuel et son état d'authentification
@@ -22,86 +18,38 @@ const useUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Récupérer le token du localStorage et userId du cookie
-        const token = localStorage.getItem("authToken");
-        const userId = Cookies.get("userId");
+        // Vérifier l'authentification via l'API
+        const {
+          isAuthenticated,
+          user: userData,
+          error: authError,
+        } = await checkAuth();
 
-        console.log(
-          "[useUser] Token (localStorage):",
-          token ? "Présent" : "Absent"
-        );
-        console.log("[useUser] UserId (cookie):", userId);
+        console.log("[useUser] Authentification vérifiée:", isAuthenticated);
 
-        if (!token || !userId) {
-          console.log("[useUser] Token ou userId manquant, non authentifié");
-          setIsAuthenticated(false);
-          setLoading(false);
-          return;
-        }
-
-        // Essayer d'abord de récupérer les données utilisateur depuis le localStorage
-        const userDataFromStorage = localStorage.getItem("userData");
-        console.log(
-          "[useUser] Données du localStorage:",
-          userDataFromStorage ? "Présentes" : "Absentes"
-        );
-
-        if (userDataFromStorage) {
-          try {
-            const parsedUserData = JSON.parse(userDataFromStorage);
-            console.log("[useUser] Données parsées du localStorage:OK");
-            setUser(parsedUserData);
-            setIsAuthenticated(true);
-          } catch (parseError) {
-            console.error(
-              "[useUser] Erreur de parsing des données du localStorage:",
-              parseError
-            );
-            localStorage.removeItem("userData");
-          }
-        }
-
-        // Requête API pour obtenir les données utilisateur à jour
-        console.log("[useUser] Requête API pour les données utilisateur");
-        const response = await axios.get(`${URLAPI}/users/${userId}`, {
-          headers: {
-            Authorization: token, // Utiliser directement le token du localStorage
-          },
-          withCredentials: true,
-        });
-
-        console.log("[useUser] Réponse API:", response.data ? "OK" : "Erreur");
-
-        // Mettre à jour les données utilisateur dans le state et dans le localStorage
-        if (response.data.success && response.data.data) {
-          setUser(response.data.data);
-          localStorage.setItem("userData", JSON.stringify(response.data.data));
+        if (isAuthenticated && userData) {
+          setUser(userData);
           setIsAuthenticated(true);
         } else {
-          throw new Error("Format de réponse invalide");
+          console.log(
+            "[useUser] Non authentifié ou données utilisateur manquantes"
+          );
+          setIsAuthenticated(false);
+
+          if (authError) {
+            throw authError;
+          }
         }
       } catch (error) {
         console.error(
-          "[useUser] Erreur lors de la récupération des données:",
+          "[useUser] Erreur lors de la vérification de l'authentification:",
           error
         );
-
-        // Si l'erreur est liée à l'authentification (401 ou 403), nettoyer les cookies et localStorage
-        if (
-          error.response &&
-          (error.response.status === 401 || error.response.status === 403)
-        ) {
-          console.log("[useUser] Erreur d'authentification, déconnexion");
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("userData");
-          Cookies.remove("userId", { path: "/" });
-          setIsAuthenticated(false);
-        }
-
         setError(
           error.message ||
             "Erreur lors de la récupération des données utilisateur"
         );
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -115,43 +63,21 @@ const useUser = () => {
    */
   const handleLogout = async () => {
     try {
-      // Récupérer l'ID utilisateur depuis les cookies
-      const userId = Cookies.get("userId");
-      const token = localStorage.getItem("authToken");
+      // Appeler l'API de déconnexion
+      const result = await apiLogout();
 
-      // Appeler l'API pour mettre à jour lastLogin_date
-      if (userId && token) {
-        await axios.post(
-          `${URLAPI}/users/logout`,
-          {},
-          {
-            headers: { Authorization: token },
-            withCredentials: true,
-          }
-        );
-        console.log("[useUser] LastLogin_date mise à jour via API");
-      }
+      console.log("[useUser] Résultat de la déconnexion:", result);
 
-      // Appeler l'API de déconnexion pour le token
-      await axios.post(`${URLAPI}/auth/logout`, {}, { withCredentials: true });
-      console.log("[useUser] Déconnexion réussie via API");
+      // Que la déconnexion réussisse ou échoue, nous réinitialisons l'état
+      setUser(null);
+      setIsAuthenticated(false);
+
+      // Rediriger vers la page de connexion
+      router.push("/login");
     } catch (error) {
-      console.error("[useUser] Erreur lors de la déconnexion via API:", error);
-    } finally {
-      // Nettoyer le localStorage et les cookies
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userData");
+      console.error("[useUser] Erreur lors de la déconnexion:", error);
 
-      // Nettoyer le cookie userId
-      const isProduction = process.env.NODE_ENV === "production";
-      const cookieOptions = {
-        path: "/",
-        sameSite: isProduction ? "None" : "Lax",
-        secure: isProduction,
-      };
-
-      Cookies.remove("userId", cookieOptions);
-
+      // Même en cas d'erreur, nous réinitialisons l'état et redirigeons
       setUser(null);
       setIsAuthenticated(false);
       router.push("/login");

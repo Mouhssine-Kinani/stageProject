@@ -4,8 +4,10 @@ import {
   logout,
   requestPasswordReset,
   resetPassword,
+  checkAuth,
 } from "../../controllers/Auth/auth.controller.js";
 import { Router } from "express";
+import { protect } from "../../middleware/auth.middleware.js";
 
 const authRouter = Router();
 
@@ -17,6 +19,9 @@ authRouter.post("/signin", signIn);
 
 // Route to log out a user
 authRouter.get("/logout", logout);
+
+// Route to check authentication status
+authRouter.get("/check-auth", protect, checkAuth);
 
 // Route to request a password reset
 authRouter.post("/forgot-password", requestPasswordReset);
