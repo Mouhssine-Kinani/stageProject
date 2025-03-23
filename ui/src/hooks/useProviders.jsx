@@ -13,7 +13,13 @@ export function useProviders() {
   // Fonction pour obtenir les en-têtes d'autorisation
   const getAuthHeaders = () => {
     const token = localStorage.getItem("authToken");
-    return token ? { Authorization: token } : {};
+    return token
+      ? {
+          Authorization: token.startsWith("Bearer ")
+            ? token
+            : `Bearer ${token}`,
+        }
+      : {};
   };
 
   // Fonction pour récupérer les fournisseurs
@@ -23,12 +29,20 @@ export function useProviders() {
 
     try {
       console.log("[useProviders] Récupération des fournisseurs");
+      console.log("[useProviders] URL API:", URLAPI);
+      const headers = getAuthHeaders();
+      console.log("[useProviders] Headers:", headers);
+
       const response = await axios.get(`${URLAPI}/providers`, {
         withCredentials: true,
-        headers: getAuthHeaders(),
+        headers: headers,
       });
 
-      console.log("[useProviders] Réponse reçue:", response.status);
+      console.log(
+        "[useProviders] Réponse reçue:",
+        response.status,
+        response.data
+      );
 
       if (response.data && Array.isArray(response.data.data)) {
         setProviders(response.data.data);

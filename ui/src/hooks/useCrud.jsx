@@ -156,7 +156,18 @@ export function useCrud(Category, searchQuery = "") {
   const createItem = async (itemData) => {
     setIsLoading(true);
     try {
-      let url = `${URLAPI}/${Category}`;
+      // Utiliser les routes spécifiques selon la catégorie
+      let url;
+      if (Category === "clients") {
+        url = `${URLAPI}/${Category}/create`;
+      } else if (Category === "products") {
+        url = `${URLAPI}/${Category}/create`;
+      } else if (Category === "users") {
+        url = `${URLAPI}/Users/`;
+      } else {
+        url = `${URLAPI}/${Category}`;
+      }
+
       let formData = null;
       let headers = getAuthHeaders(); // Utiliser les en-têtes d'autorisation
 
@@ -213,7 +224,18 @@ export function useCrud(Category, searchQuery = "") {
   const updateItem = async (id, itemData) => {
     setIsLoading(true);
     try {
-      let url = `${URLAPI}/${Category}/${id}`;
+      // Utiliser la route spécifique selon la catégorie
+      let url;
+      if (Category === "clients") {
+        url = `${URLAPI}/${Category}/edit/${id}`;
+      } else if (Category === "products") {
+        url = `${URLAPI}/${Category}/edit/${id}`;
+      } else if (Category === "users") {
+        url = `${URLAPI}/Users/edit/${id}`;
+      } else {
+        url = `${URLAPI}/${Category}/${id}`;
+      }
+
       let formData = null;
       let headers = getAuthHeaders(); // Utiliser les en-têtes d'autorisation
 

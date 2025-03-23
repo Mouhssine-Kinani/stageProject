@@ -103,7 +103,7 @@ export default function AddProductDialog({ open, onOpenChange }) {
         window.dispatchEvent(event);
         handleCancel();
       } else {
-        toast.error(result.error || "Échec de l'ajout du produit");
+        toast.error(result.message || "Échec de l'ajout du produit");
       }
     } catch (error) {
       console.error("Error creating product:", error);

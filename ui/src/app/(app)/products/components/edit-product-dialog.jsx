@@ -104,7 +104,7 @@ export default function EditProductDialog({ open, onOpenChange, productData }) {
         window.dispatchEvent(event);
         handleCancel();
       } else {
-        toast.error(result.error || "Échec de la mise à jour du produit");
+        toast.error(result.message || "Échec de la mise à jour du produit");
       }
     } catch (error) {
       console.error("Error updating product:", error);

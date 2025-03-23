@@ -5,6 +5,7 @@ const uploadLogoPaths = {
   "/clients/create": "./uploads/clientsLogo",
   "/providers/create": "./uploads/providersLogo",
   "/users/create": "./uploads/usersLogo",
+  "/": "./uploads/usersLogo", // Chemin pour la création d'utilisateurs (POST)
   "/edit/:id": "./uploads/usersLogo", // Path for user edit
   "/clients/edit/:id": "./uploads/clientsLogo",
   "/providers/edit/:id": "./uploads/providersLogo",

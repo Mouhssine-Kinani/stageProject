@@ -86,7 +86,7 @@ export default function EditUserDialog({ open, onOpenChange, userData }) {
     const file = e.target.files[0];
     if (file) {
       const validation = validateFile(file, { maxSize: 1024000 }); // Max size 1MB
-      if (!validation.isValid) {
+      if (!validation.valid) {
         setErrors((prev) => ({ ...prev, logo: validation.error }));
         return;
       }
@@ -118,29 +118,56 @@ export default function EditUserDialog({ open, onOpenChange, userData }) {
       e.preventDefault();
       await userSchema.validate(formData, { abortEarly: false });
 
-      const submitData = {
-        ...formData,
-        role: { roleName: formData.roleName },
-      };
-      delete submitData.roleName;
+      let result;
 
-      // Only include logo if changed
-      const hasNewImage = !!selectedFile;
-      if (!hasNewImage) {
-        delete submitData.logo;
+      // Si nous avons un logo, utilisons FormData
+      if (selectedFile) {
+        const submitData = new FormData();
+
+        // Ajouter les champs de base
+        submitData.append("fullName", formData.fullName);
+        submitData.append("email", formData.email);
+        submitData.append("phone", formData.phone);
+        submitData.append("status", formData.status);
+
+        // Ajouter l'objet role comme JSON string
+        const roleObj = {
+          roleName: formData.roleName,
+          description: `${formData.roleName} role`,
+        };
+        submitData.append("role", JSON.stringify(roleObj));
+
+        // Ajouter le logo explicitement avec son nom de fichier
+        submitData.append("logo", selectedFile, selectedFile.name);
+
+        console.log(
+          "Updating user with FormData (includes new logo):",
+          userData._id
+        );
+        result = await updateItem(userData._id, submitData);
       } else {
-        console.log("Submitting with new image:", selectedFile.name);
-      }
+        // Sans logo, utilisez un objet JSON simple
+        const updateData = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          status: formData.status,
+          role: {
+            roleName: formData.roleName,
+            description: `${formData.roleName} role`,
+          },
+        };
 
-      console.log("Submitting update for user:", userData._id, submitData);
-      const result = await updateItem(userData._id, submitData);
+        console.log("Updating user with JSON data:", userData._id);
+        result = await updateItem(userData._id, updateData);
+      }
 
       if (result.success) {
         // Dispatch event for user edited with updated data
         const event = new CustomEvent("userEdited", {
           detail: {
             ...result.data,
-            logo: hasNewImage ? result.data?.data?.logo : userData.logo,
+            logo: selectedFile ? result.data?.data?.logo : userData.logo,
           },
         });
         window.dispatchEvent(event);
@@ -148,8 +175,8 @@ export default function EditUserDialog({ open, onOpenChange, userData }) {
         // Close the dialog
         handleCancel();
       } else {
-        console.error("Update failed:", result.error);
-        setErrors((prev) => ({ ...prev, submit: result.error }));
+        console.error("Update failed:", result.message);
+        setErrors((prev) => ({ ...prev, submit: result.message }));
       }
     } catch (error) {
       console.error("Validation error:", error);

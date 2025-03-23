@@ -44,6 +44,7 @@ router.get("/:id", userController.getUser);
 router.post(
   "/",
   verifyRole(["Admin", "Super Admin"]),
+  upload.single("logo"),
   userController.createUser
 );
 router.put(
