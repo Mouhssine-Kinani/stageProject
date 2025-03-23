@@ -106,8 +106,6 @@ const scheduleExpirationChecks = () => {
     setInterval(checkExpirations, 24 * 60 * 60 * 1000);
   }, timeToNoon);
 };
-
-// checkExpirations();
 // let backend dynamically assigns a port
 const serverPORT = process.env.PORT || 5000;
 // Démarrer le serveur
