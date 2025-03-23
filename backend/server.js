@@ -5,7 +5,7 @@ import productRoute from "./routes/products/products.routes.js";
 import clientRoute from "./routes/clients/clients.routes.js";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/Users/user.routes.js";
-import { PORT, FRONT_END_URL, COOKIE_DOMAIN } from "./config/env.js";
+import { PORT, FRONT_END_URL, COOKIE_DOMAIN, NODE_ENV } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/Auth/auth.routes.js";
 import cors from "cors";
@@ -15,34 +15,34 @@ const app = express();
 
 app.use(cookieParser()); // Middleware to parse cookies
 
-// Configure CORS to allow requests from multiple origins with credentials
+// List of allowed origins
+const allowedOrigins = [
+  FRONT_END_URL,
+  "https://syntaradev.vercel.app",
+  "https://syntara.up.railway.app",
+  // Add other allowed origins as needed
+];
+
+// Stricter and more secure CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Whitelist of allowed origins
-      const allowedOrigins = [
-        FRONT_END_URL,
-        "https://syntaradev.vercel.app",
-        "https://syntara.up.railway.app",
-        // Ajoutez d'autres origines autorisées au besoin
-        // Exemple: "https://app.example.com", "https://admin.example.com"
-      ];
-
-      // Pour le développement local
-      if (process.env.NODE_ENV !== "production") {
+      // In development mode, allow all requests (for local development)
+      if (NODE_ENV !== "production") {
         return callback(null, true);
       }
 
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+      // Allow requests without origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
 
-      // Check if the origin is in the allowed list
-      if (allowedOrigins.indexOf(origin) !== -1 || origin === FRONT_END_URL) {
+      // Check if the origin is in the list of allowed origins
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log(`Origin ${origin} not allowed by CORS: ${origin}`);
-        callback(null, true); // Temporarily allow all origins in production
-        // callback(new Error("CORS not allowed"));
+        console.log(`Origin rejected by CORS: ${origin}`);
+        callback(new Error("CORS not allowed for this origin"));
       }
     },
     credentials: true, // Allow cookies
@@ -106,9 +106,9 @@ const scheduleExpirationChecks = () => {
     setInterval(checkExpirations, 24 * 60 * 60 * 1000);
   }, timeToNoon);
 };
-// let backend dynamically assigns a port
+// Let backend dynamically assign a port
 const serverPORT = process.env.PORT || 5000;
-// Démarrer le serveur
+// Start the server
 app.listen(serverPORT, async () => {
   try {
     await connectDB();

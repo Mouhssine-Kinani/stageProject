@@ -38,7 +38,7 @@ export const signUP = async (req, res, next) => {
 
     await newUser.save();
 
-    // Création du token avec l'ID et le rôle
+    // Create token with ID and role
     const token = jwt.sign(
       { userId: newUser._id, role: newUser.role },
       JWT_SECRET,
@@ -50,7 +50,7 @@ export const signUP = async (req, res, next) => {
     res.status(201).json({
       message: "User created successfully",
       data: {
-        token, // Ajout du token ici
+        token, // Add token here
         user: {
           _id: newUser._id,
           reference: newUser.reference,
@@ -66,162 +66,121 @@ export const signUP = async (req, res, next) => {
   }
 };
 
-// export const signIn = async (req, res, next) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = await User.findOne({ email });
-
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found",
-//       });
-//     }
-
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
-//     if (!isPasswordValid) {
-//       return res.status(401).json({
-//         message: "Invalid password",
-//         data: { email, password },
-//       });
-//     }
-
-//     // Create token with user ID and role
-//     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
-//       expiresIn: JWT_EXPIRE_INS,
-//     });
-
-//     res.cookie('token', token, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === 'production',
-//       maxAge: ms(JWT_EXPIRE_INS), // Convertit '1d' en millisecondes
-//     });
-
-//     res.status(200).json({
-//       message: "User logged in successfully",
-//       data: {
-//         token, // also returned in JSON if needed
-//         user: {
-//           _id: user._id,
-//           reference: user.reference,
-//           fullName: user.fullName,
-//           email: user.email,
-//           role: user.role,
-//           status: user.status,
-//         },
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-export const signIn = async (req, res) => {
+export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    console.log(`[Auth] Tentative de connexion pour: ${email}`);
+    console.log(`[Auth] Login attempt for email: ${email}`);
 
-    // Vérifier si l'utilisateur existe
+    // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`[Auth] Utilisateur introuvable: ${email}`);
+      console.log(`[Auth] User not found`);
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
 
-    // Vérifier le mot de passe
+    // Check the password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      console.log(`[Auth] Mot de passe incorrect pour: ${email}`);
+      console.log(`[Auth] Incorrect password`);
       return res
         .status(401)
         .json({ success: false, message: "Incorrect password" });
     }
 
-    // Générer un token JWT avec l'ID utilisateur et le rôle
+    // Generate a JWT token with user ID and role
     const token = jwt.sign(
       {
         id: user._id.toString(),
-        role: user.role.roleName, // Inclure le nom du rôle dans le token
+        role: user.role.roleName, // Include role name in the token
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    console.log(`[Auth] Génération du token pour l'utilisateur: ${user._id}`);
+    console.log(`[Auth] Token generated for user: ${user._id}`);
+
+    // Cookie options - for local development, don't set domain
+    const isProduction = process.env.NODE_ENV === "production";
+    console.log(`[Auth] Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`[Auth] Is production: ${isProduction}`);
     console.log(
-      `[Auth] Utilisateur connecté: ${JSON.stringify({
-        _id: user._id,
-        email: user.email,
-        role: user.role.roleName,
-      })}`
+      `[Auth] COOKIE_DOMAIN: ${process.env.COOKIE_DOMAIN || "not set"}`
     );
 
-    // Options pour les cookies
     const cookieOptions = {
-      httpOnly: false, // Client peut accéder au cookie
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+      httpOnly: true, // Cookies are only accessible by the server for better security
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
     };
 
-    console.log(
-      `[Auth] Production mode: ${process.env.NODE_ENV === "production"}`
-    );
-    console.log(`[Auth] Cookie domain: ${process.env.COOKIE_DOMAIN}`);
-    console.log(`[Auth] Cookie options: ${JSON.stringify(cookieOptions)}`);
+    // Only set domain in production
+    if (isProduction && process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
 
-    // Définir le cookie userId uniquement
+    console.log(`[Auth] Cookie options:`, cookieOptions);
+
+    // Set theuserId cookie
     res.cookie("userId", user._id.toString(), cookieOptions);
+    console.log(`[Auth] Cookie set with userId: ${user._id}`);
 
-    // Réponse avec succès, token comme Bearer token et données utilisateur (sans mot de passe)
+    // Response with success, token as Bearer token and user data (without password)
     const userToReturn = { ...user.toObject() };
     delete userToReturn.password;
 
     res.status(200).json({
       success: true,
       token: `Bearer ${token}`,
-      userId: user._id.toString(), // Inclure également l'userId dans la réponse
+      userId: user._id.toString(), // Also include userId in response
       user: userToReturn,
     });
   } catch (error) {
-    console.error(`[Auth] Erreur de connexion:`, error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(`[Auth] Login error:`, error);
+    next(error);
   }
 };
 
-export const logout = (req, res) => {
+export const logout = (req, res, next) => {
   try {
-    // Options complètes pour les cookies, identiques à celles utilisées lors de la création
-    const cookieOptions = {
-      path: "/",
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
-    };
+    console.log("[Logout] Processing logout");
 
+    // Get same production flag as signIn
+    const isProduction = process.env.NODE_ENV === "production";
     console.log(
-      "[Logout] Clearing cookies with options:",
-      JSON.stringify(cookieOptions)
+      `[Logout] Environment: ${process.env.NODE_ENV || "development"}`
+    );
+    console.log(`[Logout] Is production: ${isProduction}`);
+    console.log(
+      `[Logout] COOKIE_DOMAIN: ${process.env.COOKIE_DOMAIN || "not set"}`
     );
 
-    // Supprimer uniquement le cookie userId
+    // Complete cookie options, identical to those used during creation
+    const cookieOptions = {
+      path: "/",
+      httpOnly: true, // Changed to match signin cookie options
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    };
+
+    // Only set domain in production
+    if (isProduction && process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    console.log("[Logout] Clearing cookies with options:", cookieOptions);
+
+    // Delete only the userId cookie
     res.clearCookie("userId", cookieOptions);
 
     res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
     console.error("[Logout] Error:", error);
-    res.status(500).json({ success: false, message: "Error during logout" });
+    next(error);
   }
 };
 
@@ -252,7 +211,7 @@ export const requestPasswordReset = async (req, res, next) => {
     // Generate a reset token (you can set your own expiry time)
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 360000; // Token expires in 1 hour
+    user.resetTokenExpiry = Date.now() + 3600000; // Token expires in 1 hour (3600000 ms)
     await user.save();
 
     const transporter = nodemailer.createTransport({
@@ -284,9 +243,7 @@ export const requestPasswordReset = async (req, res, next) => {
       if (err) {
         const error = new Error("Error sending email");
         error.statusCode = 500;
-        return res.status(500).json({
-          message: "Error sending email",
-        });
+        return next(error);
       }
       res.status(200).json({
         message: "Password reset email sent successfully",
@@ -336,8 +293,44 @@ export const resetPassword = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Password reset error:", error);
+    next(error);
+  }
+};
+
+// Nouvelle fonction pour vérifier l'authentification
+export const checkAuth = async (req, res) => {
+  try {
+    // req.user est déjà chargé par le middleware protect
+    console.log(
+      "[CheckAuth] Vérification d'authentification pour l'utilisateur:",
+      req.user._id
+    );
+
+    // Trouver l'utilisateur avec toutes ses données (sans le mot de passe)
+    const user = await User.findById(req.user._id).select("-password");
+
+    if (!user) {
+      console.log("[CheckAuth] Utilisateur non trouvé");
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    console.log("[CheckAuth] Authentification réussie pour:", user._id);
+
+    // Retourner le statut d'authentification et les données utilisateur
+    res.status(200).json({
+      success: true,
+      message: "Authentication valid",
+      user,
+    });
+  } catch (error) {
+    console.error("[CheckAuth] Erreur:", error);
     res.status(500).json({
-      message: "An error occurred while resetting your password",
+      success: false,
+      message: "Authentication check failed",
+      error: error.message,
     });
   }
 };

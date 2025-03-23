@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useProductsStats } from "@/hooks/useProductsStats";
 import { ProductHomeTable } from "./components/ProductHomeTable";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { checkAuth } from "@/lib/api";
 
 import "./homepage.css";
 import "./homeitems.css";
@@ -119,17 +119,34 @@ function Page() {
   const [loadingToken, setLoadingToken] = useState(true); // État pour le chargement du token
 
   useEffect(() => {
-    // Vérifier l'existence du token dans localStorage et du userId dans les cookies
-    const authToken = localStorage.getItem("authToken");
-    const userId = Cookies.get("userId");
+    const verifyAuthentication = async () => {
+      try {
+        setLoadingToken(true);
+        console.log("[Home] Vérification d'authentification via API");
 
-    if (!authToken || !userId) {
-      console.log("[Home] Authentification manquante, redirection vers login");
-      router.push("/login");
-    } else {
-      console.log("[Home] Authentification vérifiée");
-      setLoadingToken(false); // Le token est vérifié, on arrête le chargement
-    }
+        // Vérifier l'authentification via l'API
+        const { isAuthenticated, user, error } = await checkAuth();
+
+        if (!isAuthenticated) {
+          console.log(
+            "[Home] Utilisateur non authentifié, redirection vers login"
+          );
+          router.push("/login");
+          return;
+        }
+
+        console.log("[Home] Authentification vérifiée avec succès");
+        setLoadingToken(false);
+      } catch (error) {
+        console.error(
+          "[Home] Erreur lors de la vérification de l'authentification:",
+          error
+        );
+        router.push("/login");
+      }
+    };
+
+    verifyAuthentication();
   }, [router]);
 
   // Afficher un écran de chargement tant que la vérification du token n'est pas terminée

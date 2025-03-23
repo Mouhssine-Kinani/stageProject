@@ -1,87 +1,79 @@
 import jwt from "jsonwebtoken";
 import User from "../models/Users/user.model.js";
 
-// Middleware pour vérifier si l'utilisateur est connecté
+// Middleware to check if the user is logged in
 export const verifyToken = async (req, res, next) => {
   try {
-    console.log("[Auth] Vérification du token");
+    console.log("[Auth] Verifying token");
 
-    // Récupérer le token depuis les headers Authorization
+    // Get the token from Authorization headers
     let token = null;
 
-    // Vérifier si le token est dans l'en-tête Authorization
+    // Check if the token is in the Authorization header
     if (req.headers.authorization) {
-      // Si le token est au format "Bearer <token>"
+      // If the token is in the format "Bearer <token>"
       if (req.headers.authorization.startsWith("Bearer ")) {
         token = req.headers.authorization.split(" ")[1];
       }
-      // Si le token est envoyé directement sans préfixe
+      // If the token is sent directly without prefix
       else {
         token = req.headers.authorization;
       }
     }
-    // Vérifier les autres emplacements possibles (compatibilité)
+    // Check other possible locations (compatibility)
     if (!token) {
       token = req.cookies.token || req.headers["x-auth-token"];
     }
 
     if (!token) {
-      console.log("[Auth] Pas de token trouvé");
+      console.log("[Auth] No token found");
       return res.status(401).json({
         success: false,
-        message: "Accès refusé. Aucun token fourni.",
+        message: "Access denied. No token provided.",
       });
     }
 
     try {
-      // Décoder le token
+      // Decode the token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("[Auth] Token décodé:", JSON.stringify(decoded));
+      console.log("[Auth] Token decoded successfully");
 
-      // Chercher l'utilisateur soit par id (nouvelle structure) soit par userId (ancienne structure)
+      // Find the user either by id (new structure) or by userId (old structure)
       const userId = decoded.id || decoded.userId;
       if (!userId) {
-        console.log("[Auth] ID utilisateur non trouvé dans le token:", decoded);
+        console.log("[Auth] User ID not found in token");
         return res.status(401).json({
           success: false,
-          message: "Token invalide - ID utilisateur manquant",
+          message: "Invalid token - User ID missing",
         });
       }
 
       const user = await User.findById(userId);
 
       if (!user) {
-        console.log(
-          `[Auth] Utilisateur non trouvé après décodage du token. ID: ${userId}`
-        );
+        console.log("[Auth] User not found after token decoding");
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
 
-      // Assigner l'utilisateur à la requête
+      // Assign the user to the request
       req.user = user;
-      console.log(
-        `[Auth] Token vérifié pour l'utilisateur: ${user.email} (${user._id})`
-      );
+      console.log("[Auth] Token verified successfully");
       next();
     } catch (error) {
-      console.error("[Auth] Erreur de vérification du token:", error.message);
+      console.error("[Auth] Token verification error:", error.message);
       return res.status(401).json({
         success: false,
-        message: "Token invalide ou expiré",
+        message: "Invalid or expired token",
       });
     }
   } catch (error) {
-    console.error(
-      "[Auth] Erreur dans le middleware d'authentification:",
-      error
-    );
-    res.status(500).json({
-      success: false,
-      message: "Server error in authentication",
-    });
+    console.error("[Auth] Error in authentication middleware:", error.message);
+    const err = new Error("Server error in authentication");
+    err.statusCode = 500;
+    next(err);
   }
 };
 
@@ -89,41 +81,39 @@ export const verifyRole = (roles) => {
   return (req, res, next) => {
     try {
       console.log(
-        `[Auth] Vérification du rôle. Rôles requis: ${roles.join(", ")}`
+        `[Auth] Role verification. Required roles: ${roles.join(", ")}`
       );
 
       if (!req.user) {
-        console.log(
-          "[Auth] Utilisateur non authentifié pour la vérification du rôle"
-        );
+        console.log("[Auth] User not authenticated for role verification");
         return res.status(401).json({
           success: false,
-          message: "Authentification requise avant la vérification du rôle",
+          message: "Authentication required before role verification",
         });
       }
 
-      // Accès au nom du rôle à partir de la structure imbriquée
+      // Access the role name from the nested structure
       const userRole = req.user.role?.roleName;
-      console.log(`[Auth] Rôle de l'utilisateur: ${userRole}`);
+      console.log(`[Auth] User role: ${userRole}`);
 
       if (!userRole || !roles.includes(userRole)) {
-        console.log(
-          `[Auth] Accès refusé. Le rôle ${userRole} n'a pas les permissions requises`
-        );
+        console.log(`[Auth] Access denied. Insufficient permissions`);
         return res.status(403).json({
           success: false,
-          message: "Accès interdit. Permissions insuffisantes.",
+          message: "Access forbidden. Insufficient permissions.",
         });
       }
 
-      console.log("[Auth] Vérification du rôle réussie");
+      console.log("[Auth] Role verification successful");
       next();
     } catch (error) {
-      console.error("Error checking permissions:", error);
-      res.status(500).json({
-        success: false,
-        message: "Error while checking permissions",
-      });
+      console.error("[Auth] Error while verifying permissions:", error.message);
+      const err = new Error("Error while checking permissions");
+      err.statusCode = 500;
+      next(err);
     }
   };
 };
+
+// Alias for verifyToken for better semantics
+export const protect = verifyToken;

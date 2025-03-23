@@ -1,6 +1,5 @@
 "use client";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import axios from "axios";
 import useUser from "@/hooks/useUser";
 

@@ -16,7 +16,12 @@ export const useProductsStats = () => {
   // Fonction pour obtenir les en-têtes d'autorisation
   const getAuthHeaders = () => {
     const token = localStorage.getItem("authToken");
-    return token ? { Authorization: token } : {};
+    if (!token) return {};
+
+    if (token.startsWith("Bearer ")) {
+      return { Authorization: token };
+    }
+    return { Authorization: `Bearer ${token}` };
   };
 
   useEffect(() => {

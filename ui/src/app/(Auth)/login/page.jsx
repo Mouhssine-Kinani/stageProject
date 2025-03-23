@@ -2,15 +2,11 @@
 import { User, LockKeyhole } from "lucide-react";
 import "../../(Auth)/css/login.css";
 import SignFromComponent from "@/components/formComponent/SignFromComponent";
-import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { object, string } from "yup";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-axios.defaults.withCredentials = true;
-// Ensure credentials are sent with every request
-axios.defaults.withCredentials = true;
+import { login, checkAuth } from "@/lib/api";
 
 const fields = [
   {
@@ -50,81 +46,69 @@ export default function Login() {
   const [processing, setProcessing] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Check if user is already logged in
+  useEffect(() => {
+    // Utiliser l'API d'authentification pour vérifier si l'utilisateur est déjà connecté
+    const checkAuthentication = async () => {
+      try {
+        const { isAuthenticated } = await checkAuth();
+
+        if (isAuthenticated) {
+          const returnUrl =
+            new URLSearchParams(window.location.search).get("returnUrl") ||
+            "/home";
+          console.log(
+            `[Login] User already logged in, redirecting to: ${returnUrl}`
+          );
+          router.push(returnUrl);
+        }
+      } catch (error) {
+        console.error("[Login] Error checking authentication:", error);
+        // En cas d'erreur, on reste sur la page de connexion
+      }
+    };
+
+    checkAuthentication();
+  }, [router]);
+
   const handleSubmit = async (values) => {
     setProcessing(true);
     setErrors({});
 
     try {
-      console.log("[Login] Tentative de connexion", values);
+      console.log("[Login] Login attempt with:", values.email);
 
       // Get the returnUrl from query parameters
       const searchParams = new URLSearchParams(window.location.search);
       const returnUrl = searchParams.get("returnUrl") || "/home";
-      console.log(`[Login] URL de retour après connexion: ${returnUrl}`);
+      console.log(`[Login] Return URL after login: ${returnUrl}`);
 
-      // Utiliser Axios avec withCredentials pour s'assurer que les cookies sont correctement traités
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_URLAPI}/auth/signin`,
-        {
-          email: values.email,
-          password: values.password,
-        },
-        { withCredentials: true }
-      );
+      // Appeler le service d'authentification
+      const result = await login({
+        email: values.email,
+        password: values.password,
+      });
 
-      if (!response.data || response.status !== 200) {
-        console.error("[Login] Échec de connexion:", response.data);
-        setErrors({ login: "Login error. Please try again." });
+      if (!result.success) {
+        console.error("[Login] Login failed:", result.message);
+        setErrors({
+          login: result.message || "Login error. Please try again.",
+        });
         setProcessing(false);
         return;
       }
 
-      const data = response.data;
-      console.log("[Login] Connexion réussie:", data);
-      console.log("[Login] Données utilisateur:", data.user);
+      toast.success("Login successful");
 
-      // Stocker le token dans localStorage (pas dans un cookie)
-      localStorage.setItem("authToken", data.token);
-
-      // Vérifier que le cookie userId est bien présent
-      // Le cookie userId devrait être défini automatiquement par le serveur
-      const userId = Cookies.get("userId");
-      if (!userId) {
-        console.log("[Login] Cookie userId non trouvé, création manuelle...");
-        // Si le cookie n'est pas défini automatiquement, le définir manuellement
-        const isProduction = process.env.NODE_ENV === "production";
-        const sameSite = isProduction ? "None" : "Lax";
-        const secure = isProduction;
-
-        Cookies.set("userId", data.userId, {
-          path: "/",
-          expires: 7, // 7 jours
-          sameSite: sameSite,
-          secure: secure,
-        });
-      }
-
-      // Stocker les données utilisateur dans localStorage
-      localStorage.setItem("userData", JSON.stringify(data.user));
-      console.log(
-        "[Login] Données utilisateur stockées dans localStorage:",
-        data.user
-      );
-
-      console.log("[Login] Token stocké dans localStorage");
-      console.log("[Login] Cookie userId:", Cookies.get("userId"));
-      console.log(`[Login] Redirection vers: ${returnUrl}`);
-
-      // Ajouter un délai plus long pour s'assurer que tous les états sont bien définis
-      // et que les hooks ne sont pas appelés pendant la redirection
-      toast.success("Connexion réussie");
+      // Force reload before redirect to ensure session is recognized
       setTimeout(() => {
-        router.push(returnUrl);
-      }, 500); // Augmentation du délai à 500ms
+        // Use window.location for a full page refresh
+        window.location.href = returnUrl;
+      }, 1000);
     } catch (error) {
-      console.error("[Login] Erreur inattendue:", error);
+      console.error("[Login] Unexpected error:", error);
       if (error.response?.data?.message) {
-        // Si l'erreur vient du serveur avec un message spécifique
+        // If the error comes from the server with a specific message
         if (error.response.data.message.includes("email")) {
           setErrors({ email: "Incorrect email or password" });
         } else if (error.response.data.message.includes("password")) {
