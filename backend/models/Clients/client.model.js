@@ -1,15 +1,12 @@
 import mongoose from "mongoose";
+import AutoIncrementFactory from 'mongoose-sequence';
+
+const AutoIncrement = AutoIncrementFactory(mongoose);
 const Schema = mongoose.Schema;
 
 const ClientSchema = new Schema(
   {
-    reference: {
-      type: String,
-      required: true,
-      minLength: 3,
-      maxLength: 10,
-      trim: true,
-    }, // ex: #CL001
+     // ex: #CL001
     logo: { type: String, trim: true },
     name: {
       type: String,
@@ -34,7 +31,7 @@ const ClientSchema = new Schema(
     renewal_status: {
       type: String,
       enum: ["ok", "Overdue", "Expiring"],
-      required: true,
+      // required: true,
     },
     phone: {
       type: String,
@@ -43,10 +40,14 @@ const ClientSchema = new Schema(
       maxLength: 15,
     },
     products: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      { type: mongoose.Schema.Types.ObjectId, ref: "ProductHistory", required: true },
     ],
   },
   { timestamps: true }
 );
 
-export default ClientSchema;
+ClientSchema.plugin(AutoIncrement, { inc_field: 'client_reference' });
+
+const Client = mongoose.model('Client', ClientSchema);
+
+export default Client;
