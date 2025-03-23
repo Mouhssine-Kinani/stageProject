@@ -131,9 +131,6 @@ export function UserTable({ data = [], onDelete, isLoading = false }) {
     if (userToDelete) {
       onDelete(userToDelete._id);
       console.log("Utilisateur supprimé avec succès");
-      toast({
-        description: "User deleted successfully",
-      });
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     }
