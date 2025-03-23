@@ -82,7 +82,7 @@ export default function AddUserDialog({ open, onOpenChange }) {
     const file = e.target.files[0];
     if (file) {
       const validation = validateFile(file, { maxSize: 1024000 }); // 1MB
-      if (!validation.isValid) {
+      if (!validation.valid) {
         setErrors((prev) => ({ ...prev, logo: validation.error }));
         return;
       }
@@ -114,20 +114,50 @@ export default function AddUserDialog({ open, onOpenChange }) {
       e.preventDefault();
       await userSchema.validate(formData, { abortEarly: false });
 
-      // Deep clone the form data to avoid mutating the state directly
-      const submitData = JSON.parse(JSON.stringify(formData));
+      let userData;
+      let result;
 
-      // Make sure the role is properly structured
-      submitData.role = {
-        roleName: formData.roleName,
-        description: `${formData.roleName} role`, // Add a basic description
-      };
+      // Si nous avons un logo, utilisons FormData
+      if (selectedFile) {
+        const submitData = new FormData();
 
-      // Remove the flattened roleName property
-      delete submitData.roleName;
+        // Ajouter les champs de base
+        submitData.append("fullName", formData.fullName);
+        submitData.append("email", formData.email);
+        submitData.append("phone", formData.phone);
+        submitData.append("status", formData.status);
 
-      console.log("Creating new user with data:", submitData);
-      const result = await createItem(submitData);
+        // Créer l'objet role
+        const roleObj = {
+          roleName: formData.roleName,
+          description: `${formData.roleName} role`,
+        };
+
+        // L'ajouter comme JSON string
+        submitData.append("role[roleName]", formData.roleName);
+        submitData.append("role[description]", `${formData.roleName} role`);
+
+        // Ajouter le logo explicitement comme dernier élément
+        submitData.append("logo", selectedFile, selectedFile.name);
+
+        console.log("Creating new user with FormData (includes logo)");
+        result = await createItem(submitData);
+      } else {
+        // Sans logo, utilisez un objet JSON simple
+        userData = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          status: formData.status,
+          role: {
+            roleName: formData.roleName,
+            description: `${formData.roleName} role`,
+          },
+        };
+
+        console.log("Creating new user with JSON data:", userData);
+        result = await createItem(userData);
+      }
 
       if (result.success) {
         // Dispatch event for user added
@@ -137,8 +167,8 @@ export default function AddUserDialog({ open, onOpenChange }) {
         // Close the dialog and reset
         handleCancel();
       } else {
-        console.error("Failed to create user:", result.error);
-        setErrors((prev) => ({ ...prev, submit: result.error }));
+        console.error("Failed to create user:", result.message);
+        setErrors((prev) => ({ ...prev, submit: result.message }));
       }
     } catch (error) {
       console.error("Validation error:", error);

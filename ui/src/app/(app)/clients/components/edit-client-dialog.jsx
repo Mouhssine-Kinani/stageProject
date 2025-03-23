@@ -73,7 +73,7 @@ export default function EditClientDialog({
         type: "image",
       });
 
-      if (!validation.isValid) {
+      if (!validation.valid) {
         toast.error(validation.error);
         return;
       }
@@ -128,7 +128,7 @@ export default function EditClientDialog({
           onClientEdited();
         }
       } else {
-        toast.error(`Failed to update client: ${result.error}`);
+        toast.error(`Failed to update client: ${result.message}`);
       }
     } catch (error) {
       toast.error(`Failed to update client: ${error.message}`);

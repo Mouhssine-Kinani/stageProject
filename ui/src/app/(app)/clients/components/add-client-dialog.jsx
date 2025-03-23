@@ -76,7 +76,7 @@ export default function AddClientDialog({ open, onOpenChange, onClientAdded }) {
         type: "image",
       });
 
-      if (!validation.isValid) {
+      if (!validation.valid) {
         toast.error(validation.error);
         return;
       }
@@ -128,7 +128,7 @@ export default function AddClientDialog({ open, onOpenChange, onClientAdded }) {
           onClientAdded();
         }
       } else {
-        toast.error(`Failed to add client: ${result.error}`);
+        toast.error(`Failed to add client: ${result.message}`);
       }
     } catch (error) {
       toast.error(`Failed to add client: ${error.message}`);

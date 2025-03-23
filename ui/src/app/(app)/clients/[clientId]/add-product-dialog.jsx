@@ -21,6 +21,7 @@ import { addProductToClient } from "@/lib/api";
 import { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 import { Loader2, Plus, Lock } from "lucide-react";
+import axios from "axios";
 
 export default function AddClientProductDialog({
   open,
@@ -40,7 +41,11 @@ export default function AddClientProductDialog({
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [providerInfo, setProviderInfo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { products, loading: isLoadingProducts } = useProducts();
+  const {
+    products,
+    loading: isLoadingProducts,
+    error: productsError,
+  } = useProducts();
 
   const {
     providers,
@@ -48,6 +53,46 @@ export default function AddClientProductDialog({
     error: providerError,
     fetchProviders,
   } = useProviders();
+
+  // Fonction pour rafraîchir manuellement la liste des produits (pour test)
+  const handleRefreshProducts = async () => {
+    try {
+      console.log(
+        "[AddClientProductDialog] Tentative de récupération manuelle des produits"
+      );
+
+      const API_URL = process.env.NEXT_PUBLIC_URLAPI;
+      const token = localStorage.getItem("authToken");
+      const headers = token
+        ? {
+            Authorization: token.startsWith("Bearer ")
+              ? token
+              : `Bearer ${token}`,
+          }
+        : {};
+
+      console.log("[AddClientProductDialog] URL API:", API_URL);
+      console.log("[AddClientProductDialog] Headers:", headers);
+
+      const response = await axios.get(`${API_URL}/products`, {
+        headers,
+        withCredentials: true,
+      });
+
+      console.log("[AddClientProductDialog] Réponse manuelle:", response.data);
+      if (response.data.success) {
+        toast.success(
+          `${response.data.data.length} produits récupérés manuellement`
+        );
+      }
+    } catch (err) {
+      console.error(
+        "[AddClientProductDialog] Erreur lors de la récupération manuelle:",
+        err
+      );
+      toast.error(`Erreur: ${err.message}`);
+    }
+  };
 
   // Charger les fournisseurs quand le dialogue s'ouvre
   useEffect(() => {
@@ -71,6 +116,13 @@ export default function AddClientProductDialog({
     fetchProviderInfo();
   }, [formData.provider, providers]);
 
+  // Ajouter un log pour voir les produits chargés
+  useEffect(() => {
+    console.log("[AddClientProductDialog] Products loaded:", products);
+    console.log("[AddClientProductDialog] Loading status:", isLoadingProducts);
+    console.log("[AddClientProductDialog] Error:", productsError);
+  }, [products, isLoadingProducts, productsError]);
+
   // Optimisation: mémoriser les options du fournisseur
   const providerOptions = useMemo(() => {
     return providers.map((provider) => (
@@ -82,11 +134,23 @@ export default function AddClientProductDialog({
 
   // Optimisation: mémoriser les options des produits
   const productOptions = useMemo(() => {
-    return products.map((product) => (
-      <SelectItem key={product._id} value={product._id}>
-        {product.productName}
-      </SelectItem>
-    ));
+    console.log(
+      "[AddClientProductDialog] Building product options from:",
+      products.length,
+      "products"
+    );
+    return products.map((product) => {
+      console.log(
+        "[AddClientProductDialog] Product option:",
+        product._id,
+        product.productName
+      );
+      return (
+        <SelectItem key={product._id} value={product._id}>
+          {product.productName}
+        </SelectItem>
+      );
+    });
   }, [products]);
 
   const handleCancel = () => {
@@ -202,33 +266,51 @@ export default function AddClientProductDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="product">Select a product</Label>
-            <Select
-              onValueChange={handleProductSelect}
-              disabled={isLoadingProducts}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    isLoadingProducts
-                      ? "Loading products..."
-                      : "Select a product"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoadingProducts ? (
-                  <SelectItem value="loading" disabled>
-                    Loading products...
-                  </SelectItem>
-                ) : products.length === 0 ? (
-                  <SelectItem value="none" disabled>
-                    No products available
-                  </SelectItem>
-                ) : (
-                  productOptions
-                )}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select
+                onValueChange={handleProductSelect}
+                disabled={isLoadingProducts}
+                className="flex-grow"
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      isLoadingProducts
+                        ? "Loading products..."
+                        : "Select a product"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingProducts ? (
+                    <SelectItem value="loading" disabled>
+                      Loading products...
+                    </SelectItem>
+                  ) : products.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      No products available{" "}
+                      {productsError ? `(Error: ${productsError})` : ""}
+                    </SelectItem>
+                  ) : (
+                    productOptions
+                  )}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleRefreshProducts}
+                className="px-3"
+              >
+                <Loader2 className="h-4 w-4" />
+              </Button>
+            </div>
+            {productsError && (
+              <p className="text-red-500 text-sm mt-1">
+                Error: {productsError}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

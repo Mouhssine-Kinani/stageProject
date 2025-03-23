@@ -116,6 +116,7 @@ export const createUser = async (req, res, next) => {
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(passwordToHash, salt);
 
+    // Créer un objet utilisateur avec les champs de base
     const newUser = new User({
       reference,
       fullName,
@@ -124,6 +125,12 @@ export const createUser = async (req, res, next) => {
       role, // Now we ensure role has the correct structure with roleName
       status,
     });
+
+    // Ajouter le logo si un fichier a été téléchargé
+    if (req.file) {
+      console.log("File uploaded for new user:", req.file);
+      newUser.logo = req.file.path;
+    }
 
     await newUser.save();
 

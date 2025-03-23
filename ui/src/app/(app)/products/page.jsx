@@ -61,17 +61,14 @@ export default function ProductsPage() {
     // Event listeners for product operations
     const handleProductAdded = () => {
       fetchData();
-      toast.success("Product added successfully");
     };
 
     const handleProductEdited = () => {
       fetchData();
-      toast.info("Product updated successfully");
     };
 
     const handleProductDeleted = () => {
       fetchData();
-      toast.error("Product deleted");
     };
 
     const handleEditEvent = (event) => {
