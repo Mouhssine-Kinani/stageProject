@@ -124,10 +124,16 @@ export default function UsersPage() {
   // Custom delete handler that dispatches an event
   const handleDelete = async (id) => {
     try {
-      await deleteItem(id);
-      // Dispatch custom event for deletion
-      const event = new CustomEvent("userDeleted");
-      window.dispatchEvent(event);
+      const result = await deleteItem(id);
+
+      if (result.success) {
+        // Dispatch custom event for deletion only if successful
+        const event = new CustomEvent("userDeleted");
+        window.dispatchEvent(event);
+      } else {
+        // Afficher directement le message d'erreur
+        showError(result.message || "Failed to delete user");
+      }
     } catch (err) {
       showError(`Failed to delete user: ${err.message}`);
     }
